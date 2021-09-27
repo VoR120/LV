@@ -1,9 +1,28 @@
-import { makeStyles, Button, Dialog, IconButton, CircularProgress, DialogTitle, DialogActions, DialogContent, Grid, TextField, FormHelperText, FormControl, InputLabel, Box, Typography, AppBar, Tabs, Tab } from '@material-ui/core';
+import {
+    Button,
+    Dialog,
+    IconButton,
+    CircularProgress,
+    DialogTitle,
+    DialogActions,
+    DialogContent,
+    Grid,
+    TextField,
+    FormHelperText,
+    FormControl,
+    InputLabel,
+    Box,
+    Typography,
+    AppBar,
+    Tabs,
+    Tab,
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import React, { useState } from 'react';
-import AddIcon from '@material-ui/icons/Add';
+import AddIcon from '@mui/icons-material/Add';
 import { useForm } from 'react-hook-form';
-import EditIcon from '@material-ui/icons/Edit';
-import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import '../public/css/Form.scss'
 import InfoForm from './InfoForm';
 import LevelForm from './LevelForm';

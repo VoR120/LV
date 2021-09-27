@@ -1,6 +1,28 @@
 import React from 'react';
-import { makeStyles, Button, Dialog, DialogTitle, DialogActions, DialogContent, Grid, TextField, FormHelperText, FormControl, InputLabel, IconButton, CircularProgress, Typography, AppBar, Tabs, Tab, Box, Radio, FormControlLabel, RadioGroup } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
+import {
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogActions,
+    DialogContent,
+    Grid,
+    TextField,
+    FormHelperText,
+    FormControl,
+    InputLabel,
+    IconButton,
+    CircularProgress,
+    Typography,
+    AppBar,
+    Tabs,
+    Tab,
+    Box,
+    Radio,
+    FormControlLabel,
+    RadioGroup,
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useState } from 'react';
 
 const useStyles = makeStyles(theme => ({

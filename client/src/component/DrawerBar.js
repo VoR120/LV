@@ -1,18 +1,19 @@
-import AppBar from '@material-ui/core/AppBar';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Divider from '@material-ui/core/Divider';
-import Drawer from '@material-ui/core/Drawer';
-import Hidden from '@material-ui/core/Hidden';
-import IconButton from '@material-ui/core/IconButton';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import MenuIcon from '@material-ui/icons/Menu';
+import AppBar from '@mui/material/AppBar';
+import CssBaseline from '@mui/material/CssBaseline';
+import Divider from '@mui/material/Divider';
+import Drawer from '@mui/material/Drawer';
+import Hidden from '@mui/material/Hidden';
+import IconButton from '@mui/material/IconButton';
+import { useTheme } from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import MenuIcon from '@mui/icons-material/Menu';
 import PropTypes from 'prop-types';
 import React from 'react';
 import DrawerList from './DrawerList';
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import { Chip } from '@material-ui/core';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { Chip } from '@mui/material';
 
 const drawerWidth = 256;
 
@@ -48,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
   drawerPaper: {
     width: drawerWidth,
     marginTop: '64px',
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       marginTop: 0,
     },
   },
@@ -57,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: drawerWidth,
     textTransform: 'uppercase',
     fontWeight: '600',
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       marginLeft: 0,
     },
   },
@@ -112,7 +113,7 @@ function DrawerBar(props) {
             edge="start"
             onClick={handleDrawerToggle}
             className={classes.menuButton}
-          >
+            size="large">
             <MenuIcon />
           </IconButton>
           <Typography className={classes.header} variant="h6" noWrap>
@@ -144,7 +145,7 @@ function DrawerBar(props) {
             {drawer}
           </Drawer>
         </Hidden>
-        <Hidden xsDown implementation="css">
+        <Hidden smDown implementation="css">
           <Drawer
             classes={{
               paper: classes.drawerPaper,

@@ -1,6 +1,20 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, Grid, makeStyles, Menu, MenuItem, TextField, Typography } from '@material-ui/core';
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    FormControl,
+    Grid,
+    Menu,
+    MenuItem,
+    TextField,
+    Typography,
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import React, { useState } from 'react';
-import RedoIcon from '@material-ui/icons/Redo';
+import RedoIcon from '@mui/icons-material/Redo';
 import { useForm } from 'react-hook-form';
 import MySelect from './UI/MySelect';
 import MyButton from './UI/MyButton';
@@ -61,10 +75,10 @@ const useStyles = makeStyles(theme => ({
         }
     },
     inputItem: {
-        marginBottom: theme.spacing(2),
+        marginTop: theme.spacing(2),
     },
     divider: {
-        marginBottom: '20px'
+        marginTop: '20px'
     },
     menuList: {
         padding: '0'
@@ -131,17 +145,17 @@ const MoveForm = () => {
                                     <TextField fullWidth size="small" variant="outlined" />
                                 </Grid>
                             </Grid>
-                            <Grid xs={6} className={classes.inputItem} spacing={1} container item alignItems="center">
-                                <Grid xs={5}>
+                            <Grid item container xs={6} className={classes.inputItem} spacing={1} alignItems="center">
+                                <Grid item xs={5}>
                                     <Typography>Chuyển đến Đảng bộ</Typography>
                                 </Grid>
-                                <Grid xs={7}>
+                                <Grid item xs={7}>
                                     <TextField fullWidth size="small" variant="outlined" />
                                 </Grid>
                             </Grid>
                         </Grid>
-                        <Grid item container xs={12} spacing={4}>
-                            <Grid xs={6} className={classes.inputItem} spacing={1} container item alignItems="center">
+                        <Grid container xs={12} spacing={4}>
+                            <Grid container item xs={6} className={classes.inputItem} spacing={1} alignItems="center">
                                 <Grid xs={5}>
                                     <Typography>Chuyển đến Chi bộ</Typography>
                                 </Grid>
@@ -150,8 +164,8 @@ const MoveForm = () => {
                                 </Grid>
                             </Grid>
                         </Grid>
-                        <Grid item container xs={12} spacing={4}>
-                            <Grid xs={6} className={classes.inputItem} spacing={1} container item alignItems="center">
+                        <Grid container xs={12} spacing={4}>
+                            <Grid container item xs={6} className={classes.inputItem} spacing={1} alignItems="center">
                                 <Grid xs={5}>
                                     <Typography>Ngày chuyển</Typography>
                                 </Grid>
@@ -161,7 +175,7 @@ const MoveForm = () => {
                             </Grid>
                         </Grid>
                         <Divider className={classes.divider} />
-                        <Grid item container xs={12} spacing={4}>
+                        <Grid container xs={12} spacing={4}>
                             <Grid xs={12} className={classes.inputItem} spacing={1} container item alignItems="center">
                                 <Grid xs={3}>
                                     <Typography>Nội dung</Typography>

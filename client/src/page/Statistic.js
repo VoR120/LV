@@ -1,4 +1,16 @@
-import { Accordion, AccordionDetails, AccordionSummary, Button, Grid, InputLabel, makeStyles, MenuItem, Paper, TextField, Typography } from '@material-ui/core';
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Button,
+    Grid,
+    InputLabel,
+    MenuItem,
+    Paper,
+    TextField,
+    Typography,
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
 import { AgGridReact } from 'ag-grid-react';
@@ -13,7 +25,7 @@ import EditFormCategory from '../component/EditFormCategory';
 import DeleteFormCategory from '../component/DeleteFormCategory';
 import MySelect from '../component/UI/MySelect';
 import PaperStatistic from '../component/PaperStatistic';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MyButton from '../component/UI/MyButton';
 
 const useStyles = makeStyles(theme => ({

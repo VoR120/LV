@@ -1,5 +1,14 @@
-import { CircularProgress, Divider, FormControl, Grid, IconButton, makeStyles, TextField, Typography } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
+import {
+    CircularProgress,
+    Divider,
+    FormControl,
+    Grid,
+    IconButton,
+    TextField,
+    Typography,
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import DeleteIcon from '@mui/icons-material/Delete';
 import React, { useState } from 'react';
 
 const useStyles = makeStyles(theme => ({

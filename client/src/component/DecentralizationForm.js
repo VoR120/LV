@@ -1,5 +1,15 @@
-import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, FormGroup, makeStyles } from '@material-ui/core';
-import PlaylistAddCheckIcon from '@material-ui/icons/PlaylistAddCheck';
+import {
+    Button,
+    Checkbox,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControlLabel,
+    FormGroup,
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import '../public/css/Form.scss';

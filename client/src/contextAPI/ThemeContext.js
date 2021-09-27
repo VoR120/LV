@@ -1,8 +1,8 @@
-import { createTheme } from '@material-ui/core';
-import { ThemeProvider } from '@material-ui/styles';
+import { createTheme, adaptV4Theme, StyledEngineProvider, ThemeProvider } from '@mui/material/styles';
+// import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 import React from 'react';
 
-const theme = createTheme({
+const theme = createTheme(adaptV4Theme({
     palette: {
         primary: {
             main: '#0c71d0',
@@ -10,13 +10,24 @@ const theme = createTheme({
             light: '#e3f2fd' 
         },
     },
-})
+    // components: {
+    //     MuiDialogContent: {
+    //         styleOverrides: {
+    //             root: {
+    //                 paddingTop: '20px'
+    //             }
+    //         }
+    //     },
+    // }
+}))
 
 const ThemeContextProvider = (props) => {
     return (
-        <ThemeProvider theme={theme}>
-            {props.children}
-        </ThemeProvider>
+        <StyledEngineProvider injectFirst>
+            <ThemeProvider theme={theme}>
+                {props.children}
+            </ThemeProvider>
+        </StyledEngineProvider>
     );
 };
 

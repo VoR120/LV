@@ -1,5 +1,24 @@
-import { makeStyles, Button, Dialog, DialogTitle, DialogActions, DialogContent, Grid, TextField, FormHelperText, FormControl, InputLabel, IconButton, CircularProgress, Typography, AppBar, Tabs, Tab, Box } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/Edit';
+import {
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogActions,
+    DialogContent,
+    Grid,
+    TextField,
+    FormHelperText,
+    FormControl,
+    InputLabel,
+    IconButton,
+    CircularProgress,
+    Typography,
+    AppBar,
+    Tabs,
+    Tab,
+    Box,
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import EditIcon from '@mui/icons-material/Edit';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import MyButton from './UI/MyButton';
@@ -67,7 +86,7 @@ const useStyles = makeStyles(theme => ({
         borderBottom: '1px solid #ddd'
     },
     inputItem: {
-        marginBottom: theme.spacing(2),
+        marginTop: theme.spacing(2),
     },
 }))
 

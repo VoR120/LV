@@ -1,6 +1,25 @@
-import { makeStyles, Button, Dialog, DialogTitle, DialogActions, DialogContent, Grid, TextField, FormHelperText, FormControl, InputLabel, IconButton, CircularProgress, Typography, AppBar, Tabs, Tab, Box } from '@material-ui/core';
+import {
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogActions,
+    DialogContent,
+    Grid,
+    TextField,
+    FormHelperText,
+    FormControl,
+    InputLabel,
+    IconButton,
+    CircularProgress,
+    Typography,
+    AppBar,
+    Tabs,
+    Tab,
+    Box,
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import React, { useState } from 'react';
-import AddIcon from '@material-ui/icons/Add';
+import AddIcon from '@mui/icons-material/Add';
 import { useForm } from 'react-hook-form';
 import '../public/css/Form.scss'
 import InfoForm from './InfoForm';
@@ -126,7 +145,7 @@ const AddForm = () => {
         setStep(newValue);
     };
     return (
-        <>
+        <div className="add-form">
             <MyButton onClick={handleOpen} success><AddIcon />Thêm</MyButton>
             <Dialog PaperProps={{ style: { minWidth: '1100px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">Thêm Đảng viên</DialogTitle>
@@ -350,7 +369,7 @@ const AddForm = () => {
                     </MyButton>
                 </DialogActions>
             </Dialog>
-        </>
+        </div>
     );
 };
 

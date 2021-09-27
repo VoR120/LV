@@ -1,4 +1,4 @@
-import { Backdrop, CircularProgress, CssBaseline } from '@material-ui/core';
+import { Backdrop, CircularProgress, CssBaseline } from '@mui/material';
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Switch } from "react-router-dom";
 import { Route } from 'react-router';

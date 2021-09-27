@@ -1,4 +1,5 @@
-import { makeStyles, MenuItem, Paper, Typography } from '@material-ui/core';
+import { MenuItem, Paper, Typography } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
 import { AgGridReact } from 'ag-grid-react';
@@ -7,8 +8,8 @@ import DecentralizationForm from '../component/DecentralizationForm';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
 import MySelect from '../component/UI/MySelect';
-import CheckIcon from '@material-ui/icons/Check';
-import ClearIcon from '@material-ui/icons/Clear';
+import CheckIcon from '@mui/icons-material/Check';
+import ClearIcon from '@mui/icons-material/Clear';
 
 const useStyles = makeStyles(theme => ({
     header: {

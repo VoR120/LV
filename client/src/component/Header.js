@@ -1,9 +1,11 @@
 import React from 'react';
-import AppBar from '@material-ui/core/AppBar'
-import Toolbar from '@material-ui/core/Toolbar'
-import Typography from '@material-ui/core/Typography'
-import MenuIcon from '@material-ui/icons/MenuIcon'
-import { Chip, makeStyles } from '@material-ui/core';
+import AppBar from '@mui/material/AppBar'
+import Toolbar from '@mui/material/Toolbar'
+import Typography from '@mui/material/Typography'
+import MenuIcon from '@mui/icons-material/MenuIcon'
+import { Chip } from '@mui/material';
+
+import makeStyles from '@mui/styles/makeStyles';
 
 const useStyles = makeStyles(theme => ({
     toolbar: {

@@ -1,10 +1,10 @@
-import { makeStyles, MenuItem, TextField } from '@material-ui/core';
+import { MenuItem, TextField } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import React from 'react';
 
 const useStyles = makeStyles(theme => ({
     menuList: {
         padding: '0',
-        outlined: '2px solid black',
     }
 }))
 
@@ -17,10 +17,6 @@ const MySelect = (props) => {
             SelectProps={{
                 MenuProps: {
                     getContentAnchorEl: null,
-                    anchorOrigin: {
-                        vertical: 'bottom',
-                        horizontal: 'left',
-                    },
                     MenuListProps: {
                         className: classes.menuList
                     }

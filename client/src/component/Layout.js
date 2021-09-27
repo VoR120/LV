@@ -1,4 +1,4 @@
-import { makeStyles } from '@material-ui/core';
+import makeStyles from '@mui/styles/makeStyles';
 import React from 'react';
 import DrawerBar from './DrawerBar';
 
@@ -11,17 +11,17 @@ const Layout = (props) => {
     const classes = useStyles();
     return (
         <>
-            {props.sidebar ? (
-                <>
+            {props.sidebar ?
+                (
                     <DrawerBar>
                         <div className={classes.content}>
                             {props.children}
                         </div>
                     </DrawerBar>
-                </>
-            ) : (
-                props.children
-            )
+                ) :
+                (
+                    props.children
+                )
             }
         </>
     );

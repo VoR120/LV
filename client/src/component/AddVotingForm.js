@@ -1,6 +1,16 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, makeStyles, TextField, Typography } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
-import CloseIcon from '@material-ui/icons/Close';
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Grid,
+    TextField,
+    Typography,
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import MyButton from './UI/MyButton';

@@ -1,14 +1,14 @@
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Grid from '@material-ui/core/Grid';
-import Link from '@material-ui/core/Link';
-import Paper from '@material-ui/core/Paper';
-import { makeStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import { withStyles } from '@material-ui/styles';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import CssBaseline from '@mui/material/CssBaseline';
+import Grid from '@mui/material/Grid';
+import Link from '@mui/material/Link';
+import Paper from '@mui/material/Paper';
+import makeStyles from '@mui/styles/makeStyles';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { withStyles } from '@mui/styles';
 import React from 'react';
 import BgImage from '../public/image/bg_login.jpg';
 import logo from '../public/image/Party_logo.png';
@@ -21,11 +21,11 @@ const useStyles = makeStyles((theme) => ({
         backgroundImage: `url(${BgImage})`,
         backgroundRepeat: 'no-repeat',
         backgroundColor:
-            theme.palette.type === 'light' ? theme.palette.grey[50] : theme.palette.grey[900],
+            theme.palette.mode === 'light' ? theme.palette.grey[50] : theme.palette.grey[900],
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         position: 'relative',
-        [theme.breakpoints.down('sm')]: { 
+        [theme.breakpoints.down('md')]: { 
             display: 'none',
           },
     },

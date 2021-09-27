@@ -1,8 +1,9 @@
-import { Button, makeStyles, Menu, MenuItem } from '@material-ui/core';
+import { Button, Menu, MenuItem } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import React, { useState } from 'react';
-import SettingsIcon from '@material-ui/icons/Settings';
-import EditIcon from '@material-ui/icons/Edit';
-import CheckIcon from '@material-ui/icons/Check';
+import SettingsIcon from '@mui/icons-material/Settings';
+import EditIcon from '@mui/icons-material/Edit';
+import CheckIcon from '@mui/icons-material/Check';
 import EditForm from './EditForm';
 import DeleteForm from './DeleteForm';
 import MoveForm from './MoveForm';

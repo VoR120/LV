@@ -1,4 +1,5 @@
-import { Divider, FormControl, Grid, makeStyles, MenuItem, TextField, Typography } from '@material-ui/core';
+import { Divider, FormControl, Grid, MenuItem, TextField, Typography } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import React, { useState } from 'react';
 import MySelect from './UI/MySelect';
 

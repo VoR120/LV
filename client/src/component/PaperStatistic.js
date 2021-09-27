@@ -1,4 +1,5 @@
-import { Grid, makeStyles, Paper, Typography } from '@material-ui/core';
+import { Grid, Paper, Typography } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import React from 'react';
 const useStyles = makeStyles(theme => ({
     paperStatistic: {
