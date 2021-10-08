@@ -93,7 +93,7 @@ const useStyles = makeStyles(theme => ({
 const EditFormCategory = (props) => {
     const classes = useStyles();
     const [open, setOpen] = useState(false);
-    const { header, idTitle, idValue, nameTitle, nameValue  } = props
+    const { header, children } = props
 
     const {
         register,
@@ -116,32 +116,19 @@ const EditFormCategory = (props) => {
 
     return (
         <>
-            <MyButton onClick={handleOpen} style={{marginRight: '8px'}} info small><EditIcon />Sửa</MyButton>
+            <MyButton onClick={handleOpen} style={{ marginRight: '8px' }} info small><EditIcon />Sửa</MyButton>
             <Dialog PaperProps={{ style: { minWidth: '300px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">{header}</DialogTitle>
                 <DialogContent>
-                    <Grid container className={classes.inputItem} alignItems="center">
-                        <Grid xs={5}>
-                            <Typography>{idTitle}</Typography>
-                        </Grid>
-                        <Grid xs={7}>
-                            <TextField value={idValue} disabled fullWidth size="small" variant="outlined" />
-                        </Grid>
-                    </Grid>
-                    <Grid container className={classes.inputItem} alignItems="center">
-                        <Grid xs={5}>
-                            <Typography>{nameTitle}</Typography>
-                        </Grid>
-                        <Grid xs={7}>
-                            <TextField value={nameValue} fullWidth size="small" variant="outlined" />
-                        </Grid>
-                    </Grid>
+                    {children}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} >
                         Cancel
                     </Button>
-                    <MyButton onClick={handleSubmit(onSubmit)} info>Lưu</MyButton>
+                    <MyButton onClick={handleSubmit(onSubmit)} info>
+                        Lưu
+                    </MyButton>
                 </DialogActions>
             </Dialog>
         </>

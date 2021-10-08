@@ -16,7 +16,7 @@ app.use(cors());
 const route = require('./routes/index');
 route(app);
 
-app.listen('3000', () => {
-    console.log('Server running 3000!');
+app.listen('4000', () => {
+    console.log('Server running 4000!');
 })
 

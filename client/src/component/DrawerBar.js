@@ -14,6 +14,7 @@ import React from 'react';
 import DrawerList from './DrawerList';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { Chip } from '@mui/material';
+import BgImage from '../public/image/bg.jpg';
 
 const drawerWidth = 256;
 
@@ -65,7 +66,13 @@ const useStyles = makeStyles((theme) => ({
   content: {
     flexGrow: 1,
     padding: theme.spacing(3),
-    marginTop: '64px'
+    marginTop: '64px',
+    // backgroundImage: `url(${BgImage})`,
+    // backgroundRepeat: 'no-repeat',
+    // backgroundColor:
+    //     theme.palette.mode === 'light' ? theme.palette.grey[50] : theme.palette.grey[900],
+    // backgroundSize: 'cover',
+    // backgroundPosition: 'center',
   },
   profileChip: {
     height: '48px',

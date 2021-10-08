@@ -1,6 +1,6 @@
 import { MenuItem, TextField } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 const useStyles = makeStyles(theme => ({
     menuList: {
@@ -10,20 +10,27 @@ const useStyles = makeStyles(theme => ({
 
 const MySelect = (props) => {
     const classes = useStyles();
-    const { value, onChange, children, autoWidth } = props
+    const { value, onChange, children, autowidth } = props
+    console.log(onChange);
+    useEffect(() => {
+        console.log(value)
+    }, [value])
     return (
         <TextField
+            select
             {...props}
+            value={value}
+            onChange={onChange}
+            fullWidth={autowidth ? false : true} 
+            size="small"
+            variant="outlined"
             SelectProps={{
                 MenuProps: {
-                    getContentAnchorEl: null,
                     MenuListProps: {
                         className: classes.menuList
                     }
                 }
             }}
-            value={value} onChange={onChange} select fullWidth={autoWidth ? false : true} size="small"
-            variant="outlined"
         >
             {children}
         </TextField>

@@ -1,0 +1,14 @@
+const Grade = require('../models/gradeModel');
+const { getAll, findById, create, updateById, remove, removeAll } = require('./utils');
+
+exports.getAllGrade = getAll(Grade);
+
+exports.findByIdGrade = findById(Grade);
+
+exports.createGrade = create(Grade);
+
+exports.updateByIdGrade = updateById(Grade);
+
+exports.removeGrade = remove(Grade);
+
+exports.removeAllGrade = removeAll(Grade);

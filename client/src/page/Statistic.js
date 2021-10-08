@@ -185,7 +185,7 @@ const Statistic = () => {
                     <MySelect
                         onChange={handleChangeField}
                         value={categoryField}
-                        autoWidth
+                        autowidth
                     >
                         <MenuItem value="chibo">Chi bộ</MenuItem>
                         <MenuItem value="loaidv">Loại Đảng viên</MenuItem>
@@ -197,7 +197,7 @@ const Statistic = () => {
                     <MySelect
                         style={{ marginLeft: '16px' }}
                         value={"sv"}
-                        autoWidth
+                        autowidth
                     >
                         <MenuItem value="sv">Sinh viên</MenuItem>
                         <MenuItem value="dv">Đảng viên</MenuItem>

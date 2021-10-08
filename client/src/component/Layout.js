@@ -3,7 +3,8 @@ import React from 'react';
 import DrawerBar from './DrawerBar';
 
 const useStyles = makeStyles(theme => ({
-    main: {
+    content: {
+        minHeight: '599px'
     },
 }))
 

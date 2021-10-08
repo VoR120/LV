@@ -12,6 +12,7 @@ import DeleteForm from '../component/DeleteForm';
 import AddFormCategory from '../component/AddFormCategory';
 import EditFormCategory from '../component/EditFormCategory';
 import DeleteFormCategory from '../component/DeleteFormCategory';
+import '../public/css/Table.scss'
 
 
 const useStyles = makeStyles(theme => ({
