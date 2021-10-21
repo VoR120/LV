@@ -20,7 +20,7 @@ const Position = {
         })
     },
     findById: findById("chucvu", "MaChucVu"),
-    create: create("chucvu"),
+    create: create("chucvu", "MaChucVu"),
     updateById: updateById("chucvu", "MaChucVu"),
     remove: remove("chucvu", "MaChucVu"),
     removeAll: removeAll("chucvu")

@@ -20,7 +20,8 @@ const FLanguageLevel = {
             })
     },
     findById: findById("trinhdongoaingu", "MaTrinhDo"),
-    create: create("trinhdongoaingu"),
+    findByFlId: findById("trinhdongoaingu", "MaNgoaiNgu"),
+    create: create("trinhdongoaingu", "MaTrinhDo"),
     updateById: updateById("trinhdongoaingu", "MaTrinhDo"),
     remove: remove("trinhdongoaingu", "MaTrinhDo"),
     removeAll: removeAll("trinhdongoaingu"),

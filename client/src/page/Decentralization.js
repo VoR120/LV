@@ -1,15 +1,12 @@
-import { MenuItem, Paper, Typography } from '@mui/material';
+import MaterialTable from '@material-table/core';
+import CheckIcon from '@mui/icons-material/Check';
+import ClearIcon from '@mui/icons-material/Clear';
+import { Paper, TableContainer, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
-import { AgGridReact } from 'ag-grid-react';
 import React, { useState } from 'react';
 import DecentralizationForm from '../component/DecentralizationForm';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
-import MySelect from '../component/UI/MySelect';
-import CheckIcon from '@mui/icons-material/Check';
-import ClearIcon from '@mui/icons-material/Clear';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -20,10 +17,10 @@ const useStyles = makeStyles(theme => ({
         fontWeight: '600',
     },
     table: {
-        height: '450px',
         width: '100%',
         backgroundColor: 'white',
-        marginTop: '20px',
+        marginTop: '18px',
+
     },
     editBtn: {
         color: theme.palette.common.white,
@@ -53,7 +50,7 @@ const useStyles = makeStyles(theme => ({
     },
     checkIcon: {
         color: theme.palette.success.main,
-    }
+    },
 }))
 
 const Decentralization = () => {
@@ -64,94 +61,69 @@ const Decentralization = () => {
         setCategoryField(e.target.value);
     }
 
-    const [rowData] = useState([
-        { cId: 'CV1', name: 'Ủy viên BCH', fullPowers: true, update: true, createVotings: true },
-        { cId: 'CV2', name: 'Ủy viên BTV', fullPowers: true, update: true, createVotings: true },
-        { cId: 'CV3', name: 'Bí thư', fullPowers: true, update: true, createVotings: true },
-        { cId: 'CV4', name: 'Phó bí thư', fullPowers: false, createVotings: true },
-        { cId: 'CV5', name: 'Đảng viên chính thức', fullPowers: false, },
-        { cId: 'CV6', name: 'Đảng viên dự bị', fullPowers: false },
+    const [rows] = useState([
+        { id: 'CV1', name: 'Ủy viên BCH', fullPowers: true, update: true, createVotings: true },
+        { id: 'CV2', name: 'Ủy viên BTV', fullPowers: true, update: true, createVotings: true },
+        { id: 'CV3', name: 'Bí thư', fullPowers: true, update: true, createVotings: true },
+        { id: 'CV4', name: 'Phó bí thư', fullPowers: false, createVotings: true },
+        { id: 'CV5', name: 'Đảng viên chính thức ', fullPowers: false, },
+        { id: 'CV6', name: 'Đảng viên dự bị', fullPowers: false },
     ])
 
-    const [columnDefs] = useState([
-        { headerName: "Mã chức vụ", field: "cId", width: '120px', pinned: 'left' },
-        { headerName: "Tên chức vụ", field: "name", pinned: 'left' },
+    const [columns] = useState([
+        { title: "Mã chức vụ", field: "id", maxWidth: 150 },
+        { title: "Tên chức vụ", field: "name", },
         {
-            headerName: "Toàn quyền", field: "fullPowers",
-            cellRendererFramework: (params) => {
+            title: "Toàn quyền", field: "fullPowers",
+            headerStyle: { width: 150, minWidth: 150 },
+            cellStyle: { width: 150, minWidth: 150, },
+            render: (params) => {
                 return (
                     <>
-                        {params.data.fullPowers ? <CheckIcon className={classes.checkIcon} /> : <ClearIcon color="error" />}
+                        {params.fullPowers ? <CheckIcon className={classes.checkIcon} /> : <ClearIcon color="error" />}
                     </>
                 )
             }
         },
         {
-            headerName: "Sửa hồ sơ Đảng viên", field: "update",
-            cellRendererFramework: (params) => {
+            title: "Sửa hồ sơ Đảng viên", field: "update",
+            headerStyle: { width: 200, minWidth: 200 },
+            cellStyle: { width: 200, minWidth: 200, },
+            render: (params) => {
                 return (
                     <>
-                        {params.data.update ? <CheckIcon className={classes.checkIcon} /> : <ClearIcon color="error" />}
+                        {params.update ? <CheckIcon className={classes.checkIcon} /> : <ClearIcon color="error" />}
                     </>
                 )
             }
         },
         {
-            headerName: "Tạo biểu quyết", field: "createVotings",
-            cellRendererFramework: (params) => {
+            title: "Tạo biểu quyết", field: "createVotings",
+            headerStyle: { width: 150, minWidth: 150 },
+            cellStyle: { width: 150, minWidth: 150, },
+            render: (params) => {
                 return (
                     <>
-                        {params.data.createVotings ? <CheckIcon className={classes.checkIcon} /> : <ClearIcon color="error" />}
+                        {params.createVotings ? <CheckIcon className={classes.checkIcon} /> : <ClearIcon color="error" />}
                     </>
                 )
             }
         },
         {
-            headerName: "Phân quyền", field: "action", sortable: false, width: '160px', pinned: 'right',
-            cellRendererFramework: (params) => {
-                console.log(params.data);
+            title: "Phân quyền", field: "action",
+            headerStyle: { width: 150, minWidth: 150 },
+            cellStyle: { width: 150, minWidth: 150, },
+            render: (params) => {
+                console.log(params);
                 return (
                     <>
-                        <DecentralizationForm data={params.data} button/>
+                        <DecentralizationForm data={params} button />
                     </>
                 )
             }
         },
     ])
 
-    const gridOptions = {
-        rowData: rowData,
-        columnDefs: columnDefs,
-        defaultColDef: {
-            resizable: true,
-        },
-        defaultColDef: {
-            sortable: true,
-        },
-        pagination: true,
-        paginationPageSize: "10",
-    }
-    const genderS = [
-        { label: 'Nam', quantity: '200' },
-        { label: 'Nữ', quantity: '200' }
-    ];
-    const partyCellS = [
-        { label: 'Sinh viên', quantity: '123' },
-        { label: 'Đảng viên', quantity: '123' }
-    ];
-    const ethnicS = [
-        { label: 'Kinh', quantity: '2000' },
-        { label: 'Khmer', quantity: '500' },
-        { label: 'Chăm', quantity: '50' },
-        { label: 'Hoa', quantity: '30' },
-    ];
-    const ageS = [
-        { label: '18 - 30', quantity: '200' },
-        { label: ' 31 - 40', quantity: '200' },
-        { label: ' 41 - 50', quantity: '200' },
-        { label: ' 51 - 60', quantity: '200' },
-        { label: ' Trên 60', quantity: '200' },
-    ]
     return (
         <>
             <Layout sidebar>
@@ -160,12 +132,23 @@ const Decentralization = () => {
                         Phân quyền
                     </Typography>
                 </div>
-                <MyButton primary>Xem</MyButton>
-                <div className={`${classes.table} ag-theme-alpine`}>
-                    <AgGridReact
-                        gridOptions={gridOptions}
+                <TableContainer style={{ maxWidth: "1170px", }} >
+                    <MaterialTable
+                        components={{
+                            Container: (props) => <Paper
+                                {...props}
+                                className={classes.table}
+                                variant="outlined"
+                            />
+                        }}
+                        options={{
+                            padding: 'dense'
+                        }}
+                        title={"Phân quyền"}
+                        columns={columns}
+                        data={rows}
                     />
-                </div>
+                </TableContainer>
             </Layout>
         </>
     );

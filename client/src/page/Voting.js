@@ -8,23 +8,13 @@ import {
     Paper,
     Radio,
     RadioGroup,
-    Typography,
+    Typography
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
-import { AgGridReact } from 'ag-grid-react';
 import React, { useState } from 'react';
-import AddForm from '../component/AddForm';
-import Layout from '../component/Layout';
-import ActionMenu from '../component/ActionMenu';
-import EditForm from '../component/EditForm';
-import DeleteForm from '../component/DeleteForm';
-import AddFormCategory from '../component/AddFormCategory';
-import EditFormCategory from '../component/EditFormCategory';
-import DeleteFormCategory from '../component/DeleteFormCategory';
-import MyButton from '../component/UI/MyButton';
 import AddVotingForm from '../component/AddVotingForm';
+import Layout from '../component/Layout';
+import MyButton from '../component/UI/MyButton';
 
 
 const useStyles = makeStyles(theme => ({
@@ -66,10 +56,10 @@ const Voting = () => {
         setValueVoting('')
         setOpen(false);
     }
-    const ConfirmDelete = () => {
+    const ConfirmSelect = () => {
         return (
             <Dialog fullWidth open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-                <DialogTitle id="form-dialog-title">Xóa Đảng viên</DialogTitle>
+                <DialogTitle id="form-dialog-title">Biểu quyết</DialogTitle>
                 <DialogContent className={classes.dialogContent}>
                     Bạn có muốn chọn Đảng viên {valueVoting} ?
                 </DialogContent>
@@ -104,7 +94,7 @@ const Voting = () => {
                         <FormControlLabel value="DV1" control={<Radio color="primary" />} label="Nguyễn Văn A - DV1" />
                         <FormControlLabel value="DV2" control={<Radio color="primary" />} label="Nguyễn Văn B - DV2" />
                     </RadioGroup>
-                    <ConfirmDelete />
+                    <ConfirmSelect />
                 </Paper>
             </Layout>
         </>

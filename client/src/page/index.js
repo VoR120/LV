@@ -64,4 +64,9 @@ export const routes = [
         exact: true,
         component: lazy(() => import('./Voting')),
     },
+    {
+        path: '/myfile',
+        exact: true,
+        component: lazy(() => import('./MyFile')),
+    },
 ]

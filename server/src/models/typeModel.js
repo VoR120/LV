@@ -3,7 +3,7 @@ const { getAll, findById, create, updateById, removeAll, remove } = require('./u
 const Type = {
     getAll: getAll("hinhthuc"),
     findById: findById("hinhthuc","MaHinhThuc"),
-    create: create("hinhthuc"),
+    create: create("hinhthuc", "MaHinhThuc"),
     updateById: updateById("hinhthuc", "MaHinhThuc"),
     remove: remove("hinhthuc", "MaHinhThuc"),
     removeAll: removeAll("hinhthuc")

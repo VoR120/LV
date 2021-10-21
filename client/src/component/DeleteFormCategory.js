@@ -1,27 +1,15 @@
+import DeleteIcon from '@mui/icons-material/Delete';
 import {
     Button,
-    Dialog,
-    DialogTitle,
-    DialogActions,
-    DialogContent,
-    Grid,
-    TextField,
-    FormHelperText,
-    FormControl,
-    InputLabel,
-    IconButton,
-    CircularProgress,
-    Typography,
-    AppBar,
-    Tabs,
-    Tab,
-    Box,
+    Dialog, DialogActions,
+    DialogContent, DialogTitle
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import DeleteIcon from '@mui/icons-material/Delete';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { removeCategory } from '../action/categoryAction';
 import MyButton from './UI/MyButton';
+import { CategoryContext } from '../contextAPI/CategoryContext';
 
 const useStyles = makeStyles(theme => ({
     btn: {
@@ -37,18 +25,12 @@ const useStyles = makeStyles(theme => ({
     },
 }))
 
-const DeleteFormCategory = () => {
+const DeleteFormCategory = (props) => {
     const classes = useStyles();
-    const [open, setOpen] = useState(false);
+    const { id, name, title, categoryField } = props;
+    const { category, categoryDispatch } = useContext(CategoryContext);
 
-    const {
-        register,
-        handleSubmit,
-        control,
-        setValue,
-        watch,
-        formState: { errors }
-    } = useForm();
+    const [open, setOpen] = useState(false);
 
     const handleClose = () => {
         setOpen(false)
@@ -56,23 +38,23 @@ const DeleteFormCategory = () => {
     const handleOpen = () => {
         setOpen(true)
     }
-    const onSubmit = () => {
-
+    const handleSubmit = () => {
+        removeCategory(categoryDispatch, { categoryField, id })
     }
 
     return (
         <>
-            <MyButton onClick={handleOpen} error small><DeleteIcon />Xóa</MyButton>
+            <MyButton onClick={handleOpen} error={true} small><DeleteIcon />Xóa</MyButton>
             <Dialog fullWidth open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-                <DialogTitle id="form-dialog-title">Xóa Đảng viên</DialogTitle>
+                <DialogTitle id="form-dialog-title">Xóa {props.title}</DialogTitle>
                 <DialogContent className={classes.dialogContent}>
-                    Bạn có muốn xóa Đảng viên?
+                    Bạn có muốn xóa {title} "{name}"?
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} >
                         Hủy
                     </Button>
-                    <MyButton onClick={handleSubmit}>
+                    <MyButton onClick={handleSubmit} error={true}>
                         Xóa
                     </MyButton>
                 </DialogActions>

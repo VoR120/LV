@@ -2,6 +2,7 @@ const express = require('express');
 const {
     getAllFLanguageLevel,
     findByIdFLanguageLevel,
+    findByFlIdFLanguageLevel,
     createFLanguageLevel,
     updateByIdFLanguageLevel,
     removeFLanguageLevel,
@@ -10,6 +11,7 @@ const {
 const Router = express.Router();
 
 Router.get('/flanguagelevel', getAllFLanguageLevel);
+Router.get('/flanguagelevel/getbyflid/:id', findByFlIdFLanguageLevel);
 Router.get('/flanguagelevel/:id', findByIdFLanguageLevel);
 Router.post('/flanguagelevel/create', createFLanguageLevel);
 Router.put('/flanguagelevel/:id', updateByIdFLanguageLevel);

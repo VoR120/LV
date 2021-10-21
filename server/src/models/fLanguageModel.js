@@ -21,13 +21,26 @@ const FLanguage = {
             })
     },
     findById: findById("ngoaingu", "MaNgoaiNgu"),
-    create: create("ngoaingu"),
+    create: create("ngoaingu", "MaNgoaiNgu"),
     updateById: updateById("ngoaingu", "MaNgoaiNgu"),
     remove: remove("ngoaingu", "MaNgoaiNgu"),
     removeAll: removeAll("ngoaingu"),
     getIdFromName: (name, callback) => {
         sql.query(
             `SELECT MaNgoaiNgu FROM ngoaingu WHERE TenNgoaiNgu = "${name}"`,
+            (err, res) => {
+                if (err) {
+                    console.log("error: ", err);
+                    callback(null, err);
+                    return;
+                }
+                console.log("Id: ", res);
+                callback(null, { data: res });
+            })
+    },
+    getNameFromId: (id, callback) => {
+        sql.query(
+            `SELECT TenNgoaiNgu FROM ngoaingu WHERE MaNgoaiNgu = "${id}"`,
             (err, res) => {
                 if (err) {
                     console.log("error: ", err);

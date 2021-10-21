@@ -1,12 +1,22 @@
+import { Backdrop, CircularProgress } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import React from 'react';
-import { Box, CircularProgress } from '@mui/material';
 
-const CustomLoadingOverlay = () => {
+
+const useStyles = makeStyles((theme) => ({
+    backdrop: {
+      zIndex: theme.zIndex.drawer + 1,
+      color: '#fff',
+    },
+  }));
+
+const Loading = (props) => {
+    const classes = useStyles();
     return (
-        <Box sx={{ display: 'flex' }}>
-            <CircularProgress />
-        </Box>
+        <Backdrop className={classes.backdrop} open={props.loading}>
+            <CircularProgress color="primary" />
+        </Backdrop>
     );
 };
 
-export default CustomLoadingOverlay;
+export default Loading;

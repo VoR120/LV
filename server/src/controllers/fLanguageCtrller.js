@@ -1,5 +1,5 @@
 const FLanguage = require('../models/fLanguageModel');
-const { getAll, findById, create, updateById, remove, removeAll, getIdFromName } = require('./utils');
+const { getAll, findById, create, updateById, remove, removeAll, getIdFromName, getNameFromId } = require('./utils');
 
 exports.getAllFLanguage = getAll(FLanguage);
 
@@ -14,3 +14,5 @@ exports.removeFLanguage = remove(FLanguage);
 exports.removeAllFLanguage = removeAll(FLanguage);
 
 exports.getIdFromNameFLanguage = getIdFromName(FLanguage);
+
+exports.getNameFromIdFLanguage = getNameFromId(FLanguage);

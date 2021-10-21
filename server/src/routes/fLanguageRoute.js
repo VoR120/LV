@@ -6,13 +6,15 @@ const {
     updateByIdFLanguage,
     removeFLanguage,
     removeAllFLanguage,
-    getIdFromNameFLanguage
+    getIdFromNameFLanguage,
+    getNameFromIdFLanguage
 } = require('../controllers/fLanguageCtrller');
 const Router = express.Router();
 
 Router.get('/flanguage', getAllFLanguage);
 Router.get('/flanguage/:id', findByIdFLanguage);
 Router.post('/flanguage/getid', getIdFromNameFLanguage);
+Router.post('/flanguage/getname', getNameFromIdFLanguage);
 Router.post('/flanguage/create', createFLanguage);
 Router.put('/flanguage/:id', updateByIdFLanguage);
 Router.delete('/flanguage/:id', removeFLanguage);

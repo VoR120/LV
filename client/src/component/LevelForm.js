@@ -106,14 +106,6 @@ const LevelForm = () => {
                 <Grid item xs={6}>
                     <Grid className={classes.inputItem} container alignItems="center">
                         <Grid xs={5}>
-                            <Typography>Học hàm</Typography>
-                        </Grid>
-                        <Grid xs={7}>
-                            <TextField fullWidth size="small" variant="outlined" />
-                        </Grid>
-                    </Grid>
-                    <Grid className={classes.inputItem} container alignItems="center">
-                        <Grid xs={5}>
                             <Typography>Lí luận chính trị</Typography>
                         </Grid>
                         <Grid xs={7}>

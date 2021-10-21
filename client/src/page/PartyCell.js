@@ -1,19 +1,14 @@
-import { Button, Typography } from '@mui/material';
+import MaterialTable from '@material-table/core';
+import DownloadIcon from '@mui/icons-material/Download';
+import { Paper, TableContainer, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
-import { AgGridReact } from 'ag-grid-react';
-import React, { useState } from 'react';
-import AddForm from '../component/AddForm';
-import Layout from '../component/Layout';
-import ActionMenu from '../component/ActionMenu';
-import EditForm from '../component/EditForm';
-import DeleteForm from '../component/DeleteForm';
-import AddFormCategory from '../component/AddFormCategory';
-import EditFormCategory from '../component/EditFormCategory';
+import React, { useContext, useEffect, useState } from 'react';
+import { getAllCategory } from '../action/categoryAction';
 import DeleteFormCategory from '../component/DeleteFormCategory';
-import '../public/css/Table.scss'
-
+import CategoryForm from '../component/CategoryForm';
+import Layout from '../component/Layout';
+import { downloadExcel } from '../utils/utils';
+import { CategoryContext } from '../contextAPI/CategoryContext';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -24,10 +19,9 @@ const useStyles = makeStyles(theme => ({
         fontWeight: '600',
     },
     table: {
-        height: '450px',
         width: '100%',
         backgroundColor: 'white',
-        marginTop: '20px',
+        marginTop: '18px',
     },
     editBtn: {
         color: theme.palette.common.white,
@@ -50,44 +44,50 @@ const useStyles = makeStyles(theme => ({
 const PartyCell = () => {
     const classes = useStyles();
 
-    const [rowData] = useState([
-        { cId: 'CB1', name: 'Sinh viên', quantity: "200" },
-        { cId: 'CB2', name: 'Giảng viên', quantity: "40" },
-    ])
+    const [rows, setRows] = useState([])
+    const [loading, setLoading] = useState(false)
 
-    const [columnDefs] = useState([
-        { headerName: "Mã Chi bộ", field: "cId", width: '100px', },
-        { headerName: "Tên chi bộ", field: "name", },
-        { headerName: "Số đảng viên", field: "quantity", },
+    const { category, categoryDispatch } = useContext(CategoryContext);
+
+    const [columns] = useState([
+        { title: "Mã Chi bộ", field: "MaChiBo", },
+        { title: "Tên chi bộ", field: "TenChiBo", },
+        { title: "Số đảng viên", field: "SoDangVien", },
         {
-            headerName: "Chức năng", field: "action", sortable: false, width: '200px',
-            cellRendererFramework: (params) => {
-                const { cId, name } = params.data
+            title: "Chức năng",
+            field: "action",
+            render: (params) => {
+                console.log(params)
                 return (
                     <>
-                        <EditFormCategory
-                            header={"Cập nhật Chi bộ"}
-                            idTitle={"Mã Đảng viên"}
-                            idValue={cId}
-                            nameTitle={"Tên Chi bộ"}
-                            nameValue={name}
+                        <CategoryForm
+                            edit={true}
+                            categoryName={"Chi bộ"}
+                            dataArr={{ "MaChiBo": params.MaChiBo, "TenChiBo": params.TenChiBo }}
+                            categoryField={"partycell"}
+                            keyField={["MaChiBo", "TenChiBo", "SoDangVien"]}
                         />
-                        <DeleteFormCategory/>
+                        <DeleteFormCategory
+                            title={"chi bộ"}
+                            id={params.MaChiBo}
+                            name={params.TenChiBo}
+                            categoryField={"partycell"}
+                        />
                     </>
                 )
             }
-        },
+        }
     ])
 
-    const gridOptions = {
-        rowData: rowData,
-        columnDefs: columnDefs,
-        defaultColDef: {
-            sortable: true,
-        },
-        pagination: true,
-        paginationPageSize: "10",
-    }
+    useEffect(() => {
+        if (category.categories["partycell"].length > 0) {
+            setRows(category.categories["partycell"]);
+        }
+    }, [category])
+
+    useEffect(() => {
+        getAllCategory(categoryDispatch, "partycell");
+    }, [])
 
     return (
         <>
@@ -97,17 +97,40 @@ const PartyCell = () => {
                         Hồ sơ Đảng viên
                     </Typography>
                 </div>
-                <AddFormCategory
-                    header={"Cập nhật Chi bộ"}
-                    idTitle={"Mã Đảng viên"}
-                    idValue={"CB3"}
-                    nameTitle={"Tên Chi bộ"}
+                <CategoryForm
+                    categoryName={"Chi bộ"}
+                    categoryField={"partycell"}
+                    keyField={["MaChiBo", "TenChiBo", "SoDangVien"]}
                 />
-                <div className={`${classes.table} ag-theme-alpine`}>
-                    <AgGridReact
-                        gridOptions={gridOptions}
+                <TableContainer style={{ maxWidth: "1170px", }} >
+                    <MaterialTable
+                        components={{
+                            Container: (props) =>
+                                <Paper
+                                    {...props}
+                                    className={classes.table}
+                                    variant="outlined"
+                                />
+                        }}
+                        title={"Chi bộ"}
+                        columns={columns}
+                        data={rows}
+                        isLoading={loading}
+                        options={{
+                            padding: 'dense'
+                        }}
+                        actions={[
+                            {
+                                icon: () => <DownloadIcon />,
+                                tooltip: "Export to excel",
+                                onClick: () => downloadExcel(),
+                                isFreeAction: true
+                            }
+                        ]}
+                        isLoading={category.loading}
+
                     />
-                </div>
+                </TableContainer>
             </Layout>
         </>
     );

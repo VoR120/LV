@@ -1,32 +1,22 @@
+import MaterialTable from '@material-table/core';
+import DownloadIcon from '@mui/icons-material/Download';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
     Accordion,
     AccordionDetails,
-    AccordionSummary,
-    Button,
-    Grid,
-    InputLabel,
-    MenuItem,
+    AccordionSummary, MenuItem,
     Paper,
-    TextField,
-    Typography,
+    TableContainer, Typography
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
-import { AgGridReact } from 'ag-grid-react';
-import React, { useState } from 'react';
-import AddForm from '../component/AddForm';
-import Layout from '../component/Layout';
+import React, { useEffect, useState } from 'react';
+import { getAllPartyMember } from '../action/infoAction';
 import ActionMenu from '../component/ActionMenu';
-import EditForm from '../component/EditForm';
-import DeleteForm from '../component/DeleteForm';
-import AddFormCategory from '../component/AddFormCategory';
-import EditFormCategory from '../component/EditFormCategory';
-import DeleteFormCategory from '../component/DeleteFormCategory';
-import MySelect from '../component/UI/MySelect';
+import Layout from '../component/Layout';
 import PaperStatistic from '../component/PaperStatistic';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MyButton from '../component/UI/MyButton';
+import MySelect from '../component/UI/MySelect';
+import { downloadExcel } from '../utils/utils';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -37,26 +27,9 @@ const useStyles = makeStyles(theme => ({
         fontWeight: '600',
     },
     table: {
-        height: '450px',
         width: '100%',
         backgroundColor: 'white',
-        marginTop: '20px',
-    },
-    editBtn: {
-        color: theme.palette.common.white,
-        backgroundColor: theme.palette.info.main,
-        margin: '0 4px',
-        '&:hover': {
-            backgroundColor: theme.palette.info.dark
-        },
-    },
-    deleteBtn: {
-        color: theme.palette.common.white,
-        backgroundColor: theme.palette.error.main,
-        margin: '0 4px',
-        '&:hover': {
-            backgroundColor: theme.palette.error.dark
-        },
+        marginTop: '18px',
     },
     paper: {
         display: 'flex',
@@ -86,47 +59,50 @@ const Statistic = () => {
         setCategoryField(e.target.value);
     }
 
-    const [rowData] = useState([
-        { cId: 'CB1', name: 'Sinh viên', quantity: "200" },
-        { cId: 'CB2', name: 'Giảng viên', quantity: "40" },
-    ])
+    const [rows, setRows] = useState([])
 
-    const [columnDefs] = useState([
-        { headerName: "Mã Chi bộ", field: "cId", width: '100px', },
-        { headerName: "Tên chi bộ", field: "name", },
-        { headerName: "Số đảng viên", field: "quantity", },
+    const [columns] = useState([
+        { title: "Mã Đảng viên", field: "MaDangVien", maxWidth: 150 },
+        { title: "Họ tên", field: "HoTen", minWidth: 200 },
+        { title: "Chi bộ", field: "TenChiBo", },
+        { title: "Giới tính", field: "GioiTinh", },
+        { title: "Ngày sinh", field: "NgaySinh", type: 'date' },
+        { title: "Quê quán", field: "QueQuan", },
+        { title: "Dân tộc", field: "DanToc", },
+        { title: "Tôn giáo", field: "TonGiao", },
+        { title: "Trình độ học vấn", field: "TDHocVan", },
+        { title: "Ngoại ngữ", field: "MaNgoaiNgu", },
+        { title: "Trình độ ngoại ngữ", field: "MaTrinhDo", },
+        { title: "Trình độ tin học", field: "MaTinHoc", },
+        { title: "Trình độ chính trị", field: "MaChinhTri", },
+        { title: "Số điện thoại", field: "SoDienThoai", },
+        { title: "Email", field: "Email", },
+        { title: "Nghề nghiệp", field: "NgheNghiep", },
+        { title: "Địa chỉ thường trú", field: "DiaChiThuongTru", },
+        { title: "Nơi ở hiện tại", field: "NoiOHienTai", },
+        { title: "Ngày vào Đoàn", field: "NgayVaoDoan", type: 'date' },
+        { title: "Nơi vào Đoàn", field: "NoiVaoDoan", },
+        { title: "Ngày vào Đảng lần đầu", field: "NgayVaoDang", type: 'date' },
+        { title: "Ngày vào Đảng chính thức", field: "NgayChinhThuc", type: 'date' },
+        { title: "Người giới thiệu", field: "NguoiGioiThieu", },
         {
-            headerName: "Chức năng", field: "action", sortable: false, width: '200px',
-            cellRendererFramework: (params) => {
-                const { cId, name } = params.data
-                return (
-                    <>
-                        <EditFormCategory
-                            header={"Cập nhật Chi bộ"}
-                            idTitle={"Mã Đảng viên"}
-                            idValue={cId}
-                            nameTitle={"Tên Chi bộ"}
-                            nameValue={name}
-                        />
-                        <DeleteFormCategory />
-                    </>
-                )
+            title: "Chức năng", field: "action", sorting: false,
+            render: (params) => {
+                console.log(params);
+                return <ActionMenu data={params} />
             }
-        },
+        }
     ])
 
-    const gridOptions = {
-        rowData: rowData,
-        columnDefs: columnDefs,
-        defaultColDef: {
-            resizable: true,
-        },
-        defaultColDef: {
-            sortable: true,
-        },
-        pagination: true,
-        paginationPageSize: "10",
-    }
+    useEffect(() => {
+        const getAll = async () => {
+            const res = await getAllPartyMember();
+            console.log(res);
+            setRows(res)
+        }
+        getAll();
+    }, [])
+
     const genderS = [
         { label: 'Nam', quantity: '200' },
         { label: 'Nữ', quantity: '200' }
@@ -172,10 +148,6 @@ const Statistic = () => {
                             <PaperStatistic title={"Chi bộ"} data={partyCellS} />
                             <PaperStatistic title={"Dân tộc"} data={ethnicS} />
                             <PaperStatistic title={"Độ tuổi"} data={ageS} />
-                            <PaperStatistic title={"Độ tuổi"} data={ageS} />
-                            <PaperStatistic title={"Độ tuổi"} data={ageS} />
-                            <PaperStatistic title={"Độ tuổi"} data={ageS} />
-                            <PaperStatistic title={"Độ tuổi"} data={ageS} />
                         </div>
                     </AccordionDetails>
                 </Accordion>
@@ -204,11 +176,32 @@ const Statistic = () => {
                     </MySelect>
                 </Paper>
                 <MyButton primary>Xem</MyButton>
-                <div className={`${classes.table} ag-theme-alpine`}>
-                    <AgGridReact
-                        gridOptions={gridOptions}
+                <TableContainer style={{ maxWidth: "1170px", }} >
+                    <MaterialTable
+                        components={{
+                            Container: (props) =>
+                                <Paper
+                                    {...props}
+                                    className={classes.table}
+                                    variant="outlined"
+                                />
+                        }}
+                        title={"Báo cáo"}
+                        columns={columns}
+                        data={rows}
+                        options={{
+                            padding: 'dense'
+                        }}
+                        actions={[
+                            {
+                                icon: () => <DownloadIcon />,
+                                tooltip: "Export to excel",
+                                onClick: () => downloadExcel(),
+                                isFreeAction: true
+                            }
+                        ]}
                     />
-                </div>
+                </TableContainer>
             </Layout>
         </>
     );

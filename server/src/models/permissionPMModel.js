@@ -3,7 +3,7 @@ const { getAll, findById, create, updateById, removeAll, remove } = require('./u
 const PermissionPM = {
     getAll: getAll("quyendangvien"),
     findById: findById("quyendangvien","MaDangVien"),
-    create: create("quyendangvien"),
+    create: create("quyendangvien", "MaDangVien"),
     // updateById: updateById("quyendangvien", "MaDangVien"),
     remove: remove("quyendangvien", "MaDangVien"),
     removeAll: removeAll("quyendangvien")

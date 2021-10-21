@@ -1,6 +1,6 @@
 const sql = require('../configs/db');
 
-const zeroFill = (num) => {
+exports.zeroFill = (num) => {
     let Snum = "" + num
     const zero = "0000"
     let newNum = zero.slice(0, zero.length - Snum.length) + Snum;
@@ -43,7 +43,7 @@ exports.findById = (table, key) => {
     }
 }
 
-exports.create = (table) => {
+exports.create = (table, key) => {
     return (newValue, callback) => {
         sql.query(`INSERT INTO ${table} SET ?`, newValue, (err, res) => {
             if (err) {
@@ -51,8 +51,8 @@ exports.create = (table) => {
                 callback(null, err);
                 return;
             }
-            console.log("Created: ", { id: zeroFill(res.insertId), ...newValue });
-            callback(null, { id: zeroFill(res.insertId), ...newValue });
+            console.log("Created: ", { [key]: this.zeroFill(res.insertId), ...newValue });
+            callback(null, { [key]: this.zeroFill(res.insertId), ...newValue, SoDangVien: 0 });
         })
     }
 }
@@ -70,8 +70,8 @@ exports.updateById = (table, key) => {
                 callback({ type: "not_found" }, null);
                 return;
             }
-            console.log("Updated: ", { id, ...newValue });
-            callback(null, { id, ...newValue });
+            console.log("Updated: ", { [key]: id, ...newValue });
+            callback(null, { [key]: id, ...newValue });
         }))
     }
 }

@@ -1,11 +1,13 @@
-import { Grid, MenuItem, Paper, TextField, Typography, Button } from '@mui/material';
+import { Grid, MenuItem, Paper, TextField, Typography, Button, TableContainer } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import { AgGridReact } from 'ag-grid-react/lib/agGridReact';
 import React, { useState } from 'react';
 import ActionMenu from '../component/ActionMenu';
 import Layout from '../component/Layout';
 import MySelect from '../component/UI/MySelect';
-import MyButton from '../component/UI/MyButton'
+import MyButton from '../component/UI/MyButton';
+import MaterialTable from '@material-table/core';
+import DownloadIcon from '@mui/icons-material/Download';
+import xlsx from 'xlsx'
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -16,10 +18,9 @@ const useStyles = makeStyles(theme => ({
         fontWeight: '600',
     },
     table: (props) => ({
-        height: props.rows.length > 0 ? 400 : 200,
         width: '100%',
         backgroundColor: 'white',
-        marginTop: '20px'
+        marginTop: '18px'
     }),
     deleteBtn: {
         color: theme.palette.common.white,
@@ -37,53 +38,54 @@ const useStyles = makeStyles(theme => ({
 
 const Search = () => {
 
-    const [rowData] = useState([
-        { id: 1, name: 'Nguyễn Văn A', partyCell: 'Sinh viên', birth: '01/01/1999', dayIn: '12/12/2017' },
-        { id: 2, name: 'Trần Văn B', partyCell: 'Sinh viên', birth: '01/01/1999', dayIn: '12/12/2017', },
-        { id: 3, name: 'Nguyễn Trần Thị C', partyCell: 'Sinh viên', birth: '01/01/1999', dayIn: '12/12/2017' },
-        { id: 4, name: 'Đặng Hoài D', partyCell: 'Sinh viên', birth: '01/01/1999', dayIn: '12/12/2017' },
-        { id: 5, name: 'Nguyễn Văn E', partyCell: 'Giảng viên', birth: null, dayIn: '12/12/2017' },
-        { id: 6, name: 'Nguyễn Văn F', partyCell: 'Giảng viên', birth: '01/01/1999', dayIn: '01/12/2017' },
-        { id: 7, name: 'Nguyễn Văn G', partyCell: 'Giảng viên', birth: '01/01/1999', dayIn: '01/12/2014' },
-        { id: 8, name: 'Nguyễn Văn H', partyCell: 'Giảng viên', birth: '01/01/1999', dayIn: '12/12/2017' },
-        { id: 9, name: 'Nguyễn Văn A', partyCell: 'Giảng viên', birth: '01/01/1999', dayIn: '12/12/2017' },
-        { id: 10, name: 'Nguyễn Văn A', partyCell: 'Giảng viên', birth: '01/01/1999', dayIn: '12/12/2017' },
-        { id: 11, name: 'Nguyễn Văn A', partyCell: 'Giảng viên', birth: '01/01/1999', dayIn: '12/12/2017' },
+    const [rows] = useState([
+        { HoTen: "Nguyen Vân A" },
+        { HoTen: "Nguyen Vân A" },
+        { HoTen: "Nguyen Vân A" },
+        { HoTen: "Nguyen Vân A" },
+        { HoTen: "Nguyen Vân A" },
+        { HoTen: "Nguyen Vân A" },
+        { HoTen: "Nguyen Vân A" },
     ])
 
-    const [columnDefs] = useState([
-        { headerName: "ID", field: "id", pinned: 'left', width: '50px', },
-        { headerName: "Họ tên", field: "name", pinned: 'left', },
-        { headerName: "Chi bộ", field: "partyCell", },
-        { headerName: "Ngày sinh", field: "birth", },
-        { headerName: "Ngày vào Đảng", field: "dayIn", },
-        { headerName: "Ngày vào Đảng", field: "dayIn", },
-        { headerName: "Ngày vào Đảng", field: "dayIn", },
-        { headerName: "Ngày vào Đảng", field: "dayIn", },
-        { headerName: "Ngày vào Đảng", field: "dayIn", },
+    const [columns] = useState([
+        { title: "Mã Đảng viên", field: "MaDangVien", maxWidth: 150 },
         {
-            headerName: "Chức năng", field: "action", pinned: 'right', sortable: false, width: '110px',
-            cellRendererFramework: (params) => {
-                // console.log(params.data);
-                return <ActionMenu data={params.data} />
+            title: "Họ tên", field: "HoTen", minWidth: 200
+        },
+        { title: "Chi bộ", field: "TenChiBo", },
+        { title: "Giới tính", field: "GioiTinh", },
+        { title: "Ngày sinh", field: "NgaySinh", },
+        { title: "Quê quán", field: "QueQuan", },
+        { title: "Dân tộc", field: "DanToc", },
+        { title: "Tôn giáo", field: "TonGiao", },
+        { title: "Ngày vào Đảng", field: "NgayVaoDang", },
+        { title: "Ngày chính thức", field: "NgayChinhThuc", },
+        { title: "Số điện thoại", field: "SoDienThoai", },
+        { title: "Email", field: "Email", },
+        { title: "CMND", field: "CMND", },
+        {
+            title: "Chức năng", field: "action", sorting: false,
+            render: (params) => {
+                console.log(params);
+                return <ActionMenu data={params} />
             }
         },
     ])
 
-    const gridOptions = {
-        rowData: rowData,
-        columnDefs: columnDefs,
-        defaultColDef: {
-            sortable: true,
-        },
-        pagination: true,
-        paginationPageSize: "10",
-    }
-
-    const classes = useStyles({ rows: rowData });
+    const classes = useStyles({ rows: rows });
     const [gender, setGender] = useState('2');
     const handleChangeGender = (e) => {
         setGender(e.target.value)
+    }
+
+    const downloadExcel = () => {
+        const workSheet = xlsx.utils.json_to_sheet(rows);
+        const workBook = xlsx.utils.book_new();
+        xlsx.utils.book_append_sheet(workBook, workSheet, "data")
+        let buf = xlsx.write(workBook, { bookType: "xlsx", type: "buffer" })
+        xlsx.write(workBook, { bookType: "xlsx", type: "binary" });
+        xlsx.writeFile(workBook, "DataExcel.xlsx")
     }
 
     return (
@@ -115,13 +117,13 @@ const Search = () => {
                                 <Typography>Trạng thái</Typography>
                             </Grid>
                             <Grid xs={7}>
-                            <MySelect
+                                <MySelect
                                     // onChange={handleChangeGender}
                                     value={"sv"}
                                 >
                                     <MenuItem value="sv">Đang sinh hoạt</MenuItem>
-                                    <MenuItem value="gv">Chuyển sinh hoạt tạm thời</MenuItem>
-                                    <MenuItem value="gv">Chuyển sinh hoạt vĩnh viễn</MenuItem>
+                                    <MenuItem value="cshtt">Chuyển sinh hoạt tạm thời</MenuItem>
+                                    <MenuItem value="cshct">Chuyển sinh hoạt chính thức</MenuItem>
                                 </MySelect>
                             </Grid>
                         </Grid>
@@ -146,7 +148,14 @@ const Search = () => {
                                 <Typography>Dân tộc</Typography>
                             </Grid>
                             <Grid xs={7}>
-                                <TextField fullWidth size="small" variant="outlined" />
+                                <MySelect
+                                    // onChange={handleChangeGender}
+                                    value={"sv"}
+                                >
+                                    <MenuItem value="sv">Kinh</MenuItem>
+                                    <MenuItem value="cshtt">Khmer</MenuItem>
+                                    <MenuItem value="cshct">Chăm</MenuItem>
+                                </MySelect>
                             </Grid>
                         </Grid>
                         <Grid className={classes.inputItem} xs={4} container item alignItems="center">
@@ -154,7 +163,14 @@ const Search = () => {
                                 <Typography>Tôn giáo</Typography>
                             </Grid>
                             <Grid xs={7}>
-                                <TextField type="date" fullWidth size="small" variant="outlined" />
+                                <MySelect
+                                    // onChange={handleChangeGender}
+                                    value={"sv"}
+                                >
+                                    <MenuItem value="sv">Phật giáo</MenuItem>
+                                    <MenuItem value="cshtt">...</MenuItem>
+                                    <MenuItem value="cshct">...</MenuItem>
+                                </MySelect>
                             </Grid>
                         </Grid>
                         <Grid className={classes.inputItem} xs={4} container item alignItems="center">
@@ -175,11 +191,32 @@ const Search = () => {
                     </Grid>
                 </Paper>
                 <MyButton primary >Xem</MyButton>
-                <div className={`${classes.table} ag-theme-alpine`}>
-                    <AgGridReact
-                        gridOptions={gridOptions}
+                <TableContainer style={{ maxWidth: "1170px", }} >
+                    <MaterialTable
+                        components={{
+                            Container: (props) =>
+                                <Paper
+                                    {...props}
+                                    className={classes.table}
+                                    variant="outlined"
+                                />
+                        }}
+                        title={"Tìm kiếm"}
+                        columns={columns}
+                        data={rows}
+                        options={{
+                            padding: 'dense'
+                        }}
+                        actions={[
+                            {
+                                icon: () => <DownloadIcon />,
+                                tooltip: "Export to excel",
+                                onClick: () => downloadExcel(),
+                                isFreeAction: true
+                            }
+                        ]}
                     />
-                </div>
+                </TableContainer>
             </Layout>
         </>
     );

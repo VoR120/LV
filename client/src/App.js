@@ -2,9 +2,9 @@ import { Backdrop, CircularProgress, CssBaseline } from '@mui/material';
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Switch } from "react-router-dom";
 import { Route } from 'react-router';
-import './App.css';
+import './App.scss';
 import RouteList from './config/routeConfig';
-import ThemeContextProvider from './contextAPI/ThemeContext';
+import AppContextProvider from './contextAPI/index';
 import { routes } from './page';
 import Home from './page/Home';
 import File from './page/File';
@@ -12,13 +12,13 @@ import File from './page/File';
 function App() {
   return (
     <div className="App">
-      <ThemeContextProvider>
-      <CssBaseline />
+      <AppContextProvider>
+        <CssBaseline />
         <Router>
           <Switch>
             <Suspense
               fallback={
-                <Backdrop style={{backgroundColor: '#fff'}} open={true}>
+                <Backdrop style={{ backgroundColor: '#fff' }} open={true}>
                   <CircularProgress color="primary" />
                 </Backdrop>
               }
@@ -27,7 +27,7 @@ function App() {
             </Suspense>
           </Switch>
         </Router>
-      </ThemeContextProvider>
+      </AppContextProvider>
     </div>
   );
 }

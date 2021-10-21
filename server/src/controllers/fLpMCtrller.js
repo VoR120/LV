@@ -1,20 +1,11 @@
 const fLpM = require('../models/fLpMModel');
-const { getAll, findById, updateById, remove, removeAll } = require('./utils');
+const { getAll, findById, updateById, remove, removeAll, create } = require('./utils');
 
 exports.getAllfLpM = getAll(fLpM);
 
 exports.findByIdfLpM = findById(fLpM);
 
-exports.createfLpM = (req, res) => {
-    fLpM.create(req.body, (err, data) => {
-        if (err)
-            res.status(500).send({
-                message:
-                    err.message || "ERROR!"
-            });
-        else res.send(data);
-    })
-}
+exports.createfLpM = create(fLpM)
 
 exports.updateByIdfLpM = updateById(fLpM);
 

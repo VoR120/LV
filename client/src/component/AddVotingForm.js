@@ -11,7 +11,7 @@ import {
 import makeStyles from '@mui/styles/makeStyles';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import MyButton from './UI/MyButton';
 
@@ -101,8 +101,17 @@ const AddVotingForm = (props) => {
                             {inputList.map((input, index) => {
                                 return (
                                     <div className={classes.inputWrapper}>
-                                        <TextField onChange={(e) => handleInputChange(e, index)} name="info" value={input.value} className={classes.inputItem} fullWidth size="small" variant="outlined" />
-                                        <CloseIcon id="close-icon" className={classes.closeIcon} onClick={() => handleRemoveList(index)} />
+                                        <TextField
+                                            onChange={(e) => handleInputChange(e, index)}
+                                            name="info" value={input.value}
+                                            className={classes.inputItem}
+                                            fullWidth
+                                            size="small"
+                                            variant="outlined" />
+                                        <CloseIcon id="close-icon"
+                                            className={classes.closeIcon}
+                                            onClick={() => handleRemoveList(index)}
+                                        />
                                     </div>
                                 )
                             })}

@@ -124,7 +124,7 @@ const InfoForm = (props) => {
                             <Typography>Họ và tên khai sinh</Typography>
                         </Grid>
                         <Grid xs={7}>
-                            <TextField fullWidth size="small" variant="outlined" />
+                            <TextField fullWidth size="small" variant="outlined" value={props.data.HoTen}/>
                         </Grid>
                     </Grid>
                     <Grid className={classes.inputItem} container alignItems="center">

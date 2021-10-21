@@ -1,0 +1,53 @@
+:root {
+  --primary: #0c71d0;
+  --primaryDark: #1831e4;
+  --primaryLight: #e3f2fd;
+  --bg: #e3f2fd;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+.MuiTable-root {
+  & .MuiTableCell-root {
+    white-space: nowrap;
+  }
+}
+
+table:first-child {
+  & tr {
+    &:hover {
+      background-color: #fff !important
+    };
+    & td:first-child,
+    th:first-child {
+      background-color: #fff;
+      position: sticky;
+      left: 0;
+      z-index: 10;
+    }
+    & td:nth-child(2),
+    th:nth-child(2) {
+      background-color: #fff;
+      position: sticky;
+      left: 150px;
+      z-index: 10;
+    }
+    & td:last-child,
+    th:last-child {
+      background-color: #fff;
+      position: sticky;
+      right: 0;
+      z-index: 10;
+    }
+  }
+}

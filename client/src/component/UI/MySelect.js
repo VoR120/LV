@@ -11,10 +11,6 @@ const useStyles = makeStyles(theme => ({
 const MySelect = (props) => {
     const classes = useStyles();
     const { value, onChange, children, autowidth } = props
-    console.log(onChange);
-    useEffect(() => {
-        console.log(value)
-    }, [value])
     return (
         <TextField
             select

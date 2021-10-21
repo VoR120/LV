@@ -3,7 +3,6 @@ import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import MenuIcon from '@mui/icons-material/MenuIcon'
-import { Chip } from '@mui/material';
 
 import makeStyles from '@mui/styles/makeStyles';
 

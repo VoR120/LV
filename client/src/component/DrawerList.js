@@ -1,22 +1,20 @@
-import { Badge, Divider } from '@mui/material';
+import EqualizerIcon from '@mui/icons-material/Equalizer';
+import GroupIcon from '@mui/icons-material/Group';
+import HomeIcon from '@mui/icons-material/Home';
+import HowToVoteIcon from '@mui/icons-material/HowToVote';
+import InfoIcon from '@mui/icons-material/Info';
+import LayersIcon from '@mui/icons-material/Layers';
+import ListIcon from '@mui/icons-material/List';
+import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
+import SearchIcon from '@mui/icons-material/Search';
+import SyncAltIcon from '@mui/icons-material/SyncAlt';
+import ThumbsUpDownIcon from '@mui/icons-material/ThumbsUpDown';
+import { Divider } from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import EqualizerIcon from '@mui/icons-material/Equalizer';
-import SearchIcon from '@mui/icons-material/Search';
-import HomeIcon from '@mui/icons-material/Home';
-import HowToVoteIcon from '@mui/icons-material/HowToVote';
-import LayersIcon from '@mui/icons-material/Layers';
-import RedoIcon from '@mui/icons-material/Redo';
-import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
-import GroupIcon from '@mui/icons-material/Group';
-import ThumbsUpDownIcon from '@mui/icons-material/ThumbsUpDown';
-import UndoIcon from '@mui/icons-material/Undo';
-import { makeStyles, withStyles } from '@mui/styles';
+import { makeStyles } from '@mui/styles';
 import { NavLink } from "react-router-dom";
-import ListIcon from '@mui/icons-material/List';
-import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
 import '../public/css/Drawer.scss';
 
 const useStyles = makeStyles(theme => ({
@@ -45,15 +43,21 @@ const DrawerList = () => {
                         <ListItemText primary="Trang chủ" />
                     </ListItem>
                 </NavLink>
+                <NavLink to={"/myfile"}>
+                    <ListItem button>
+                        <InfoIcon className={classes.icon} />
+                        <ListItemText primary="Thông tin cá nhân" />
+                    </ListItem>
+                </NavLink>
                 <NavLink to={"/file"}>
                     <ListItem button>
                         <LayersIcon className={classes.icon} />
-                        <ListItemText primary="Hồ sơ nhân viên" />
+                        <ListItemText primary="Hồ sơ Đảng viên" />
                     </ListItem>
                 </NavLink>
                 <NavLink to={"/move"}>
                     <ListItem button>
-                        <UndoIcon className={classes.icon} />
+                        <SyncAltIcon className={classes.icon} />
                         <ListItemText primary="Chuyển sinh hoạt" />
                     </ListItem>
                 </NavLink>

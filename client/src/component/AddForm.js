@@ -91,7 +91,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 
-const AddForm = () => {
+const AddForm = (props) => {
     const classes = useStyles();
     const [open, setOpen] = useState(false);
     const [imageUpload, setImageUpload] = useState('');
@@ -129,7 +129,7 @@ const AddForm = () => {
             >
                 {value === index && (
                     <Box p={3}>
-                        <Typography>{children}</Typography>
+                        {children}
                     </Box>
                 )}
             </div>
@@ -149,7 +149,7 @@ const AddForm = () => {
             <MyButton onClick={handleOpen} success><AddIcon />Thêm</MyButton>
             <Dialog PaperProps={{ style: { minWidth: '1100px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">Thêm Đảng viên</DialogTitle>
-                <AppBar className={classes.tabsbar} position="static">
+                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs
                         value={step}
                         onChange={handleChange}
@@ -161,10 +161,10 @@ const AddForm = () => {
                         <Tab label="Trình độ" {...a11yProps(1)} />
                         <Tab label="Về Đoàn / Đảng" {...a11yProps(2)} />
                     </Tabs>
-                </AppBar>
+                </Box>
                 <form className="add-form">
                     <TabPanel value={step} index={0}>
-                        <InfoForm />
+                        <InfoForm data={props.data} />
                     </TabPanel>
                     <TabPanel value={step} index={1}>
                         <LevelForm />

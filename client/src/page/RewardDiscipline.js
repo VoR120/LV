@@ -1,12 +1,10 @@
-import { Button, Typography } from '@mui/material';
+import MaterialTable from '@material-table/core';
+import DownloadIcon from '@mui/icons-material/Download';
+import { Button, Paper, TableContainer, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
-import { AgGridReact } from 'ag-grid-react';
-import React, { useEffect, useState } from 'react';
-import AddForm from '../component/AddForm';
+import React, { useState } from 'react';
 import Layout from '../component/Layout';
-import ActionMenu from '../component/ActionMenu';
+import { downloadExcel } from '../utils/utils';
 
 
 const useStyles = makeStyles(theme => ({
@@ -18,10 +16,9 @@ const useStyles = makeStyles(theme => ({
         fontWeight: '600',
     },
     table: {
-        height: '450px',
         width: '100%',
         backgroundColor: 'white',
-        marginTop: '20px',
+        marginTop: '18px',
     },
     editBtn: {
         color: theme.palette.common.white,
@@ -33,7 +30,7 @@ const useStyles = makeStyles(theme => ({
     },
 }))
 
-const Move = () => {
+const RewardDiscipline = () => {
     const classes = useStyles();
     const [typeMove, setTypeMove] = useState('in');
     const handleChangeList = (e) => {
@@ -48,48 +45,34 @@ const Move = () => {
         return typeMove === value ? "contained" : "outlined"
     }
 
-    const [rowData] = useState([
-        { id: 1, name: 'Nguyễn Văn A', partyCell: 'Sinh viên', birth: '01/01/1999', dayIn: '12/12/2017' },
-        { id: 2, name: 'Trần Văn B', partyCell: 'Sinh viên', birth: '01/01/1999', dayIn: '12/12/2017', },
-        { id: 3, name: 'Nguyễn Trần Thị C', partyCell: 'Sinh viên', birth: '01/01/1999', dayIn: '12/12/2017' },
-        { id: 4, name: 'Đặng Hoài D', partyCell: 'Sinh viên', birth: '01/01/1999', dayIn: '12/12/2017' },
-        { id: 5, name: 'Nguyễn Văn E', partyCell: 'Giảng viên', birth: null, dayIn: '12/12/2017' },
-        { id: 6, name: 'Nguyễn Văn F', partyCell: 'Giảng viên', birth: '01/01/1999', dayIn: '01/12/2017' },
-        { id: 7, name: 'Nguyễn Văn G', partyCell: 'Giảng viên', birth: '01/01/1999', dayIn: '01/12/2014' },
-        { id: 8, name: 'Nguyễn Văn H', partyCell: 'Giảng viên', birth: '01/01/1999', dayIn: '12/12/2017' },
-        { id: 9, name: 'Nguyễn Văn A', partyCell: 'Giảng viên', birth: '01/01/1999', dayIn: '12/12/2017' },
-        { id: 10, name: 'Nguyễn Văn A', partyCell: 'Giảng viên', birth: '01/01/1999', dayIn: '12/12/2017' },
-        { id: 11, name: 'Nguyễn Văn A', partyCell: 'Giảng viên', birth: '01/01/1999', dayIn: '12/12/2017' },
+    const [rows] = useState([
+        { MaDangVien: "0001" },
+        { MaDangVien: "0001" },
+        { MaDangVien: "0001" },
+        { MaDangVien: "0001" },
+        { MaDangVien: "0001" },
+        { MaDangVien: "0001" },
+        { MaDangVien: "0001" },
+        { MaDangVien: "0001" },
+        { MaDangVien: "0001" },
+        { MaDangVien: "0001" },
     ])
 
-    const [columnDefs] = useState([
-        { headerName: "ID", field: "id", pinned: 'left', width: '50px', },
-        { headerName: "Họ tên", field: "name", pinned: 'left', },
-        { headerName: "Chi bộ", field: "partyCell", },
-        { headerName: "Ngày sinh", field: "birth", },
-        { headerName: "Ngày vào Đảng", field: "dayIn", },
-        { headerName: "Ngày vào Đảng", field: "dayIn", },
-        { headerName: "Ngày vào Đảng", field: "dayIn", },
-        { headerName: "Ngày vào Đảng", field: "dayIn", },
-        { headerName: "Ngày vào Đảng", field: "dayIn", },
-        {
-            headerName: "Chức năng", field: "action", pinned: 'right', sortable: false, width: '110px',
-            cellRendererFramework: (params) => {
-                // console.log(params.data);
-                return <ActionMenu data={params.data} />
-            }
-        },
+    const [columns] = useState([
+        { title: "Mã Đảng viên", field: "MaDangVien", maxWidth: 150 },
+        { title: "Họ tên", field: "HoTen", },
+        { title: "Tên khen thưởng", field: "TenKhenThuong", },
+        { title: "Loại khen thưởng", field: "LoaiKhenThuong", },
+        { title: "Hình thức khen thưởng", field: "TenHinhThuc", },
+        { title: "Ngày khen thưởng", field: "NgayKhenThuong", sorting: false },
+        // {
+        //     title: "Chức năng", field: "action", sorting: false,
+        //     render: (params) => {
+        //         console.log(params);
+        //         return <ActionMenu data={params} />
+        //     }
+        // },
     ])
-
-    const gridOptions = {
-        rowData: rowData,
-        columnDefs: columnDefs,
-        defaultColDef: {
-            sortable: true,
-        },
-        pagination: true,
-        paginationPageSize: "10",
-    }
 
     return (
         <>
@@ -101,14 +84,35 @@ const Move = () => {
                 </div>
                 <Button value="in" onClick={handleChangeList} style={{ marginRight: '8px', }} variant={active("in")} color="primary">Khen thưởng</Button>
                 <Button value="out" onClick={handleChangeList} variant={active("out")} color="primary">Kỷ luật</Button>
-                <div className={`${classes.table} ag-theme-alpine`}>
-                    <AgGridReact
-                        gridOptions={gridOptions}
+                <TableContainer style={{ maxWidth: "1170px", }} >
+                    <MaterialTable
+                        components={{
+                            Container: (props) =>
+                                <Paper
+                                    {...props}
+                                    className={classes.table}
+                                    variant="outlined"
+                                />
+                        }}
+                        title={"Khen thưởng - Kỷ luật"}
+                        columns={columns}
+                        data={rows}
+                        options={{
+                            padding: 'dense'
+                        }}
+                        actions={[
+                            {
+                                icon: () => <DownloadIcon />,
+                                tooltip: "Export to excel",
+                                onClick: () => downloadExcel(),
+                                isFreeAction: true
+                            }
+                        ]}
                     />
-                </div>
+                </TableContainer>
             </Layout>
         </>
     );
 };
 
-export default Move;
+export default RewardDiscipline;
