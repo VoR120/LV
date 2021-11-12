@@ -7,12 +7,12 @@ const Position = {
                 FROM chucvu 
                 LEFT JOIN chucvudangvien 
                 INNER JOIN dangvien
-                ON dangvien.MaDangVien = chucvudangvien.MaDangVien
+                ON dangvien.MaSoDangVien = chucvudangvien.MaSoDangVien
                 ON chucvu.MaChucVu=chucvudangvien.MaChucVu
                 GROUP BY chucvu.MaChucVu`, (err, res) => {
             if (err) {
                 console.log("error: ", err);
-                callback(null, err);
+                callback(err, null);
                 return;
             }
             console.log("All: ", res);

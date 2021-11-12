@@ -20,7 +20,7 @@ const Header = () => {
                 <Toolbar className={classes.toolbar}>
                     <MenuIcon />
                     <Typography variant="h6">
-                        Hệ thống quản lý hồ sơ Đảng viên
+                        {/* Hệ thống quản lý hồ sơ Đảng viên */}
                     </Typography>
                 </Toolbar>
             </AppBar>

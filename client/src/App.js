@@ -1,18 +1,41 @@
 import { Backdrop, CircularProgress, CssBaseline } from '@mui/material';
-import React, { Suspense } from 'react';
-import { BrowserRouter as Router, Switch } from "react-router-dom";
-import { Route } from 'react-router';
+import React, { Suspense, useContext, useEffect, useState } from 'react';
+import { BrowserRouter as Router, Switch, useHistory } from "react-router-dom";
+import { isLogin } from './action/infoAction';
 import './App.scss';
 import RouteList from './config/routeConfig';
-import AppContextProvider from './contextAPI/index';
+import { InfoContext } from './contextAPI/InfoContext';
 import { routes } from './page';
-import Home from './page/Home';
-import File from './page/File';
+import Login from './page/Login';
 
 function App() {
+  const { info, infoDispatch } = useContext(InfoContext);
+  const history = useHistory();
+
+  useEffect(() => {
+    console.log(info);
+    isLogin(infoDispatch)
+  }, [])
+
+  useEffect(() => {
+    console.log(!info.isAuthenticated);
+    if (!info.isAuthenticated) {
+      return <Login />
+    }
+  }, [info.isAuthenticated])
+
+  // getAllCategory(categoryDispatch, "ethnic")
+  // getAllCategory(categoryDispatch, "religion")
+  // getAllCategory(categoryDispatch, "partycell")
+  // getAllCategory(categoryDispatch, "position")
+  // getAllCategory(categoryDispatch, "flanguage");
+  // getAllCategory(categoryDispatch, "flanguagelevel");
+  // getAllCategory(categoryDispatch, "politics");
+  // getAllCategory(categoryDispatch, "it");
+  // getAllCategory(categoryDispatch, "grade");
+
   return (
     <div className="App">
-      <AppContextProvider>
         <CssBaseline />
         <Router>
           <Switch>
@@ -27,7 +50,6 @@ function App() {
             </Suspense>
           </Switch>
         </Router>
-      </AppContextProvider>
     </div>
   );
 }

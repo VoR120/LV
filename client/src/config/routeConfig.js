@@ -3,6 +3,7 @@ import { Route } from 'react-router-dom';
 import PrivateRoute from '../component/HOC/PrivateRoute';
 
 const RouteList = (props) => {
+
     return (
         <Fragment>
             {props.routes.map(({ component: Component, path, isPrivate, ...rest }) => {

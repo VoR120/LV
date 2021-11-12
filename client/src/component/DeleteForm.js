@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -7,6 +7,9 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MyButton from './UI/MyButton';
+import { removePartyMember } from '../action/partyMemberAction';
+import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
 const useStyles = makeStyles(theme => ({
     dialogContent: {
         marginBottom: theme.spacing(2),
@@ -31,8 +34,12 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const DeleteForm = (props) => {
+
+    const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
+    const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
+
     const classes = useStyles();
-    const { name } = props.data;
+    const { name, id } = props;
     const [open, setOpen] = useState(false);
     const handleClose = () => {
         setOpen(false)
@@ -41,7 +48,8 @@ const DeleteForm = (props) => {
         setOpen(true)
     }
     const handleSubmit = () => {
-
+        removePartyMember(partyMemberDispatch, { id }, openSnackbarDispatch)
+        setOpen(false);
     }
 
     return (
@@ -52,7 +60,7 @@ const DeleteForm = (props) => {
             <Dialog fullWidth open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">Xóa Đảng viên</DialogTitle>
                 <DialogContent className={classes.dialogContent}>
-                    Bạn có muốn xóa Đảng viên "{name}"?
+                    Bạn có muốn xóa Đảng viên "{name}" - "{id}"?
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} >

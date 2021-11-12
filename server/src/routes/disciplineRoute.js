@@ -5,11 +5,14 @@ const {
     createDiscipline,
     updateByIdDiscipline,
     removeDiscipline,
-    removeAllDiscipline
+    removeAllDiscipline,
+    findByTypeDiscipline,
+    findByTypeIdDiscipline
 } = require('../controllers/disciplineCtrller');
 const Router = express.Router();
 
 Router.get('/discipline', getAllDiscipline);
+Router.get('/discipline/getbytypeid/:id', findByTypeIdDiscipline);
 Router.get('/discipline/:id', findByIdDiscipline);
 Router.post('/discipline/create', createDiscipline);
 Router.put('/discipline/:id', updateByIdDiscipline);

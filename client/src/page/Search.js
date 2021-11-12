@@ -1,6 +1,6 @@
 import { Grid, MenuItem, Paper, TextField, Typography, Button, TableContainer } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import ActionMenu from '../component/ActionMenu';
 import Layout from '../component/Layout';
 import MySelect from '../component/UI/MySelect';
@@ -8,6 +8,12 @@ import MyButton from '../component/UI/MyButton';
 import MaterialTable from '@material-table/core';
 import DownloadIcon from '@mui/icons-material/Download';
 import xlsx from 'xlsx'
+import { allInfoColumn, downloadExcel } from '../utils/utils';
+import InputGrid from '../component/InputGrid';
+import { useForm } from 'react-hook-form';
+import { filterPartyMember } from '../action/partyMemberAction';
+import { CategoryContext } from '../contextAPI/CategoryContext';
+import axios from '../helper/axios';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -38,55 +44,42 @@ const useStyles = makeStyles(theme => ({
 
 const Search = () => {
 
-    const [rows] = useState([
-        { HoTen: "Nguyen Vân A" },
-        { HoTen: "Nguyen Vân A" },
-        { HoTen: "Nguyen Vân A" },
-        { HoTen: "Nguyen Vân A" },
-        { HoTen: "Nguyen Vân A" },
-        { HoTen: "Nguyen Vân A" },
-        { HoTen: "Nguyen Vân A" },
-    ])
-
-    const [columns] = useState([
-        { title: "Mã Đảng viên", field: "MaDangVien", maxWidth: 150 },
-        {
-            title: "Họ tên", field: "HoTen", minWidth: 200
-        },
-        { title: "Chi bộ", field: "TenChiBo", },
-        { title: "Giới tính", field: "GioiTinh", },
-        { title: "Ngày sinh", field: "NgaySinh", },
-        { title: "Quê quán", field: "QueQuan", },
-        { title: "Dân tộc", field: "DanToc", },
-        { title: "Tôn giáo", field: "TonGiao", },
-        { title: "Ngày vào Đảng", field: "NgayVaoDang", },
-        { title: "Ngày chính thức", field: "NgayChinhThuc", },
-        { title: "Số điện thoại", field: "SoDienThoai", },
-        { title: "Email", field: "Email", },
-        { title: "CMND", field: "CMND", },
-        {
-            title: "Chức năng", field: "action", sorting: false,
-            render: (params) => {
-                console.log(params);
-                return <ActionMenu data={params} />
-            }
-        },
-    ])
-
+    const [rows, setRows] = useState([])
+    const [columns] = useState(allInfoColumn)
     const classes = useStyles({ rows: rows });
     const [gender, setGender] = useState('2');
-    const handleChangeGender = (e) => {
-        setGender(e.target.value)
+    const [loadingTable, setLoadingTable] = useState(false);
+    const [provinceArr, setProvinceArr] = useState([]);
+
+    const { category, categoryDispatch } = useContext(CategoryContext);
+
+    const {
+        handleSubmit,
+        control,
+        setValue,
+        clearErrors,
+        getValues,
+        formState: { errors }
+    } = useForm();
+
+    const handleChangeSelect = (e) => {
+        setValue(e.target.name, e.target.value)
     }
 
-    const downloadExcel = () => {
-        const workSheet = xlsx.utils.json_to_sheet(rows);
-        const workBook = xlsx.utils.book_new();
-        xlsx.utils.book_append_sheet(workBook, workSheet, "data")
-        let buf = xlsx.write(workBook, { bookType: "xlsx", type: "buffer" })
-        xlsx.write(workBook, { bookType: "xlsx", type: "binary" });
-        xlsx.writeFile(workBook, "DataExcel.xlsx")
+    const onSubmit = async (data) => {
+        setLoadingTable(true)
+        const res = await filterPartyMember(data)
+        setRows(res);
+        setLoadingTable(false)
     }
+
+    useEffect(() => {
+        const fetchAPISetArr = async () => {
+            const res = await axios.get('https://provinces.open-api.vn/api/')
+            setProvinceArr(res.data);
+        }
+        fetchAPISetArr();
+    }, [])
 
     return (
         <>
@@ -98,99 +91,122 @@ const Search = () => {
                 </div>
                 <Paper variant="outlined" className={classes.paper}>
                     <Grid container spacing={2}>
-                        <Grid className={classes.inputItem} xs={4} container item alignItems="center">
-                            <Grid xs={5}>
-                                <Typography>Chi bộ</Typography>
-                            </Grid>
-                            <Grid xs={7}>
-                                <MySelect
-                                    // onChange={handleChangeGender}
-                                    value={"sv"}
-                                >
-                                    <MenuItem value="sv">Sinh viên</MenuItem>
-                                    <MenuItem value="gv">Giảng viên</MenuItem>
-                                </MySelect>
-                            </Grid>
+                        <Grid item xs={4}>
+                            <InputGrid
+                                select
+                                onChange={handleChangeSelect}
+                                nameTitle={"Chi bộ"}
+                                name="partycell"
+                                defaultValue="0"
+                                control={control}
+                                errors={errors}
+                            >
+                                <MenuItem value="0">Tất cả</MenuItem>
+                                {
+                                    category.categories["partycell"].map(el =>
+                                        <MenuItem key={el.MaChiBo} value={el.MaChiBo} >{el.TenChiBo}</MenuItem>
+                                    )
+                                }
+                            </InputGrid>
                         </Grid>
-                        <Grid className={classes.inputItem} xs={4} container item alignItems="center">
-                            <Grid xs={5}>
-                                <Typography>Trạng thái</Typography>
-                            </Grid>
-                            <Grid xs={7}>
-                                <MySelect
-                                    // onChange={handleChangeGender}
-                                    value={"sv"}
-                                >
-                                    <MenuItem value="sv">Đang sinh hoạt</MenuItem>
-                                    <MenuItem value="cshtt">Chuyển sinh hoạt tạm thời</MenuItem>
-                                    <MenuItem value="cshct">Chuyển sinh hoạt chính thức</MenuItem>
-                                </MySelect>
-                            </Grid>
+                        <Grid item xs={4}>
+                            <InputGrid
+                                select
+                                onChange={handleChangeSelect}
+                                nameTitle={"Trạng thái"}
+                                name="status"
+                                defaultValue="0"
+                                control={control}
+                                errors={errors}
+                            >
+                                <MenuItem value="0">Tất cả</MenuItem>
+                                <MenuItem value="1">Đang sinh hoạt</MenuItem>
+                                <MenuItem value="2">Đã chuyển sinh hoạt</MenuItem>
+                            </InputGrid>
                         </Grid>
-                        <Grid className={classes.inputItem} xs={4} container item alignItems="center">
-                            <Grid xs={5}>
-                                <Typography>Họ tên</Typography>
-                            </Grid>
-                            <Grid xs={7}>
-                                <TextField fullWidth size="small" variant="outlined" />
-                            </Grid>
+                        <Grid item xs={4}>
+                            <InputGrid
+                                nameTitle={"Họ tên"}
+                                name="name"
+                                defaultValue={""}
+                                control={control}
+                                errors={errors}
+                            />
                         </Grid>
-                        <Grid className={classes.inputItem} xs={4} container item alignItems="center">
-                            <Grid xs={5}>
-                                <Typography>Quê quán</Typography>
-                            </Grid>
-                            <Grid xs={7}>
-                                <TextField fullWidth size="small" variant="outlined" />
-                            </Grid>
+                        <Grid item xs={4}>
+                            <InputGrid
+                                select
+                                onChange={handleChangeSelect}
+                                nameTitle={"Dân tộc"}
+                                name="ethnic"
+                                defaultValue="0"
+                                control={control}
+                                errors={errors}
+                            >
+                                <MenuItem value="0">Tất cả</MenuItem>
+                                {
+                                    category.categories["ethnic"].map(el =>
+                                        <MenuItem key={el.MaDanToc} value={el.MaDanToc} >{el.TenDanToc}</MenuItem>
+                                    )
+                                }
+                            </InputGrid>
                         </Grid>
-                        <Grid className={classes.inputItem} xs={4} container item alignItems="center">
-                            <Grid xs={5}>
-                                <Typography>Dân tộc</Typography>
-                            </Grid>
-                            <Grid xs={7}>
-                                <MySelect
-                                    // onChange={handleChangeGender}
-                                    value={"sv"}
-                                >
-                                    <MenuItem value="sv">Kinh</MenuItem>
-                                    <MenuItem value="cshtt">Khmer</MenuItem>
-                                    <MenuItem value="cshct">Chăm</MenuItem>
-                                </MySelect>
-                            </Grid>
+                        <Grid item xs={4}>
+                            <InputGrid
+                                select
+                                onChange={handleChangeSelect}
+                                nameTitle={"Tôn giáo"}
+                                name="religion"
+                                defaultValue="0"
+                                control={control}
+                                errors={errors}
+                            >
+                                <MenuItem value="0">Tất cả</MenuItem>
+                                {
+                                    category.categories["religion"].map(el =>
+                                        <MenuItem key={el.MaTonGiao} value={el.MaTonGiao} >{el.TenTonGiao}</MenuItem>
+                                    )
+                                }
+                            </InputGrid>
                         </Grid>
-                        <Grid className={classes.inputItem} xs={4} container item alignItems="center">
-                            <Grid xs={5}>
-                                <Typography>Tôn giáo</Typography>
-                            </Grid>
-                            <Grid xs={7}>
-                                <MySelect
-                                    // onChange={handleChangeGender}
-                                    value={"sv"}
-                                >
-                                    <MenuItem value="sv">Phật giáo</MenuItem>
-                                    <MenuItem value="cshtt">...</MenuItem>
-                                    <MenuItem value="cshct">...</MenuItem>
-                                </MySelect>
-                            </Grid>
+                        <Grid item xs={4}>
+                            <InputGrid
+                                select
+                                onChange={handleChangeSelect}
+                                nameTitle={"Giới tính"}
+                                name="gender"
+                                defaultValue="0"
+                                control={control}
+                                errors={errors}
+                            >
+                                <MenuItem value="0">Tất cả</MenuItem>
+                                <MenuItem value="m">Nam</MenuItem>
+                                <MenuItem value="f">Nữ</MenuItem>
+                                <MenuItem value="u">Khác</MenuItem>
+                            </InputGrid>
                         </Grid>
-                        <Grid className={classes.inputItem} xs={4} container item alignItems="center">
-                            <Grid xs={5}>
-                                <Typography>Giới tính</Typography>
-                            </Grid>
-                            <Grid xs={7}>
-                                <MySelect
-                                    onChange={handleChangeGender}
-                                    value={gender}
-                                >
-                                    <MenuItem value="2">Tất cả</MenuItem>
-                                    <MenuItem value="male">Nam</MenuItem>
-                                    <MenuItem value="female">Nữ</MenuItem>
-                                </MySelect>
-                            </Grid>
+                        <Grid item xs={4}>
+                            <InputGrid
+                                select
+                                onChange={handleChangeSelect}
+                                nameTitle={"Quê quán"}
+                                name="province"
+                                defaultValue="0"
+                                control={control}
+                                errors={errors}
+                            >
+                                <MenuItem value="0">Tất cả</MenuItem>
+                                {
+                                    provinceArr.length > 0 &&
+                                    provinceArr.map((pro =>
+                                        <MenuItem value={pro.code} key={pro.code}>{pro.name}</MenuItem>
+                                    ))
+                                }
+                            </InputGrid>
                         </Grid>
                     </Grid>
                 </Paper>
-                <MyButton primary >Xem</MyButton>
+                <MyButton primary onClick={handleSubmit(onSubmit)} >Xem</MyButton>
                 <TableContainer style={{ maxWidth: "1170px", }} >
                     <MaterialTable
                         components={{
@@ -215,8 +231,10 @@ const Search = () => {
                                 isFreeAction: true
                             }
                         ]}
+                        isLoading={loadingTable}
                     />
                 </TableContainer>
+                {/* <Loading loading={loading} /> */}
             </Layout>
         </>
     );

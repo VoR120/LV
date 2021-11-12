@@ -11,12 +11,12 @@ const FLanguageLevel = {
             (err, res) => {
                 if (err) {
                     console.log("error: ", err);
-                    callback(null, err);
+                    callback(err, null);
                     return;
                 }
 
                 console.log("All: ", res);
-                callback(null, { data: res, columnName : ["Mã trình độ", "Tên trình độ", "Tên ngoại ngữ"] });
+                callback(null, { data: res, columnName: ["Mã trình độ", "Tên trình độ", "Tên ngoại ngữ"] });
             })
     },
     findById: findById("trinhdongoaingu", "MaTrinhDo"),

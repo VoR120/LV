@@ -2,10 +2,10 @@ const { getAll, findById, create, updateById, removeAll, remove } = require('./u
 
 const PositionPM = {
     getAll: getAll("chucvu", "MaChucVu", "TenChucVu", ["Mã Chức vụ", "Tên Chức vụ", "Số Đảng viên"]),
-    findById: findById("chucvu","MaDangVien"),
-    create: create("chucvu", "MaDangVien"),
-    updateById: updateById("chucvu", "MaDangVien"),
-    remove: remove("chucvu", "MaDangVien"),
+    findById: findById("chucvu","MaSoDangVien"),
+    create: create("chucvu", "MaSoDangVien"),
+    updateById: updateById("chucvu", "MaSoDangVien"),
+    remove: remove("chucvu", "MaSoDangVien"),
     removeAll: removeAll("chucvu")
 }
 

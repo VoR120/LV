@@ -1,8 +1,53 @@
-const { getAll, findById, create, updateById, removeAll, remove } = require('./utils');
+const { findById, create, updateById, removeAll, remove, getDate } = require('./utils');
+const sql = require('../configs/db');
 
 const Reward = {
-    getAll: getAll("khenthuong"),
-    findById: findById("khenthuong","MaKhenThuong"),
+    getAll: (callback) => {
+        const sqlQuery = `SELECT khenthuong.*, dangvien.HoTen , hinhthuc.TenHinhThuc
+            FROM khenthuong, dangvien, hinhthuc
+            WHERE khenthuong.MaHinhThuc IN (
+            SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "Khen thưởng"
+            )
+            AND khenthuong.MaHinhThuc = hinhthuc.MaHinhThuc
+            AND khenthuong.MaSoDangVien = dangvien.MaSoDangVien`;
+        sql.query(sqlQuery, (err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                callback(err, null);
+                return;
+            }
+            let result = [...res]
+            res.map((el, index) => {
+                result[index].NgayKhenThuong = result[index].NgayKhenThuong && getDate(result[index].NgayKhenThuong);
+            })
+            console.log("All: ", result);
+            callback(null, result);
+            return;
+        })
+    },
+    findById: findById("khenthuong", "MaKhenThuong"),
+    findByTypeId: (id, callback) => {
+        const sqlQuery = `SELECT khenthuong.*, dangvien.HoTen, hinhthuc.TenHinhThuc
+            FROM khenthuong, dangvien, hinhthuc
+            WHERE khenthuong.MaHinhThuc = "${id}"
+            AND khenthuong.MaHinhThuc = hinhthuc.MaHinhThuc
+            AND khenthuong.MaSoDangVien = dangvien.MaSoDangVien
+        `;
+        sql.query(sqlQuery, (err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                callback(err, null);
+                return;
+            }
+            let result = [...res]
+            res.map((el, index) => {
+                result[index].NgayKhenthuong = result[index].NgayKhenthuong && getDate(result[index].NgayKhenthuong);
+            })
+            console.log("Found: ", result);
+            callback(null, result);
+            return;
+        })
+    },
     create: create("khenthuong", "MaKhenThuong"),
     updateById: updateById("khenthuong", "MaKhenThuong"),
     remove: remove("khenthuong", "MaKhenThuong"),

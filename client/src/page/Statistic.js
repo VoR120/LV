@@ -9,14 +9,18 @@ import {
     TableContainer, Typography
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useEffect, useState } from 'react';
-import { getAllPartyMember } from '../action/infoAction';
+import React, { useEffect, useState, useContext } from 'react';
 import ActionMenu from '../component/ActionMenu';
 import Layout from '../component/Layout';
 import PaperStatistic from '../component/PaperStatistic';
 import MyButton from '../component/UI/MyButton';
 import MySelect from '../component/UI/MySelect';
-import { downloadExcel } from '../utils/utils';
+import { allInfoColumn, downloadExcel, getKeyField } from '../utils/utils';
+import { filterPartyMember, getAllPartyMember } from '../action/partyMemberAction';
+import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
+import { getAllCategory } from '../action/categoryAction';
+import { CategoryContext } from '../contextAPI/CategoryContext';
+import Loading from '../component/CustomLoadingOverlay'
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -40,6 +44,7 @@ const useStyles = makeStyles(theme => ({
     },
     inputSelect: {
         marginRight: '20px',
+        marginLeft: '16px',
     },
     paperStatistic: {
         padding: '8px',
@@ -53,56 +58,26 @@ const useStyles = makeStyles(theme => ({
 
 const Statistic = () => {
     const classes = useStyles();
-    const [categoryField, setCategoryField] = useState("chibo");
 
-    const handleChangeField = (e) => {
-        setCategoryField(e.target.value);
-    }
+    // ContextAPI
+    const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
+    const { category, categoryDispatch } = useContext(CategoryContext);
+
+    // State
+    const [field, setField] = useState("partycell");
+    const [fieldKey, setFieldKey] = useState("partycell");
+    const [fieldArr, setFieldArr] = useState([]);
+    const [fieldValue, setFieldValue] = useState("");
+    const [yearGradeArr, setYearGradeArr] = useState([]);
+    const [yearGrade, setYearGrade] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [loadingTable, setLoadingTable] = useState(false);
 
     const [rows, setRows] = useState([])
 
-    const [columns] = useState([
-        { title: "Mã Đảng viên", field: "MaDangVien", maxWidth: 150 },
-        { title: "Họ tên", field: "HoTen", minWidth: 200 },
-        { title: "Chi bộ", field: "TenChiBo", },
-        { title: "Giới tính", field: "GioiTinh", },
-        { title: "Ngày sinh", field: "NgaySinh", type: 'date' },
-        { title: "Quê quán", field: "QueQuan", },
-        { title: "Dân tộc", field: "DanToc", },
-        { title: "Tôn giáo", field: "TonGiao", },
-        { title: "Trình độ học vấn", field: "TDHocVan", },
-        { title: "Ngoại ngữ", field: "MaNgoaiNgu", },
-        { title: "Trình độ ngoại ngữ", field: "MaTrinhDo", },
-        { title: "Trình độ tin học", field: "MaTinHoc", },
-        { title: "Trình độ chính trị", field: "MaChinhTri", },
-        { title: "Số điện thoại", field: "SoDienThoai", },
-        { title: "Email", field: "Email", },
-        { title: "Nghề nghiệp", field: "NgheNghiep", },
-        { title: "Địa chỉ thường trú", field: "DiaChiThuongTru", },
-        { title: "Nơi ở hiện tại", field: "NoiOHienTai", },
-        { title: "Ngày vào Đoàn", field: "NgayVaoDoan", type: 'date' },
-        { title: "Nơi vào Đoàn", field: "NoiVaoDoan", },
-        { title: "Ngày vào Đảng lần đầu", field: "NgayVaoDang", type: 'date' },
-        { title: "Ngày vào Đảng chính thức", field: "NgayChinhThuc", type: 'date' },
-        { title: "Người giới thiệu", field: "NguoiGioiThieu", },
-        {
-            title: "Chức năng", field: "action", sorting: false,
-            render: (params) => {
-                console.log(params);
-                return <ActionMenu data={params} />
-            }
-        }
-    ])
+    const [columns] = useState(allInfoColumn);
 
-    useEffect(() => {
-        const getAll = async () => {
-            const res = await getAllPartyMember();
-            console.log(res);
-            setRows(res)
-        }
-        getAll();
-    }, [])
-
+    // Variable
     const genderS = [
         { label: 'Nam', quantity: '200' },
         { label: 'Nữ', quantity: '200' }
@@ -124,6 +99,74 @@ const Statistic = () => {
         { label: ' 51 - 60', quantity: '200' },
         { label: ' Trên 60', quantity: '200' },
     ]
+
+    // Handle Function
+    const handleChangeField = (e) => {
+        if (e.target.value == "age")
+            setFieldValue("from18to30")
+        setField(e.target.value);
+    }
+
+    const handleChangeFieldValue = (e) => {
+        setFieldValue(e.target.value)
+    }
+
+    const handleChangeYear = (e) => {
+        setYearGrade(e.target.value)
+        yearGradeArr.forEach(el => {
+            if (el.Nam == e.target.value) {
+                setFieldArr(el.Data);
+                setFieldValue(el.Data[0].MaLoai)
+            }
+        })
+    }
+
+    const handleSubmit = async () => {
+        setLoadingTable(true)
+        const res = await filterPartyMember({ [field]: fieldValue });
+        setRows(res);
+        setLoadingTable(false)
+    }
+
+    // UseEffect
+    useEffect(() => {
+        getAllPartyMember(partyMemberDispatch);
+    }, [])
+
+    useEffect(() => {
+        if (field != "age") {
+            setLoading(true)
+            getAllCategory(categoryDispatch, field)
+            setFieldValue("")
+        }
+    }, [field])
+
+    useEffect(() => {
+        if (field != "grade") {
+            setFieldKey(getKeyField(field));
+            setFieldArr(category.categories[field])
+        } else {
+            setYearGradeArr(category.categories[field])
+        }
+    }, [category])
+
+    useEffect(() => {
+        if (yearGradeArr.length > 0) {
+            setYearGrade(yearGradeArr[yearGradeArr.length - 1].Nam)
+            setFieldArr(yearGradeArr[yearGradeArr.length - 1].Data)
+        }
+    }, [yearGradeArr])
+
+    useEffect(() => {
+        if (fieldArr.length > 0) {
+            if (field != "grade") {
+                setFieldValue(fieldArr.length > 0 ? fieldArr[0][fieldKey[0]] : "")
+            } else
+                setFieldValue(fieldArr.length > 0 ? fieldArr[0]["MaLoai"] : "")
+            setLoading(false)
+        }
+    }, [fieldArr])
+
     return (
         <>
             <Layout sidebar>
@@ -153,29 +196,77 @@ const Statistic = () => {
                 </Accordion>
 
                 <Paper variant="outlined" className={classes.paper}>
-                    <Typography className={classes.inputSelect}>Loại báo cáo</Typography>
                     <MySelect
+                        nameTitle={"Loại báo cáo"}
                         onChange={handleChangeField}
-                        value={categoryField}
+                        value={field}
                         autowidth
                     >
-                        <MenuItem value="chibo">Chi bộ</MenuItem>
-                        <MenuItem value="loaidv">Loại Đảng viên</MenuItem>
-                        <MenuItem value="capbac">Cấp bậc</MenuItem>
-                        <MenuItem value="tuoi">Tuổi</MenuItem>
-                        <MenuItem value="khenthuong">Khen thưởng</MenuItem>
-                        <MenuItem value="kyluat">Kỷ luật</MenuItem>
+                        <MenuItem value="partycell">Chi bộ</MenuItem>
+                        <MenuItem value="position">Chức vụ</MenuItem>
+                        <MenuItem value="grade">Xếp Loại</MenuItem>
+                        <MenuItem value="age">Tuổi</MenuItem>
+                        <MenuItem value="ethnic">Dân tộc</MenuItem>
+                        <MenuItem value="religion">Tôn giáo</MenuItem>
                     </MySelect>
-                    <MySelect
-                        style={{ marginLeft: '16px' }}
-                        value={"sv"}
-                        autowidth
-                    >
-                        <MenuItem value="sv">Sinh viên</MenuItem>
-                        <MenuItem value="dv">Đảng viên</MenuItem>
-                    </MySelect>
+                    {!loading &&
+                        (field == "grade" ?
+                            <>
+                                <Typography className={classes.inputSelect}>Năm</Typography>
+                                <MySelect
+                                    value={yearGrade}
+                                    autowidth
+                                    onChange={handleChangeYear}
+                                >
+                                    {yearGradeArr.map(el =>
+                                        <MenuItem key={el.Nam} value={el.Nam}>{el.Nam}</MenuItem>
+                                    )}
+                                </MySelect>
+                                <MySelect
+                                    style={{ marginLeft: '16px' }}
+                                    value={fieldValue}
+                                    autowidth
+                                    onChange={handleChangeFieldValue}
+                                >
+                                    {
+                                        fieldArr.map(el =>
+                                            <MenuItem key={el["MaLoai"]} value={el["MaLoai"]}>{el["TenLoai"]}</MenuItem>
+                                        )
+                                    }
+                                </MySelect>
+                            </>
+                            :
+                            field == "age"
+                                ?
+                                <MySelect
+                                    style={{ marginLeft: '16px' }}
+                                    value={fieldValue}
+                                    autowidth
+                                    onChange={handleChangeFieldValue}
+                                >
+                                    <MenuItem value="from18to30">Từ 18 đến 30 tuổi</MenuItem>
+                                    <MenuItem value="from31to40">Từ 31 đến 40 tuổi</MenuItem>
+                                    <MenuItem value="from41to50">Từ 41 đến 50 tuổi</MenuItem>
+                                    <MenuItem value="from51to60">Từ 51 đến 60 tuổi</MenuItem>
+                                    <MenuItem value="over60">Trên 61 tuổi</MenuItem>
+                                </MySelect>
+                                :
+                                <MySelect
+                                    style={{ marginLeft: '16px' }}
+                                    value={fieldValue}
+                                    autowidth
+                                    onChange={handleChangeFieldValue}
+                                >
+                                    {fieldArr.length > 0 &&
+                                        fieldArr.map(el =>
+                                            <MenuItem key={el[fieldKey[0]]} value={el[fieldKey[0]]}>{el[fieldKey[1]]}</MenuItem>
+                                        )
+                                    }
+                                </MySelect>
+                        )
+                    }
                 </Paper>
-                <MyButton primary>Xem</MyButton>
+                <MyButton onClick={handleSubmit} primary>Xem</MyButton>
                 <TableContainer style={{ maxWidth: "1170px", }} >
                     <MaterialTable
                         components={{
@@ -200,9 +291,11 @@ const Statistic = () => {
                                 isFreeAction: true
                             }
                         ]}
+                        isLoading={loadingTable}
                     />
                 </TableContainer>
             </Layout>
+            <Loading loading={loading} />
         </>
     );
 };

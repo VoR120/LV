@@ -9,6 +9,7 @@ import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
 import SearchIcon from '@mui/icons-material/Search';
 import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import ThumbsUpDownIcon from '@mui/icons-material/ThumbsUpDown';
+import GradeIcon from '@mui/icons-material/Grade';
 import { Divider } from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -61,6 +62,18 @@ const DrawerList = () => {
                         <ListItemText primary="Chuyển sinh hoạt" />
                     </ListItem>
                 </NavLink>
+                <NavLink to={"/grade"}>
+                    <ListItem button>
+                        <GradeIcon className={classes.icon} />
+                        <ListItemText primary="Loại Đảng viên" />
+                    </ListItem>
+                </NavLink>
+                <NavLink to={"/rewarddiscipline"}>
+                    <ListItem button>
+                        <ThumbsUpDownIcon className={classes.icon} />
+                        <ListItemText primary="Khen thưởng - kỷ luật" />
+                    </ListItem>
+                </NavLink>
                 <NavLink to={"/statistic"}>
                     <ListItem button>
                         <EqualizerIcon className={classes.icon} />
@@ -71,12 +84,6 @@ const DrawerList = () => {
                     <ListItem button>
                         <SearchIcon className={classes.icon} />
                         <ListItemText primary="Tìm kiếm" />
-                    </ListItem>
-                </NavLink>
-                <NavLink to={"/rewarddiscipline"}>
-                    <ListItem button>
-                        <ThumbsUpDownIcon className={classes.icon} />
-                        <ListItemText primary="Khen thưởng - kỷ luật" />
                     </ListItem>
                 </NavLink>
                 <NavLink to={"/partycell"}>

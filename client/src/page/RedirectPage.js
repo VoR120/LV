@@ -7,7 +7,7 @@ const RedirectPage = () => {
         history.push('/home');
     }, [])
     return (
-        <></>
+        <>Đang chuyển hướng ...</>
     );
 };
 

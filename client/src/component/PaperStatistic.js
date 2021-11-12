@@ -25,7 +25,6 @@ const PaperStatistic = (props) => {
         <Paper variant="outlined" className={classes.paperStatistic}>
             <Typography align="center" style={{ marginBottom: '8px' }} variant="h5">{title}</Typography>
             {data.map((el, index) =>
-            (
                 <Grid className={classes.gridContainer} container key={index}>
                     <Grid className={classes.label} xs={6} item >
                         {el.label}:
@@ -35,7 +34,6 @@ const PaperStatistic = (props) => {
                         {el.quantity}
                     </Grid>
                 </Grid>
-            )
             )}
         </Paper>
     );

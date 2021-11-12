@@ -7,13 +7,13 @@ const FLanguage = {
         FROM ngoaingu 
         LEFT JOIN ngoaingudangvien 
         INNER JOIN dangvien
-        ON dangvien.MaDangVien = ngoaingudangvien.MaDangVien
+        ON dangvien.MaSoDangVien = ngoaingudangvien.MaSoDangVien
         ON ngoaingudangvien.MaNgoaiNgu=ngoaingu.MaNgoaiNgu
         GROUP BY ngoaingu.MaNgoaiNgu`,
             (err, res) => {
                 if (err) {
                     console.log("error: ", err);
-                    callback(null, err);
+                    callback(err, null);
                     return;
                 }
                 console.log("All: ", res);
@@ -31,7 +31,7 @@ const FLanguage = {
             (err, res) => {
                 if (err) {
                     console.log("error: ", err);
-                    callback(null, err);
+                    callback(err, null);
                     return;
                 }
                 console.log("Id: ", res);
@@ -44,7 +44,7 @@ const FLanguage = {
             (err, res) => {
                 if (err) {
                     console.log("error: ", err);
-                    callback(null, err);
+                    callback(err, null);
                     return;
                 }
                 console.log("Id: ", res);

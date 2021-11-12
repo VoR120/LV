@@ -10,6 +10,7 @@ import { useForm } from 'react-hook-form';
 import { removeCategory } from '../action/categoryAction';
 import MyButton from './UI/MyButton';
 import { CategoryContext } from '../contextAPI/CategoryContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
 
 const useStyles = makeStyles(theme => ({
     btn: {
@@ -29,6 +30,7 @@ const DeleteFormCategory = (props) => {
     const classes = useStyles();
     const { id, name, title, categoryField } = props;
     const { category, categoryDispatch } = useContext(CategoryContext);
+    const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
 
     const [open, setOpen] = useState(false);
 
@@ -39,7 +41,8 @@ const DeleteFormCategory = (props) => {
         setOpen(true)
     }
     const handleSubmit = () => {
-        removeCategory(categoryDispatch, { categoryField, id })
+        removeCategory(categoryDispatch, { categoryField, id }, openSnackbarDispatch)
+        setOpen(false)
     }
 
     return (

@@ -18,19 +18,22 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const InputGrid = (props) => {
-    const { nameTitle, select, onChange, children, errors, name, id, register, disabled, type, ...other } = props;
+    const { nameTitle, noTitle, select, children, onChange, errors, name, id, register, disabled, type, placeholder, ...other } = props;
     const classes = useStyles();
     return (
         <div className={classes.input}>
             {select ?
                 (
-                    <Grid container className={classes.inputItem} alignItems="center">
-                        <Grid item style={{ width: '150px' }}>
-                            <Typography>{nameTitle}</Typography>
-                        </Grid>
+                    <Grid container className={classes.inputItem}>
+                        {noTitle || (
+                            <Grid item style={{ width: '150px' }}>
+                                <Typography>{nameTitle}</Typography>
+                            </Grid>
+                        )
+                        }
                         <Grid item flex={1}>
                             <MySelectReactHookForm
-                                onChange={onChange}
+                                onChange={props.onChange}
                                 disabled={disabled}
                                 name={name}
                                 id={id}
@@ -44,26 +47,45 @@ const InputGrid = (props) => {
                 ) :
                 (
                     <>
-                        <Grid container className={classes.inputItem} alignItems="center">
-                            <Grid item style={{ width: '150px' }}>
-                                <Typography>{nameTitle}</Typography>
-                            </Grid>
+                        <Grid container className={classes.inputItem}>
+                            {noTitle ||
+                                <Grid item style={{ width: '150px' }}>
+                                    <Typography>{nameTitle}</Typography>
+                                </Grid>
+                            }
                             <Grid item flex={1}>
                                 <Controller
                                     name={name}
                                     {...other}
-                                    render={({ field }) => (
-                                        <TextField
-                                            {...field}
-                                            type={type}
-                                            id={id}
-                                            disabled={disabled}
-                                            fullWidth
-                                            size="small"
-                                            variant="outlined"
-                                            error={!!errors[name]}
-                                            helperText={errors[name]?.message}
-                                        />)
+                                    render={({ field }) =>
+                                        onChange ?
+                                            <TextField
+                                                placeholder={placeholder || ""}
+                                                {...field}
+                                                type={type}
+                                                id={id}
+                                                onChange={onChange}
+                                                disabled={disabled}
+                                                fullWidth
+                                                size="small"
+                                                variant="outlined"
+                                                error={!!errors[name]}
+                                                helperText={errors[name]?.message}
+                                            />
+                                            :
+                                            <TextField
+                                                placeholder={placeholder || ""}
+                                                {...field}
+                                                type={type}
+                                                id={id}
+                                                disabled={disabled}
+                                                fullWidth
+                                                size="small"
+                                                variant="outlined"
+                                                error={!!errors[name]}
+                                                helperText={errors[name]?.message}
+                                            />
+
                                     }
                                 />
                             </Grid>

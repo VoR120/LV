@@ -23,338 +23,464 @@ const useStyles = makeStyles(theme => ({
 const MyInfo = (props) => {
     const { category, categoryDispatch } = useContext(CategoryContext);
 
-    const { disable, control, errors, setValue } = props
-    const [provinceArr, setProvinceArr] = useState([]);
-    const [districtArr, setDistrictArr] = useState([]);
-    const [wardArr, setWardArr] = useState([]);
-    const [province, setProvince] = useState('');
-    const [district, setDistrict] = useState('');
-    const [ward, setWard] = useState('');
+    const { disable, control, errors, setValue, loading, setError, clearErrors, getValues,
+        qqArr, setQqArr,
+        dcttArr, setDcttArr,
+        nohtArr, setNohtArr,
+        qqValue, setQqValue,
+        dcttValue, setDcttValue,
+        nohtValue, setNohtValue, } = props
+
     const classes = useStyles();
 
-    useEffect(() => {
-        getAllCategory(categoryDispatch, "ethnic");
-        getAllCategory(categoryDispatch, "religion");
-        const fetchApi = async () => {
-            const res = await axios.get('https://provinces.open-api.vn/api/')
-            setProvinceArr(res.data);
-        }
-        fetchApi();
-    }, [])
+    const handleChangeInput = (e) => {
+        setValue(e.target.name, e.target.value)
+    }
 
-    useEffect(() => {
-        const fetchApi = async () => {
-            const res = await axios.get(`https://provinces.open-api.vn/api/p/${province}/?depth=2`)
-            setDistrictArr(res.data.districts);
+    const handleChangeProvince = (e, type) => {
+        const { name, value } = e.target;
+        setValue(name, value);
+        if (value != "0") {
+            clearErrors(e.target.name)
         }
-        if (province != '') {
-            // setValue("QQTinh", province)
-            // setValue("QQHuyen", "0");
-            // setValue("QQXa", "0");
-            fetchApi();
+        switch (type) {
+            case "qq":
+                setQqValue({ ...qqValue, provinceValue: value });
+                const fetchApiSetQq = async () => {
+                    const res = await axios.get(`https://provinces.open-api.vn/api/p/${value}/?depth=2`)
+                    setQqArr({ ...qqArr, districtArr: res.data.districts })
+                }
+                if (value != '0') {
+                    fetchApiSetQq();
+                } else
+                    setQqArr({ ...qqArr, districtArr: [], wardArr: [] });
+                setValue("QQHuyen", "0");
+                setValue("QQXa", "0");
+                break;
+            case "dctt":
+                setDcttValue({ ...dcttValue, provinceValue: value });
+                const fetchApiSetDctt = async () => {
+                    const res = await axios.get(`https://provinces.open-api.vn/api/p/${value}/?depth=2`)
+                    setDcttArr({ ...dcttArr, districtArr: res.data.districts })
+                }
+                if (value != '0') {
+                    fetchApiSetDctt();
+                } else
+                    setDcttArr({ ...dcttArr, districtArr: [], wardArr: [] });
+                setValue("DCTTHuyen", "0");
+                setValue("DCTTXa", "0");
+                break;
+            case "noht":
+                setNohtValue({ ...nohtValue, provinceValue: value });
+                const fetchApiSetNoht = async () => {
+                    const res = await axios.get(`https://provinces.open-api.vn/api/p/${value}/?depth=2`)
+                    setNohtArr({ ...nohtArr, districtArr: res.data.districts })
+                }
+                if (value != '0') {
+                    fetchApiSetNoht();
+                } else
+                    setNohtArr({ ...nohtArr, districtArr: [], wardArr: [] });
+                setValue("NOHTHuyen", "0");
+                setValue("NOHTXa", "0");
+            default:
+                break;
         }
-    }, [province])
+    }
 
-    useEffect(() => {
-        const fetchApi = async () => {
-            const res = await axios.get(`https://provinces.open-api.vn/api/d/${district}/?depth=2`)
-            setWardArr(res.data.wards);
+    const handleChangeDistrict = (e, type) => {
+        const { name, value } = e.target;
+        setValue(name, value);
+        if (value != "0") {
+            clearErrors(e.target.name)
         }
-        if (district != '') {
-            // setValue("Huyen", district)
-            // setValue("Xa", "0")
-            fetchApi();
+        switch (type) {
+            case "qq":
+                setQqValue({ ...qqValue, districtValue: value });
+                const fetchApiSetQq = async () => {
+                    const res = await axios.get(`https://provinces.open-api.vn/api/d/${value}/?depth=2`)
+                    setQqArr({ ...qqArr, wardArr: res.data.wards })
+                }
+                if (value != '0') {
+                    fetchApiSetQq();
+                } else
+                    setQqArr({ ...qqArr, wardArr: [] })
+                setValue("QQXa", "0")
+                break;
+            case "dctt":
+                setDcttValue({ ...dcttValue, districtValue: value });
+                const fetchApiSetDctt = async () => {
+                    const res = await axios.get(`https://provinces.open-api.vn/api/d/${value}/?depth=2`)
+                    setDcttArr({ ...dcttArr, wardArr: res.data.wards })
+                }
+                if (value != '0') {
+                    fetchApiSetDctt();
+                } else
+                    setDcttArr({ ...dcttArr, wardArr: [] })
+                setValue("DCTTXa", "0")
+                break;
+            case "noht":
+                setNohtValue({ ...nohtValue, districtValue: value });
+                const fetchApiSetNoht = async () => {
+                    const res = await axios.get(`https://provinces.open-api.vn/api/d/${value}/?depth=2`)
+                    setNohtArr({ ...nohtArr, wardArr: res.data.wards })
+                }
+                if (value != '0') {
+                    fetchApiSetNoht();
+                } else
+                    setNohtArr({ ...nohtArr, wardArr: [] })
+                setValue("NOHTXa", "0")
+                break;
+            default:
+                break;
         }
-    }, [district])
+    }
 
-    // useEffect(() => {
-    //     if (ward != '')
-    //         setValue("Xa", ward);
-    // }, [ward])
+    const handleChangeWard = (e, type) => {
+        const { name, value } = e.target;
+        setValue(name, value);
+        if (value != "0") {
+            clearErrors(e.target.name)
+        }
+        switch (type) {
+            case "qq":
+                if (value != 0)
+                    setQqValue({ ...qqValue, wardValue: value });
+                break;
+            case "dctt":
+                if (value != 0)
+                    setDcttValue({ ...dcttValue, wardValue: value });
+                break;
+            case "noht":
+                if (value != 0)
+                    setNohtValue({ ...nohtValue, wardValue: value });
+            default:
+                break;
+        }
+    }
 
     return (
-        <Grid container className={classes.input} spacing={1}>
-            <Grid item xs={6}>
-                <InputGrid
-                    select
-                    nameTitle={"Dân tộc"}
-                    name={"MaDanToc"}
-                    defaultValue={"0001"}
-                    control={control}
-                    errors={errors}
-                    disabled={disable}
-                    onChange={e => setValue("MaDanToc", e.target.value)}
-                >
-                    {category.categories.ethnic.map(eth =>
-                        <MenuItem key={eth.MaDanToc} value={eth.MaDanToc}>{eth.TenDanToc}</MenuItem>
-                    )}
-                </InputGrid>
-            </Grid>
-            <Grid item xs={6}>
-                <InputGrid
-                    select
-                    nameTitle={"Tôn giáo"}
-                    name={"MaTonGiao"}
-                    control={control}
-                    errors={errors}
-                    disabled={disable}
-                    defaultValue={"0"}
-                    onChange={e => setValue("MaTonGiao", e.target.value)}
-                >
-                    <MenuItem value={"0"}>Không</MenuItem>
-                    {category.categories.religion.map(rel =>
-                        <MenuItem key={rel.MaTonGiao} value={rel.MaTonGiao}>{rel.TenTonGiao}</MenuItem>
-                    )}
-                </InputGrid>
-            </Grid>
-            <Grid item xs={6}>
-                <InputGrid
-                    type="date"
-                    value="2012-12-12"
-                    nameTitle={`Ngày sinh`}
-                    name={"NgaySinh"}
-                    control={control}
-                    errors={errors}
-                    disabled={disable}
-                />
-            </Grid>
-            <Grid item xs={6}>
-                <InputGrid
-                    nameTitle={`Quốc tịch`}
-                    name={"QuocTich"}
-                    control={control}
-                    errors={errors}
-                    disabled={disable}
-                />
-            </Grid>
-            <Grid item xs={12} container>
-                <Grid item xs={4}></Grid>
-            </Grid>
-            {/* <Grid item xs={12} container className={classes.inputItem} alignItems="center">
-                <Grid item style={{ width: '150px' }}>
-                    <Typography>Quê quán</Typography>
-                </Grid>
-                <Grid item flex={1} container spacing={1}>
-                    <Grid item xs={4}>
-                        <MySelectReactHookForm
-                            nameTitle={"Tỉnh"}
-                            name={"QQTinh"}
-                            defaultValue={"0"}
+        <>
+            {loading ||
+                <Grid container className={classes.input} spacing={1}>
+                    <Grid item xs={6}>
+                        <InputGrid
+                            select
+                            nameTitle={"Dân tộc"}
+                            name={"MaDanToc"}
+                            defaultValue=""
                             control={control}
                             errors={errors}
                             disabled={disable}
-                            onChange={e => setProvince(e.target.value)}
+                            onChange={handleChangeInput}
                         >
-                            <MenuItem value="0">Tỉnh</MenuItem>
-                            {provinceArr.map(pro =>
-                                <MenuItem value={pro.code} key={pro.code}>{pro.name}</MenuItem>
-                            )}
-                        </MySelectReactHookForm>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <MySelectReactHookForm
-                            nameTitle={"Huyện"}
-                            name={"QQHuyen"}
-                            defaultValue={"0"}
-                            control={control}
-                            errors={errors}
-                            disabled={disable}
-                            onChange={e => setDistrict(e.target.value)}
-
-                        >
-                            <MenuItem value="0">Huyện</MenuItem>
-                            {districtArr.map(dis =>
-                                <MenuItem value={dis.code} key={dis.code}>{dis.name}</MenuItem>
-                            )}
-                        </MySelectReactHookForm>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <MySelectReactHookForm
-                            nameTitle={"Xã"}
-                            name={"QQXa"}
-                            defaultValue={"0"}
-                            control={control}
-                            errors={errors}
-                            disabled={disable}
-                            onChange={e => setWard(e.target.value)}
-                        >
-                            <MenuItem value="0">Xã</MenuItem>
-                            {wardArr.map(w =>
-                                <MenuItem value={w.code} key={w.code}>{w.name}</MenuItem>
-                            )}
-                        </MySelectReactHookForm>
-                    </Grid>
-                </Grid>
-            </Grid>
-            <Grid item xs={12} container className={classes.inputItem}>
-                <Grid item style={{ width: '150px' }}>
-                    <Typography>Địa chỉ thường trú</Typography>
-                </Grid>
-                <Grid item flex={1} container spacing={1}>
-                    <Grid item xs={4}>
-                        <MySelectReactHookForm
-                            nameTitle={"Tỉnh"}
-                            name={"TTTinh"}
-                            defaultValue={"0"}
-                            control={control}
-                            errors={errors}
-                            disabled={disable}
-                            onChange={e => setProvince(e.target.value)}
-                        >
-                            <MenuItem value="0">Tỉnh</MenuItem>
-                            {provinceArr.map(pro =>
-                                <MenuItem value={pro.code} key={pro.code}>{pro.name}</MenuItem>
-                            )}
-                        </MySelectReactHookForm>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <MySelectReactHookForm
-                            nameTitle={"Huyện"}
-                            name={"TTHuyen"}
-                            defaultValue={"0"}
-                            control={control}
-                            errors={errors}
-                            disabled={disable}
-                            onChange={e => setDistrict(e.target.value)}
-
-                        >
-                            <MenuItem value="0">Huyện</MenuItem>
-                            {districtArr.map(dis =>
-                                <MenuItem value={dis.code} key={dis.code}>{dis.name}</MenuItem>
-                            )}
-                        </MySelectReactHookForm>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <MySelectReactHookForm
-                            nameTitle={"Xã"}
-                            name={"TTXa"}
-                            defaultValue={"0"}
-                            control={control}
-                            errors={errors}
-                            disabled={disable}
-                            onChange={e => setWard(e.target.value)}
-                        >
-                            <MenuItem value="0">Xã</MenuItem>
-                            {wardArr.map(w =>
-                                <MenuItem value={w.code} key={w.code}>{w.name}</MenuItem>
-                            )}
-                        </MySelectReactHookForm>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Controller
-                            control={control}
-                            name={"TTDiaChiCuThe"}
-                            render={({ field }) => (
-                                <TextField
-                                placeholder={"Số nhà, đường"}
-                                    {...field}
-                                    className={classes.inputItem}
-                                    disabled={disable}
-                                    fullWidth
-                                    size="small"
-                                    variant="outlined"
-                                    error={!!errors["DiaChiCuThe"]}
-                                    helperText={errors["DiaChiCuThe"]?.message}
-                                />)
+                            {category.categories.ethnic.length > 0 &&
+                                category.categories.ethnic.map(eth =>
+                                    <MenuItem key={eth.MaDanToc} value={eth.MaDanToc}>{eth.TenDanToc}</MenuItem>
+                                )
                             }
+                        </InputGrid>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <InputGrid
+                            select
+                            nameTitle={"Tôn giáo"}
+                            name={"MaTonGiao"}
+                            control={control}
+                            errors={errors}
+                            disabled={disable}
+                            onChange={handleChangeInput}
+                        >
+                            <MenuItem value={"0"}>Không</MenuItem>
+                            {category.categories.religion.length > 0 &&
+                                category.categories.religion.map(rel =>
+                                    <MenuItem key={rel.MaTonGiao} value={rel.MaTonGiao}>{rel.TenTonGiao}</MenuItem>
+                                )
+                            }
+                        </InputGrid>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <InputGrid
+                            type="date"
+                            nameTitle={`Ngày sinh`}
+                            name={"NgaySinh"}
+                            control={control}
+                            errors={errors}
+                            disabled={disable}
                         />
                     </Grid>
-                </Grid>
-            </Grid>
-            <Grid item xs={12} container className={classes.inputItem}>
-                <Grid item style={{ width: '150px' }}>
-                    <Typography>Nơi ở hiện tại</Typography>
-                </Grid>
-                <Grid item flex={1} container spacing={1}>
-                    <Grid item xs={4}>
-                        <MySelectReactHookForm
-                            nameTitle={"Tỉnh"}
-                            name={"HTTinh"}
-                            defaultValue={"0"}
+                    <Grid item xs={6}>
+                        <InputGrid
+                            nameTitle={`Quốc tịch`}
+                            name={"QuocTich"}
                             control={control}
                             errors={errors}
                             disabled={disable}
-                            onChange={e => setProvince(e.target.value)}
-                        >
-                            <MenuItem value="0">Tỉnh</MenuItem>
-                            {provinceArr.map(pro =>
-                                <MenuItem value={pro.code} key={pro.code}>{pro.name}</MenuItem>
-                            )}
-                        </MySelectReactHookForm>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <MySelectReactHookForm
-                            nameTitle={"Huyện"}
-                            name={"HTHuyen"}
-                            defaultValue={"0"}
-                            control={control}
-                            errors={errors}
-                            disabled={disable}
-                            onChange={e => setDistrict(e.target.value)}
-
-                        >
-                            <MenuItem value="0">Huyện</MenuItem>
-                            {districtArr.map(dis =>
-                                <MenuItem value={dis.code} key={dis.code}>{dis.name}</MenuItem>
-                            )}
-                        </MySelectReactHookForm>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <MySelectReactHookForm
-                            nameTitle={"Xã"}
-                            name={"HTXa"}
-                            defaultValue={"0"}
-                            control={control}
-                            errors={errors}
-                            disabled={disable}
-                            onChange={e => setWard(e.target.value)}
-                        >
-                            <MenuItem value="0">Xã</MenuItem>
-                            {wardArr.map(w =>
-                                <MenuItem value={w.code} key={w.code}>{w.name}</MenuItem>
-                            )}
-                        </MySelectReactHookForm>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Controller
-                            control={control}
-                            name={"HTDiaChiCuThe"}
-                            render={({ field }) => (
-                                <TextField
-                                placeholder={"Số nhà, đường"}
-                                    {...field}
-                                    className={classes.inputItem}
-                                    disabled={disable}
-                                    fullWidth
-                                    size="small"
-                                    variant="outlined"
-                                    error={!!errors["DiaChiCuThe"]}
-                                    helperText={errors["DiaChiCuThe"]?.message}
-                                />)
-                            }
                         />
                     </Grid>
+                    <Grid item xs={6}>
+                        <InputGrid
+                            nameTitle={`Số điện thoại`}
+                            name={"SoDienThoai"}
+                            control={control}
+                            errors={errors}
+                            disabled={disable}
+                        />
+                    </Grid>
+                    <Grid item xs={6}>
+                        <InputGrid
+                            nameTitle={`Email`}
+                            name={"Email"}
+                            control={control}
+                            errors={errors}
+                            disabled={disable}
+                        />
+                    </Grid>
+                    <Grid container item xs={12} className={classes.inputItem}>
+                        <Grid item style={{ width: '150px' }}>
+                            <Typography>Quê quán</Typography>
+                        </Grid>
+                        <Grid item container flex={1} spacing={1}>
+                            <Grid item xs={4}>
+                                <MySelectReactHookForm
+                                    nameTitle={"Tỉnh"}
+                                    name={"QQTinh"}
+                                    defaultValue={"0"}
+                                    control={control}
+                                    errors={errors}
+                                    disabled={disable}
+                                    rules={{
+                                        validate: value =>
+                                            value != "0" || "Vui lòng nhập trường này!"
+                                    }}
+                                    onChange={e => handleChangeProvince(e, "qq")}
+                                >
+                                    <MenuItem value="0">Tỉnh</MenuItem>
+                                    {qqArr.provinceArr.map(pro =>
+                                        <MenuItem value={pro.code} key={pro.code}>{pro.name}</MenuItem>
+                                    )}
+                                </MySelectReactHookForm>
+                            </Grid>
+                            <Grid item xs={4}>
+                                <MySelectReactHookForm
+                                    nameTitle={"Huyện"}
+                                    name={"QQHuyen"}
+                                    defaultValue={"0"}
+                                    control={control}
+                                    errors={errors}
+                                    disabled={disable}
+                                    rules={{
+                                        validate: value =>
+                                            value != "0" || "Vui lòng nhập trường này!"
+                                    }}
+                                    onChange={e => handleChangeDistrict(e, "qq")}
+
+                                >
+                                    <MenuItem value="0">Huyện</MenuItem>
+                                    {qqArr.districtArr.map(dis =>
+                                        <MenuItem value={dis.code} key={dis.code}>{dis.name}</MenuItem>
+                                    )}
+                                </MySelectReactHookForm>
+                            </Grid>
+                            <Grid item xs={4}>
+                                <MySelectReactHookForm
+                                    nameTitle={"Xã"}
+                                    name={"QQXa"}
+                                    defaultValue={"0"}
+                                    control={control}
+                                    errors={errors}
+                                    disabled={disable}
+                                    rules={{
+                                        validate: value =>
+                                            value != "0" || "Vui lòng nhập trường này!"
+                                    }}
+                                    onChange={e => handleChangeWard(e, "qq")}
+                                >
+                                    <MenuItem value="0">Xã</MenuItem>
+                                    {qqArr.wardArr.map(w =>
+                                        <MenuItem value={w.code} key={w.code}>{w.name}</MenuItem>
+                                    )}
+                                </MySelectReactHookForm>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <InputGrid
+                                    onChange={handleChangeInput}
+                                    placeholder={"Số nhà, Đường..."}
+                                    noTitle
+                                    name={"QQChiTiet"}
+                                    defaultValue={""}
+                                    control={control}
+                                    errors={errors}
+                                    disabled={disable}
+                                // rules={{ required: "Vui lòng nhập trường này!" }}
+                                />
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <Grid container item xs={12} className={classes.inputItem}>
+                        <Grid item style={{ width: '150px' }}>
+                            <Typography>Địa chỉ thường trú</Typography>
+                        </Grid>
+                        <Grid item container flex={1} spacing={1}>
+                            <Grid item xs={4}>
+                                <MySelectReactHookForm
+                                    nameTitle={"Tỉnh"}
+                                    name={"DCTTTinh"}
+                                    defaultValue={"0"}
+                                    control={control}
+                                    errors={errors}
+                                    disabled={disable}
+                                    rules={{
+                                        validate: value =>
+                                            value != "0" || "Vui lòng nhập trường này!"
+                                    }}
+                                    onChange={e => handleChangeProvince(e, "dctt")}
+                                >
+                                    <MenuItem value="0">Tỉnh</MenuItem>
+                                    {dcttArr.provinceArr.map(pro =>
+                                        <MenuItem value={pro.code} key={pro.code}>{pro.name}</MenuItem>
+                                    )}
+                                </MySelectReactHookForm>
+                            </Grid>
+                            <Grid item xs={4}>
+                                <MySelectReactHookForm
+                                    nameTitle={"Huyện"}
+                                    name={"DCTTHuyen"}
+                                    defaultValue={"0"}
+                                    control={control}
+                                    disabled={disable}
+                                    errors={errors}
+                                    rules={{
+                                        validate: value =>
+                                            value != "0" || "Vui lòng nhập trường này!"
+                                    }}
+                                    onChange={e => handleChangeDistrict(e, "dctt")}
+
+                                >
+                                    <MenuItem value="0">Huyện</MenuItem>
+                                    {dcttArr.districtArr.map(dis =>
+                                        <MenuItem value={dis.code} key={dis.code}>{dis.name}</MenuItem>
+                                    )}
+                                </MySelectReactHookForm>
+                            </Grid>
+                            <Grid item xs={4}>
+                                <MySelectReactHookForm
+                                    nameTitle={"Xã"}
+                                    name={"DCTTXa"}
+                                    defaultValue={"0"}
+                                    control={control}
+                                    errors={errors}
+                                    disabled={disable}
+                                    rules={{
+                                        validate: value =>
+                                            value != "0" || "Vui lòng nhập trường này!"
+                                    }}
+                                    onChange={e => handleChangeWard(e, "dctt")}
+                                >
+                                    <MenuItem value="0">Xã</MenuItem>
+                                    {dcttArr.wardArr.map(w =>
+                                        <MenuItem value={w.code} key={w.code}>{w.name}</MenuItem>
+                                    )}
+                                </MySelectReactHookForm>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <InputGrid
+                                    onChange={handleChangeInput}
+                                    placeholder={"Số nhà, Đường..."}
+                                    noTitle
+                                    name={"DCTTChiTiet"}
+                                    defaultValue={""}
+                                    control={control}
+                                    errors={errors}
+                                    disabled={disable}
+                                // rules={{ required: "Vui lòng nhập trường này!" }}
+                                />
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <Grid container item xs={12} className={classes.inputItem}>
+                        <Grid item style={{ width: '150px' }}>
+                            <Typography>Nơi ở hiện tại</Typography>
+                        </Grid>
+                        <Grid item container flex={1} spacing={1}>
+                            <Grid item xs={4}>
+                                <MySelectReactHookForm
+                                    nameTitle={"Tỉnh"}
+                                    name={"NOHTTinh"}
+                                    defaultValue={"0"}
+                                    control={control}
+                                    errors={errors}
+                                    disabled={disable}
+                                    rules={{
+                                        validate: value =>
+                                            value != "0" || "Vui lòng nhập trường này!"
+                                    }}
+                                    onChange={e => handleChangeProvince(e, "noht")}
+                                >
+                                    <MenuItem value="0">Tỉnh</MenuItem>
+                                    {nohtArr.provinceArr.map(pro =>
+                                        <MenuItem value={pro.code} key={pro.code}>{pro.name}</MenuItem>
+                                    )}
+                                </MySelectReactHookForm>
+                            </Grid>
+                            <Grid item xs={4}>
+                                <MySelectReactHookForm
+                                    nameTitle={"Huyện"}
+                                    name={"NOHTHuyen"}
+                                    defaultValue={"0"}
+                                    control={control}
+                                    disabled={disable}
+                                    errors={errors}
+                                    rules={{
+                                        validate: value =>
+                                            value != "0" || "Vui lòng nhập trường này!"
+                                    }}
+                                    onChange={e => handleChangeDistrict(e, "noht")}
+
+                                >
+                                    <MenuItem value="0">Huyện</MenuItem>
+                                    {nohtArr.districtArr.map(dis =>
+                                        <MenuItem value={dis.code} key={dis.code}>{dis.name}</MenuItem>
+                                    )}
+                                </MySelectReactHookForm>
+                            </Grid>
+                            <Grid item xs={4}>
+                                <MySelectReactHookForm
+                                    nameTitle={"Xã"}
+                                    name={"NOHTXa"}
+                                    defaultValue={"0"}
+                                    control={control}
+                                    disabled={disable}
+                                    errors={errors}
+                                    rules={{
+                                        validate: value =>
+                                            value != "0" || "Vui lòng nhập trường này!"
+                                    }}
+                                    onChange={e => handleChangeWard(e, "noht")}
+                                >
+                                    <MenuItem value="0">Xã</MenuItem>
+                                    {nohtArr.wardArr.map(w =>
+                                        <MenuItem value={w.code} key={w.code}>{w.name}</MenuItem>
+                                    )}
+                                </MySelectReactHookForm>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <InputGrid
+                                    onChange={handleChangeInput}
+                                    placeholder={"Số nhà, Đường..."}
+                                    noTitle
+                                    name={"NOHTChiTiet"}
+                                    defaultValue={""}
+                                    disabled={disable}
+                                    control={control}
+                                    errors={errors}
+                                // rules={{ required: "Vui lòng nhập trường này!" }}
+                                />
+                            </Grid>
+                        </Grid>
+                    </Grid>
                 </Grid>
-            </Grid> */}
-            <Grid item xs={6}>
-                <InputGrid
-                    nameTitle={`Số điện thoại`}
-                    name={"SoDienThoai"}
-                    control={control}
-                    errors={errors}
-                    disabled={disable}
-                />
-            </Grid>
-            <Grid item xs={6}>
-                <InputGrid
-                    nameTitle={`Email`}
-                    name={"Email"}
-                    control={control}
-                    errors={errors}
-                    disabled={disable}
-                />
-            </Grid>
-        </Grid>
+            }
+        </>
     );
 };
 

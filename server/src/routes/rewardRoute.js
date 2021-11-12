@@ -5,12 +5,14 @@ const {
     createReward,
     updateByIdReward,
     removeReward,
-    removeAllReward
+    removeAllReward,
+    findByTypeIdReward
 } = require('../controllers/rewardCtrller');
 const Router = express.Router();
 
 Router.get('/reward', getAllReward);
 Router.get('/reward/:id', findByIdReward);
+Router.get('/reward/getbytypeid/:id', findByTypeIdReward);
 Router.post('/reward/create', createReward);
 Router.put('/reward/:id', updateByIdReward);
 Router.delete('/reward/:id', removeReward);

@@ -10,10 +10,11 @@ import {
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import '../public/css/Form.scss';
 import MyButton from './UI/MyButton';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
 
 
 const useStyles = makeStyles(theme => ({
@@ -44,6 +45,7 @@ const useStyles = makeStyles(theme => ({
 const DecentralizationForm = (props) => {
     const classes = useStyles();
     const [open, setOpen] = useState(false);
+    const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
     const [fullPowers, setFullPowers] = useState(props.data.fullPowers);
     const [createVotings, setCreateVotings] = useState(props.data.createVotings);
     const [update, setUpdate] = useState(props.data.update);
@@ -64,6 +66,13 @@ const DecentralizationForm = (props) => {
     }
     const onSubmit = () => {
         alert("abc")
+        openSnackbarDispatch({
+            type: 'SET_OPEN',
+            payload: {
+                msg: "Đã cập nhật!",
+                type: "success"
+            }
+        })
     }
     const handleChangeCheckBox = () => {
 

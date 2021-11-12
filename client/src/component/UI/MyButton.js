@@ -28,10 +28,10 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const MyButton = (props) => {
-    const { onClick, children, small } = props
+    const { children, small, success, primary, info, error, ...other } = props
     const classes = useStyles(props);
     return (
-        <Button {...props} onClick={onClick} size={small ? "small" : "medium"} variant="contained" className={classes.btn}>
+        <Button {...other} size={small ? "small" : "medium"} variant="contained" className={classes.btn}>
             {children}
         </Button>
     );

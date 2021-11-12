@@ -15,6 +15,7 @@ import DrawerList from './DrawerList';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { Chip } from '@mui/material';
 import BgImage from '../public/image/bg.jpg';
+import RightHeaderBar from './RightHeaderBar';
 
 const drawerWidth = 256;
 
@@ -126,11 +127,7 @@ function DrawerBar(props) {
           <Typography className={classes.header} variant="h6" noWrap>
             Hệ thống quản lý hồ sơ Đảng viên
           </Typography>
-          <Chip
-            className={classes.profileChip}
-            icon={<AccountCircleIcon fontSize="large" />}
-            label="Nguyễn Văn A"
-          />
+          <RightHeaderBar />
         </Toolbar>
       </AppBar>
       <nav className={classes.drawer} aria-label="mailbox folders">

@@ -9,9 +9,14 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { withStyles } from '@mui/styles';
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import BgImage from '../public/image/bg_login.jpg';
 import logo from '../public/image/Party_logo.png';
+import { useForm } from 'react-hook-form';
+import { InfoContext } from '../contextAPI/InfoContext';
+import { login } from '../action/infoAction'
+import { useHistory } from 'react-router-dom';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -25,9 +30,9 @@ const useStyles = makeStyles((theme) => ({
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         position: 'relative',
-        [theme.breakpoints.down('md')]: { 
+        [theme.breakpoints.down('md')]: {
             display: 'none',
-          },
+        },
     },
     paper: {
         margin: theme.spacing(8, 4),
@@ -37,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
     },
     avatar: {
         margin: theme.spacing(1),
-        backgroundColor: theme.palette.secondary.main,
+        backgroundColor: theme.palette.primary.main,
     },
     form: {
         width: '100%', // Fix IE 11 issue.
@@ -75,9 +80,9 @@ const useStyles = makeStyles((theme) => ({
 
 const CssTextField = withStyles(theme => ({
     root: {
-        '& label.Mui-focused': {
-            color: theme.palette.primary.main,
-        },
+        // '& label.Mui-focused': {
+        //     color: theme.palette.primary.main,
+        // },
         '& .MuiInput-underline:after': {
             borderBottomColor: theme.palette.primary.main,
         },
@@ -91,18 +96,68 @@ const CssTextField = withStyles(theme => ({
             '& input': {
                 paddingLeft: '20px'
             },
-            '&:hover fieldset': {
-                borderColor: theme.palette.primary.main,
-            },
-            '&.Mui-focused fieldset': {
-                borderColor: theme.palette.primary.main,
-            },
+            // '&:hover fieldset': {
+            //     borderColor: theme.palette.primary.main,
+            // },
+            // '&.Mui-focused fieldset': {
+            //     borderColor: theme.palette.primary.main,
+            // },
         },
     },
 }))(TextField);
 
-export default function SignInSide() {
+const Login = () => {
     const classes = useStyles();
+    const { info, infoDispatch } = useContext(InfoContext);
+    const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext);
+    const history = useHistory()
+
+    const {
+        register,
+        handleSubmit,
+        setError,
+        clearErrors,
+        formState: { errors }
+    } = useForm();
+
+    const onLogin = (data) => {
+        login(infoDispatch, data)
+    }
+
+    useEffect(() => {
+        if (info.isAuthenticated) {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Đăng nhập thành công!",
+                    type: "success"
+                }
+            })
+            history.push('/home')
+        }
+    }, [info])
+
+    useEffect(() => {
+        if (info.error == "email") {
+            setError("email", {
+                type: 'manual',
+                message: info.message
+            })
+        }
+        if (info.error == "password") {
+            setError("password", {
+                type: 'manual',
+                message: info.message
+            })
+        }
+    }, [info])
+
+    useEffect(() => {
+        if (info.loading) {
+            clearErrors("email");
+            clearErrors("password");
+        }
+    }, [info.loading])
 
     return (
         <Grid container component="main" className={classes.root}>
@@ -123,8 +178,16 @@ export default function SignInSide() {
                     <Typography component="h1" variant="h5">
                         Đăng nhập
                     </Typography>
+
                     <form className={classes.form} noValidate>
                         <CssTextField
+                            {...register("email", {
+                                required: "Vui lòng nhập email",
+                                pattern: {
+                                    value: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                                    message: 'Email không hợp lệ!'
+                                }
+                            })}
                             variant="outlined"
                             margin="normal"
                             required
@@ -134,8 +197,16 @@ export default function SignInSide() {
                             name="email"
                             autoComplete="email"
                             autoFocus
+                            error={Boolean(errors.email)}
+                            helperText={errors.email?.message}
                         />
                         <CssTextField
+                            {...register("password", {
+                                required: "Vui lòng nhập mật khẩu!",
+                            })}
+                            autoComplete="current-password"
+                            error={Boolean(errors.password)}
+                            helperText={errors.password?.message}
                             variant="outlined"
                             margin="normal"
                             required
@@ -152,6 +223,7 @@ export default function SignInSide() {
                             variant="contained"
                             color="primary"
                             className={classes.submit}
+                            onClick={handleSubmit(onLogin)}
                         >
                             Đăng nhập
                         </Button>
@@ -168,3 +240,5 @@ export default function SignInSide() {
         </Grid>
     );
 }
+
+export default Login;

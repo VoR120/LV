@@ -5,12 +5,16 @@ const {
     createMove,
     updateByIdMove,
     removeMove,
-    removeAllMove
+    removeAllMove,
+    findByTypeMove,
+    findByTypeIdMove
 } = require('../controllers/moveCtrller');
 const Router = express.Router();
 
 Router.get('/move', getAllMove);
 Router.get('/move/:id', findByIdMove);
+Router.get('/move/getbytypeid/:id', findByTypeIdMove);
+Router.post('/move/getbytype', findByTypeMove);
 Router.post('/move/create', createMove);
 Router.put('/move/:id', updateByIdMove);
 Router.delete('/move/:id', removeMove);

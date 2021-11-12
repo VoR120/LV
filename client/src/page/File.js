@@ -2,12 +2,15 @@ import MaterialTable from '@material-table/core';
 import DownloadIcon from '@mui/icons-material/Download';
 import { Paper, TableContainer, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useEffect, useState } from 'react';
-import xlsx from 'xlsx';
-import { getAllPartyMember } from '../action/infoAction';
-import ActionMenu from '../component/ActionMenu';
+import React, { useContext, useEffect, useState } from 'react';
+import { getAllCategory } from '../action/categoryAction';
+import { getAllPartyMember } from '../action/partyMemberAction';
 import AddForm from '../component/AddForm';
+import CustomizedSnackbars from '../component/CustomizedSnackbars';
 import Layout from '../component/Layout';
+import { CategoryContext } from '../contextAPI/CategoryContext';
+import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
+import { allInfoColumn, downloadExcel } from '../utils/utils';
 
 
 const useStyles = makeStyles(theme => ({
@@ -36,58 +39,29 @@ const useStyles = makeStyles(theme => ({
 const File = () => {
     const classes = useStyles();
 
+    const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
+    const { category, categoryDispatch } = useContext(CategoryContext);
     const [rows, setRows] = useState([])
 
-    const [columns] = useState([
-        { title: "Mã Đảng viên", field: "MaDangVien", maxWidth: 150 },
-        { title: "Họ tên", field: "HoTen", minWidth: 200 },
-        { title: "Chi bộ", field: "TenChiBo", },
-        { title: "Giới tính", field: "GioiTinh", },
-        { title: "Ngày sinh", field: "NgaySinh", type: 'date' },
-        { title: "Quê quán", field: "QueQuan", },
-        { title: "Dân tộc", field: "DanToc", },
-        { title: "Tôn giáo", field: "TonGiao", },
-        { title: "Trình độ học vấn", field: "TDHocVan", },
-        { title: "Ngoại ngữ", field: "MaNgoaiNgu", },
-        { title: "Trình độ ngoại ngữ", field: "MaTrinhDo", },
-        { title: "Trình độ tin học", field: "MaTinHoc", },
-        { title: "Trình độ chính trị", field: "MaChinhTri", },
-        { title: "Số điện thoại", field: "SoDienThoai", },
-        { title: "Email", field: "Email", },
-        { title: "Nghề nghiệp", field: "NgheNghiep", },
-        { title: "Địa chỉ thường trú", field: "DiaChiThuongTru", },
-        { title: "Nơi ở hiện tại", field: "NoiOHienTai", },
-        { title: "Ngày vào Đoàn", field: "NgayVaoDoan", type: 'date'},
-        { title: "Nơi vào Đoàn", field: "NoiVaoDoan", },
-        { title: "Ngày vào Đảng lần đầu", field: "NgayVaoDang", type: 'date' },
-        { title: "Ngày vào Đảng chính thức", field: "NgayChinhThuc", type: 'date' },
-        { title: "Người giới thiệu", field: "NguoiGioiThieu", },
-        {
-            title: "Chức năng", field: "action", sorting: false,
-            render: (params) => {
-                console.log(params);
-                return <ActionMenu data={params} />
-            }
-        },
-    ])
-
-    const downloadExcel = () => {
-        const workSheet = xlsx.utils.json_to_sheet(rows);
-        const workBook = xlsx.utils.book_new();
-        xlsx.utils.book_append_sheet(workBook, workSheet, "data")
-        let buf = xlsx.write(workBook, { bookType: "xlsx", type: "buffer" })
-        xlsx.write(workBook, { bookType: "xlsx", type: "binary" });
-        xlsx.writeFile(workBook, "DataExcel.xlsx")
-    }
+    const [columns] = useState(allInfoColumn)
 
     useEffect(() => {
-        const getAll = async () => {
-            const res = await getAllPartyMember();
-            console.log(res);
-            setRows(res)
-        }
-        getAll();
+        getAllCategory(categoryDispatch, "ethnic")
+        getAllCategory(categoryDispatch, "religion")
+        getAllCategory(categoryDispatch, "partycell")
+        getAllCategory(categoryDispatch, "position")
+        getAllCategory(categoryDispatch, "flanguage");
+        getAllCategory(categoryDispatch, "flanguagelevel");
+        getAllCategory(categoryDispatch, "politics");
+        getAllCategory(categoryDispatch, "it");
+        getAllCategory(categoryDispatch, "grade");
+        if (partyMember.partyMembers.length == 0)
+            getAllPartyMember(partyMemberDispatch);
     }, [])
+
+    useEffect(() => {
+        setRows(partyMember.partyMembers)
+    }, [partyMember])
 
     return (
         <>
@@ -122,6 +96,7 @@ const File = () => {
                                 isFreeAction: true
                             }
                         ]}
+                        isLoading={partyMember.loading}
                     />
                 </TableContainer>
             </Layout>

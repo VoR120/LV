@@ -26,7 +26,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import '../public/css/Form.scss'
 import InfoForm from './InfoForm';
 import LevelForm from './LevelForm';
-import ParticipateForm from './ParticipateForm';
+import PartyForm from './PartyForm';
 import MyButton from './UI/MyButton';
 
 const useStyles = makeStyles(theme => ({
@@ -209,7 +209,7 @@ const EditForm = (props) => {
                         <LevelForm update data={data} />
                     </TabPanel>
                     <TabPanel value={step} index={2}>
-                        <ParticipateForm update data={data} />
+                        <PartyForm update data={data} />
                     </TabPanel>
                 </form>
                 <DialogActions>

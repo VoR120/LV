@@ -1,15 +1,20 @@
+import { categoryConstant } from '../constant';
 import axios from '../helper/axios';
-import { categoryConstant } from '../constant'
 import { getKeyField } from '../utils/utils';
+
+// export const getAllCategoryPM = async (dispatch, payload) => {
+//     const categoryArr = ["ethnic", "religion", "partycell", "position", ""]
+//     try {
+
+//     } catch (error) {
+
+//     }
+// }
 
 export const getAllCategory = async (dispatch, payload) => {
     try {
         dispatch({ type: categoryConstant.GET_ALL_CATEGORY_REQUEST })
-        const config = {
-            method: 'GET',
-            url: '/api/' + payload,
-        }
-        const res = await axios(config);
+        const res = await axios.get('/api/' + payload);
         console.log(res);
         if (res.status == 200)
             dispatch({
@@ -33,11 +38,7 @@ export const getAllCategory = async (dispatch, payload) => {
 
 export const getLanguage = async () => {
     try {
-        const config = {
-            method: 'GET',
-            url: '/api/flanguage',
-        }
-        const res = await axios(config);
+        const res = await axios.get('/api/flanguage');
         console.log(res)
         return res.data
     } catch (error) {
@@ -47,12 +48,7 @@ export const getLanguage = async () => {
 
 export const getfLanguageId = async (payload) => {
     try {
-        const config = {
-            method: 'POST',
-            url: '/api/flanguage/getid',
-            data: payload
-        }
-        const res = await axios(config);
+        const res = await axios.post('/api/flanguage/getid', payload);
         return res.data
     } catch (error) {
         throw new Error(error)
@@ -77,7 +73,6 @@ export const getFlanguageLevel = async (payload) => {
     try {
         let res = await axios.get('/api/flanguagelevel/getbyflid/' + payload)
         if (res.status == 200) {
-            console.log(res.data);
             return res.data;
         }
     } catch (error) {
@@ -85,7 +80,7 @@ export const getFlanguageLevel = async (payload) => {
     }
 }
 
-export const actionGrade = async (dispatch, payload) => {
+export const actionGrade = async (dispatch, payload, open) => {
     const { add, update, remove, year } = payload;
     try {
         console.log(payload);
@@ -108,11 +103,7 @@ export const actionGrade = async (dispatch, payload) => {
             }))
         }
         dispatch({ type: categoryConstant.GET_ALL_CATEGORY_REQUEST })
-        const config = {
-            method: 'GET',
-            url: '/api/grade',
-        }
-        const res = await axios(config);
+        const res = await axios.get('/api/grade');
         console.log(res);
         if (res.status == 200)
             dispatch({
@@ -123,21 +114,23 @@ export const actionGrade = async (dispatch, payload) => {
                     key: 'grade',
                 }
             })
+        open({
+            type: 'SET_OPEN',
+            payload: {
+                msg: "Đã cập nhật!",
+                type: "success"
+            }
+        })
     } catch (error) {
         console.log(error.response.data.message);
         // throw new Error(error)
     }
 }
 
-export const createCategory = async (dispatch, payload) => {
+export const createCategory = async (dispatch, payload, open) => {
     try {
         dispatch({ type: categoryConstant.ADD_CATEGORY_REQUEST });
-        const config = {
-            method: 'POST',
-            url: '/api/' + payload.categoryField + '/create',
-            data: payload.data
-        }
-        const res = await axios(config);
+        const res = await axios.post('/api/' + payload.categoryField + '/create', payload.data);
         let newData = new Object(res.data);
 
         if (payload.categoryField == 'flanguagelevel') {
@@ -151,7 +144,13 @@ export const createCategory = async (dispatch, payload) => {
                 key: payload.categoryField,
             }
         })
-
+        open({
+            type: 'SET_OPEN',
+            payload: {
+                msg: "Đã cập nhật!",
+                type: "success"
+            }
+        })
     } catch (error) {
         throw new Error(error)
         // dispatch({
@@ -163,17 +162,12 @@ export const createCategory = async (dispatch, payload) => {
     }
 }
 
-export const updateCategory = async (dispatch, payload) => {
+export const updateCategory = async (dispatch, payload, open) => {
     try {
         dispatch({ type: categoryConstant.UPDATE_CATEGORY_REQUEST });
-        const config = {
-            method: 'PUT',
-            url: '/api/' + payload.categoryField + '/' + payload.id,
-            data: payload.data
-        }
-        const res = await axios(config);
+        const res = await axios.put('/api/' + payload.categoryField + '/' + payload.id, payload.data);
         let newData = new Object(res.data);
-
+        console.log(payload);
         if (payload.categoryField == 'flanguagelevel') {
             newData = await getfLanguageName(res.data)
         }
@@ -183,6 +177,13 @@ export const updateCategory = async (dispatch, payload) => {
             payload: {
                 data: newData,
                 key: payload.categoryField,
+            }
+        })
+        open({
+            type: 'SET_OPEN',
+            payload: {
+                msg: "Đã cập nhật!",
+                type: "success"
             }
         })
     } catch (error) {
@@ -196,15 +197,11 @@ export const updateCategory = async (dispatch, payload) => {
     }
 }
 
-export const removeCategory = async (dispatch, payload) => {
+export const removeCategory = async (dispatch, payload, open) => {
     try {
         dispatch({ type: categoryConstant.REMOVE_CATEGORY_REQUEST })
-        const config = {
-            method: 'DELETE',
-            url: '/api/' + payload.categoryField + '/' + payload.id,
-        }
-        const res = await axios(config);
-        if (res.status == 200)
+        const res = await axios.delete('/api/' + payload.categoryField + '/' + payload.id);
+        if (res.status == 200) {
             dispatch({
                 type: categoryConstant.REMOVE_CATEGORY_SUCCESS,
                 payload: {
@@ -213,15 +210,15 @@ export const removeCategory = async (dispatch, payload) => {
                     keyArray: getKeyField(payload.categoryField),
                 }
             })
+            open({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Đã cập nhật!",
+                    type: "success"
+                }
+            })
+        }
     } catch (error) {
         throw new Error(error)
-    }
-}
-
-export const updateFLPM = (payload) => {
-    try {
-        const res = axios.put()
-    } catch (error) {
-        console.log(error.response.data.message);
     }
 }

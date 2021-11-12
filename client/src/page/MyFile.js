@@ -1,8 +1,9 @@
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Button, Grid, IconButton, Paper, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Button, Grid, IconButton, MenuItem, Paper, Tab, Tabs, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { getAllCategory, getFlanguageLevel } from '../action/categoryAction';
 import { getInfo, updateInfo } from '../action/infoAction';
 import CustomLoadingOverlay from '../component/CustomLoadingOverlay';
 import InputGrid from '../component/InputGrid';
@@ -11,7 +12,10 @@ import MyInfo from '../component/MyInfo';
 import MyLevel from '../component/MyLevel';
 import MyParty from '../component/MyParty';
 import MyButton from '../component/UI/MyButton';
+import { CategoryContext } from '../contextAPI/CategoryContext';
 import { InfoContext } from '../contextAPI/InfoContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import axios from '../helper/axios';
 import image from '../public/image/anhthe1.png';
 
 const useStyles = makeStyles(theme => ({
@@ -28,6 +32,9 @@ const useStyles = makeStyles(theme => ({
     paper: {
         padding: '16px',
         marginBottom: '16px',
+    },
+    paperContent: {
+        paddingBottom: '60px'
     },
     imageWrapper: {
         position: 'relative',
@@ -60,10 +67,10 @@ const useStyles = makeStyles(theme => ({
         position: 'absolute',
         top: '2px',
         right: '2px',
-        backgroundColor: 'transparent',
+        backgroundColor: theme.palette.common.white,
         color: theme.palette.primary.main,
         '&:hover': {
-            backgroundColor: 'transparent',
+            backgroundColor: theme.palette.common.white,
             color: theme.palette.primary.main
         }
     },
@@ -83,16 +90,31 @@ const useStyles = makeStyles(theme => ({
 const MyFile = () => {
     const classes = useStyles();
     const { info, infoDispatch } = useContext(InfoContext);
+    const { category, categoryDispatch } = useContext(CategoryContext);
+    const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
+    const [loading, setLoading] = useState(true);
+    const [step, setStep] = useState(0);
+    const [disable, setDisable] = useState(true);
+    const [flArray, setFlArray] = useState([]);
+    const [levelArray, setLevelArray] = useState([]);
+    const [imageUpload, setImageUpload] = useState([]);
+
+    const [qqArr, setQqArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
+    const [dcttArr, setDcttArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
+    const [nohtArr, setNohtArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
+    const [qqValue, setQqValue] = useState({ provinceValue: '', districtValue: '', wardValue: '' })
+    const [dcttValue, setDcttValue] = useState({ provinceValue: '', districtValue: '', wardValue: '' })
+    const [nohtValue, setNohtValue] = useState({ provinceValue: '', districtValue: '', wardValue: '' })
+
     const {
         handleSubmit,
         control,
         setValue,
         formState: { errors },
-        getValues
+        getValues,
+        reset,
+        clearErrors
     } = useForm();
-
-    const [step, setStep] = useState(0);
-    const [disable, setDisable] = useState(true);
 
     const TabPanel = (props) => {
         const { children, value, index, ...other } = props;
@@ -121,61 +143,157 @@ const MyFile = () => {
         };
     }
 
-    const formatDate = () => {
-        setValue("NgaySinh", getValues("NgaySinh").slice(0, 10))
-        setValue("NgayVaoDoan", getValues("NgaySinh").slice(0, 10))
-        setValue("NgayVaoDang", getValues("NgaySinh").slice(0, 10))
-        setValue("NgayChinhThuc", getValues("NgaySinh").slice(0, 10))
-    }
-
     const handleChange = (event, newValue) => {
         setStep(newValue);
     };
 
-    const handleRemove = () => {
-
+    const handleChangeSelect = (e) => {
+        setValue(e.target.name, e.target.value)
     }
-    const handleUpload = () => {
 
+    const handleRemove = () => {
+        setImageUpload('');
+        setValue("ImageUpload", "");
+    }
+    const handleUpload = (e) => {
+        const file = e.target.files[0];
+        file.preview = URL.createObjectURL(file)
+        setImageUpload(file);
+        setValue("ImageUpload", file);
     }
 
     const handleCancer = () => {
         Object.keys(info.info).forEach(key => setValue(key, info.info[key]))
-        // setValue("Tinh", "0")
-        // setValue("Huyen", "0")
-        // setValue("Xa", "0")
-        formatDate();
+        Object.keys(info.info).forEach(key => {
+            let image = {};
+            image.preview = info.info["HinhAnh"]
+            setImageUpload(image)
+            if (key == "NgoaiNgu") {
+                info.info[key].map((el, index) => {
+                    setValue(`MaNgoaiNgu${index}`, el.MaNgoaiNgu)
+                    setValue(`MaTrinhDo${index}`, el.MaTrinhDo)
+                })
+            } else
+                setValue(key, info.info[key])
+        })
         setDisable(true);
     }
 
     const onSubmit = (data) => {
-        // console.log(data);
-        updateInfo(infoDispatch, data)
-        // setValue("Tinh", "0")
-        // setValue("Huyen", "0")
-        // setValue("Xa", "0")
+        setLoading(true);
+        data.QQAddress = { ...qqValue, detail: getValues("QQChiTiet") };
+        data.DCTTAddress = { ...dcttValue, detail: getValues("DCTTChiTiet") };
+        data.NOHTAddress = { ...nohtValue, detail: getValues("NOHTChiTiet") };
+        setQqValue({ provinceValue: '', districtValue: '', wardValue: '' })
+        setDcttValue({ provinceValue: '', districtValue: '', wardValue: '' })
+        setNohtValue({ provinceValue: '', districtValue: '', wardValue: '' })
+        updateInfo(infoDispatch, data, openSnackbarDispatch)
         setDisable(true);
     }
 
     useEffect(() => {
-        if (info.info) {
-            Object.keys(info.info).forEach(key =>
-                key == "NgoaiNgu" ?
+        console.log(info)
+        if (info.info && !info.loading) {
+            Object.keys(info.info).forEach(key => {
+                function isEmpty(obj) {
+                    return Object.keys(obj).length === 0;
+                }
+                let image = {};
+                image.preview = info.info["HinhAnh"]
+                setImageUpload(image)
+                if (key == "NgoaiNgu") {
+                    let arr = [];
                     info.info[key].map((el, index) => {
                         setValue(`MaNgoaiNgu${index}`, el.MaNgoaiNgu)
                         setValue(`MaTrinhDo${index}`, el.MaTrinhDo)
-                    }) :
-                    setValue(key, info.info[key]))
-            formatDate();
+                        arr.push({ MaNgoaiNgu: el.MaNgoaiNgu, MaTrinhDo: el.MaTrinhDo });
+                    })
+                    setFlArray(arr);
+                } else if (key == "DiaChi") {
+                    console.log("SetDiaChi")
+                    const getProvinceArr = async () => {
+                        const resQQP = await axios.get('https://provinces.open-api.vn/api/')
+                        const resQQD = await axios.get(`https://provinces.open-api.vn/api/p/${info.info["DiaChi"].QueQuan.provinceValue}/?depth=2`)
+                        const resQQW = await axios.get(`https://provinces.open-api.vn/api/d/${info.info["DiaChi"].QueQuan.districtValue}/?depth=2`)
+                        const resDCTTP = await axios.get('https://provinces.open-api.vn/api/')
+                        const resDCTTD = await axios.get(`https://provinces.open-api.vn/api/p/${info.info["DiaChi"].DiaChiThuongTru.provinceValue}/?depth=2`)
+                        const resDCTTW = await axios.get(`https://provinces.open-api.vn/api/d/${info.info["DiaChi"].DiaChiThuongTru.districtValue}/?depth=2`)
+                        const resNOHTP = await axios.get('https://provinces.open-api.vn/api/')
+                        const resNOHTD = await axios.get(`https://provinces.open-api.vn/api/p/${info.info["DiaChi"].NoiOHienTai.provinceValue}/?depth=2`)
+                        const resNOHTW = await axios.get(`https://provinces.open-api.vn/api/d/${info.info["DiaChi"].NoiOHienTai.districtValue}/?depth=2`)
+                        setQqArr({ ...qqArr, provinceArr: resQQP.data, districtArr: resQQD.data.districts, wardArr: resQQW.data.wards })
+                        setDcttArr({ ...dcttArr, provinceArr: resDCTTP.data, districtArr: resDCTTD.data.districts, wardArr: resDCTTW.data.wards })
+                        setNohtArr({ ...nohtArr, provinceArr: resNOHTP.data, districtArr: resNOHTD.data.districts, wardArr: resNOHTW.data.wards })
+                        setQqValue({
+                            ...qqValue,
+                            provinceValue: info.info["DiaChi"].QueQuan.provinceValue,
+                            districtValue: info.info["DiaChi"].QueQuan.districtValue,
+                            wardValue: info.info["DiaChi"].QueQuan.wardValue,
+                        })
+                        setDcttValue({
+                            ...dcttValue,
+                            provinceValue: info.info["DiaChi"].DiaChiThuongTru.provinceValue,
+                            districtValue: info.info["DiaChi"].DiaChiThuongTru.districtValue,
+                            wardValue: info.info["DiaChi"].DiaChiThuongTru.wardValue,
+                        })
+                        setNohtValue({
+                            ...nohtValue,
+                            provinceValue: info.info["DiaChi"].NoiOHienTai.provinceValue,
+                            districtValue: info.info["DiaChi"].NoiOHienTai.districtValue,
+                            wardValue: info.info["DiaChi"].NoiOHienTai.wardValue,
+                        })
+                        setValue('QQTinh', info.info["DiaChi"].QueQuan.provinceValue)
+                        setValue('QQHuyen', info.info["DiaChi"].QueQuan.districtValue)
+                        setValue('QQXa', info.info["DiaChi"].QueQuan.wardValue)
+                        setValue('QQChiTiet', info.info["DiaChi"].QueQuan.detail)
+                        setValue('DCTTTinh', info.info["DiaChi"].DiaChiThuongTru.provinceValue)
+                        setValue('DCTTHuyen', info.info["DiaChi"].DiaChiThuongTru.districtValue)
+                        setValue('DCTTXa', info.info["DiaChi"].DiaChiThuongTru.wardValue)
+                        setValue('DCTTChiTiet', info.info["DiaChi"].DiaChiThuongTru.detail)
+                        setValue('NOHTTinh', info.info["DiaChi"].NoiOHienTai.provinceValue)
+                        setValue('NOHTHuyen', info.info["DiaChi"].NoiOHienTai.districtValue)
+                        setValue('NOHTXa', info.info["DiaChi"].NoiOHienTai.wardValue)
+                        setValue('NOHTChiTiet', info.info["DiaChi"].NoiOHienTai.detail)
+                        setLoading(false);
+                    }
+                    if (!isEmpty(info.info["DiaChi"]))
+                        getProvinceArr();
+                } else {
+                    setValue(key, info.info[key])
+                }
+            })
         }
     }, [info])
 
     useEffect(() => {
-
-    })
+        const setA = async () => {
+            let arr = [];
+            await Promise.all(flArray.map(async (el, index) => {
+                if (el.MaNgoaiNgu != "0") {
+                    const res = await getFlanguageLevel(el.MaNgoaiNgu);
+                    setValue(`MaNgoaiNgu${index}`, el.MaNgoaiNgu);
+                    setValue(`MaTrinhDo${index}`, el.MaTrinhDo);
+                    arr[index] = res
+                }
+            }))
+            setLevelArray(arr);
+            setValue("NgoaiNgu", flArray)
+        }
+        if (flArray.length > 0) {
+            setA();
+        }
+    }, [flArray])
 
     useEffect(() => {
-        getInfo(infoDispatch, { id: '0001' })
+        getAllCategory(categoryDispatch, "ethnic")
+        getAllCategory(categoryDispatch, "religion")
+        getAllCategory(categoryDispatch, "partycell")
+        getAllCategory(categoryDispatch, "position")
+        getAllCategory(categoryDispatch, "flanguage");
+        getAllCategory(categoryDispatch, "flanguagelevel");
+        getAllCategory(categoryDispatch, "politics");
+        getAllCategory(categoryDispatch, "it");
+        getAllCategory(categoryDispatch, "grade");
     }, [])
 
     return (
@@ -187,102 +305,168 @@ const MyFile = () => {
             </div>
             {disable ?
                 (
-                    <MyButton onClick={() => setDisable(false)} primary={true}>Chỉnh sửa thông tin</MyButton>
+                    <MyButton onClick={() => setDisable(false)} primary>Chỉnh sửa thông tin</MyButton>
                 ) :
                 (
                     <>
-                        <MyButton onClick={handleSubmit(onSubmit)} info={true}>Lưu</MyButton>
+                        <MyButton onClick={handleSubmit(onSubmit)} info>Lưu</MyButton>
                         <Button onClick={handleCancer} >Hủy</Button>
                     </>
                 )
             }
-            <Grid container spacing={2} className={classes.wrapper}>
-                <Grid item xs={4}>
-                    <Paper variant="outlined" className={classes.paper}>
-                        <div className={classes.imageWrapper} >
-                            <img className={classes.fileUpload} style={{ height: '100%' }}
-                                src={image}
-                                alt="avatar-image"
+            {loading ||
+                <Grid container spacing={2} className={classes.wrapper}>
+                    <Grid item xs={4}>
+                        <Paper variant="outlined" className={classes.paper}>
+                            <div className={classes.imageWrapper} >
+                                <>
+                                    {imageUpload ?
+                                        <>
+                                            <img className={classes.fileUpload} style={{ height: '100%' }}
+                                                src={imageUpload.preview}
+                                                alt=""
+                                            />
+                                            {disable ||
+                                                <IconButton className={classes.closeBtn} size="small" onClick={handleRemove}>
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            }
+                                        </>
+                                        :
+                                        <>
+                                            <input type="file" multiple className={classes.fileUpload} onChange={handleUpload} />
+                                            {/* <FormHelperText error style={{ position: "absolute" }}>Vui lòng chọn ảnh!</FormHelperText> */}
+                                        </>
+                                    }
+                                </>
+                            </div>
+                            <InputGrid
+                                nameTitle={`Mã Đảng viên`}
+                                name={"MaSoDangVien"}
+                                control={control}
+                                errors={errors}
+                                disabled={disable}
                             />
-                            {disable ||
-                                <IconButton className={classes.closeBtn} size="small" onClick={handleRemove}>
-                                    <DeleteIcon />
-                                </IconButton>
-                            }
-
-                            {/* <div className={classes.loadingWrapper}>
-                            <CircularProgress className={classes.loading} />
-                        </div> */}
-
-                            {/* <input type="file" multiple className={classes.fileUpload} onChange={handleUpload} /> */}
-                        </div>
-                        <InputGrid
-                            nameTitle={`Mã Đảng viên`}
-                            name={"MaDangVien"}
-                            control={control}
-                            errors={errors}
-                            disabled={true}
-                        />
-                        <InputGrid
-                            nameTitle={`Họ tên`}
-                            name={"HoTen"}
-                            control={control}
-                            errors={errors}
-                            disabled={true}
-                        />
-                        <InputGrid
-                            nameTitle={`Chi bộ`}
-                            name={"TenChiBo"}
-                            control={control}
-                            errors={errors}
-                            disabled={true}
-                        />
-                        <InputGrid
-                            nameTitle={`Giới tính`}
-                            name={"GioiTinh"}
-                            control={control}
-                            errors={errors}
-                            disabled={true}
-                        />
-                        <InputGrid
-                            nameTitle={`CMND`}
-                            name={"CMND"}
-                            control={control}
-                            errors={errors}
-                            disabled={true}
-                        />
-                    </Paper>
-                </Grid>
-                <Grid item xs={8}>
-                    <Paper variant="outlined">
-                        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                            <Tabs
-                                value={step}
-                                onChange={handleChange}
-                                aria-label="simple tabs example"
-                                indicatorColor="primary"
-                                textColor="primary"
+                            <InputGrid
+                                nameTitle={`Họ tên`}
+                                name={"HoTen"}
+                                control={control}
+                                errors={errors}
+                                disabled={disable}
+                            />
+                            <InputGrid
+                                select
+                                nameTitle={"Chi bộ"}
+                                name={"MaChiBo"}
+                                defaultValue=""
+                                control={control}
+                                errors={errors}
+                                disabled={disable}
+                                onChange={handleChangeSelect}
                             >
-                                <Tab label="Cơ bản" {...a11yProps(0)} />
-                                <Tab label="Trình độ" {...a11yProps(1)} />
-                                <Tab label="Về Đoàn / Đảng" {...a11yProps(2)} />
-                            </Tabs>
-                        </Box>
-                        <form className="add-form">
-                            <TabPanel value={step} index={0}>
-                                <MyInfo disable={disable} control={control} errors={errors} setValue={setValue} />
-                            </TabPanel>
-                            <TabPanel value={step} index={1}>
-                                <MyLevel disable={disable} control={control} errors={errors} setValue={setValue} />
-                            </TabPanel>
-                            <TabPanel value={step} index={2}>
-                                <MyParty disable={disable} control={control} errors={errors} setValue={setValue} />
-                            </TabPanel>
-                        </form>
-                    </Paper>
+                                {
+                                    category.categories.partycell.map(el =>
+                                        <MenuItem key={el.MaChiBo} value={el.MaChiBo}>{el.TenChiBo}</MenuItem>
+                                    )
+                                }
+                            </InputGrid>
+                            <InputGrid
+                                select
+                                onChange={handleChangeSelect}
+                                nameTitle={"Giới tính"}
+                                name={`GioiTinh`}
+                                defaultValue={"0"}
+                                rules={{
+                                    validate: value =>
+                                        value != "0" || "Vui lòng nhập trường này!"
+                                }}
+                                control={control}
+                                errors={errors}
+                                disabled={disable}
+                            >
+                                <MenuItem value="0">Chọn giới tính</MenuItem>
+                                <MenuItem value="m">Nam</MenuItem>
+                                <MenuItem value="f">Nữ</MenuItem>
+                                <MenuItem value="u">Khác</MenuItem>
+                            </InputGrid>
+                            <InputGrid
+                                nameTitle={`CMND`}
+                                name={"CMND"}
+                                control={control}
+                                errors={errors}
+                                disabled={disable}
+                            />
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={8}>
+                        <Paper className={classes.paperContent} variant="outlined">
+                            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                                <Tabs
+                                    value={step}
+                                    onChange={handleChange}
+                                    aria-label="simple tabs example"
+                                    indicatorColor="primary"
+                                    textColor="primary"
+                                >
+                                    <Tab label="Cơ bản" {...a11yProps(0)} />
+                                    <Tab label="Trình độ" {...a11yProps(1)} />
+                                    <Tab label="Về Đoàn / Đảng" {...a11yProps(2)} />
+                                </Tabs>
+                            </Box>
+                            {loading ||
+                                <form className="add-form">
+                                    <TabPanel value={step} index={0}>
+                                        <MyInfo
+                                            loading={loading}
+                                            disable={disable}
+                                            control={control}
+                                            errors={errors}
+                                            setValue={setValue}
+                                            clearErrors={clearErrors}
+                                            getValues={getValues}
+                                            qqArr={qqArr}
+                                            setQqArr={setQqArr}
+                                            dcttArr={dcttArr}
+                                            setDcttArr={setDcttArr}
+                                            nohtArr={nohtArr}
+                                            setNohtArr={setNohtArr}
+                                            qqValue={qqValue}
+                                            setQqValue={setQqValue}
+                                            dcttValue={dcttValue}
+                                            setDcttValue={setDcttValue}
+                                            nohtValue={nohtValue}
+                                            setNohtValue={setNohtValue} F
+                                        />
+                                    </TabPanel>
+                                    <TabPanel value={step} index={1}>
+                                        <MyLevel
+                                            disable={disable}
+                                            control={control}
+                                            errors={errors}
+                                            setValue={setValue}
+                                            loading={loading}
+                                            flArray={flArray}
+                                            setFlArray={setFlArray}
+                                            levelArray={levelArray}
+                                            setLevelArray={setLevelArray}
+                                        />
+                                    </TabPanel>
+                                    <TabPanel value={step} index={2}>
+                                        <MyParty
+                                            disable={disable}
+                                            control={control}
+                                            errors={errors}
+                                            setValue={setValue}
+                                            loading={loading}
+                                        />
+                                    </TabPanel>
+                                </form>
+                            }
+                        </Paper>
+                    </Grid>
                 </Grid>
-            </Grid>
-            <CustomLoadingOverlay loading={info.loading} />
+            }
+            <CustomLoadingOverlay loading={loading} />
         </Layout>
     );
 };

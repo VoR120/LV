@@ -18,14 +18,22 @@ import {
     Box,
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
 import { useForm } from 'react-hook-form';
 import '../public/css/Form.scss'
 import InfoForm from './InfoForm';
 import LevelForm from './LevelForm';
-import ParticipateForm from './ParticipateForm';
+import PartyForm from './PartyForm';
 import MyButton from './UI/MyButton';
+import { getAllCategory, getFlanguageLevel } from '../action/categoryAction';
+import { CategoryContext } from '../contextAPI/CategoryContext';
+import { addPartyMember, updatePartyMember } from '../action/partyMemberAction';
+import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
+import axios from '../helper/axios';
+import CustomizedSnackbars from './CustomizedSnackbars';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
 
 const useStyles = makeStyles(theme => ({
     btn: {
@@ -87,22 +95,47 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: theme.palette.common.white,
         boxShadow: 'none',
         borderBottom: '1px solid #ddd'
-    }
+    },
+    icon: {
+        margin: theme.spacing(0.5, 1, 0.5, 0),
+        fontSize: '1.2rem'
+    },
+    iconWrapper: {
+        display: 'flex',
+        alignItems: 'center',
+        width: '100%',
+        height: '100%'
+    },
 }))
 
 
 const AddForm = (props) => {
+    const { edit, data } = props
     const classes = useStyles();
     const [open, setOpen] = useState(false);
     const [imageUpload, setImageUpload] = useState('');
     const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState('');
     const [step, setStep] = useState(0);
+    const { category, categoryDispatch } = useContext(CategoryContext);
+    const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
+    const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
+    const [flArray, setFlArray] = useState([{ MaNgoaiNgu: "0", MaTrinhDo: "0" }]);
+    const [levelArray, setLevelArray] = useState([]);
+
+    const [qqArr, setQqArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
+    const [dcttArr, setDcttArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
+    const [nohtArr, setNohtArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
+    const [qqValue, setQqValue] = useState({ provinceValue: '', districtValue: '', wardValue: '' })
+    const [dcttValue, setDcttValue] = useState({ provinceValue: '', districtValue: '', wardValue: '' })
+    const [nohtValue, setNohtValue] = useState({ provinceValue: '', districtValue: '', wardValue: '' })
+
     const {
-        register,
         handleSubmit,
         control,
         setValue,
-        watch,
+        clearErrors,
+        getValues,
         formState: { errors }
     } = useForm();
 
@@ -112,10 +145,7 @@ const AddForm = (props) => {
     const handleOpen = () => {
         setOpen(true)
     }
-    const onSubmit = () => {
-        alert("abc")
-        // setOpen(false)
-    }
+
     function TabPanel(props) {
         const { children, value, index, ...other } = props;
 
@@ -139,14 +169,137 @@ const AddForm = (props) => {
         return {
             id: `simple-tab-${index}`,
             'aria-controls': `simple-tabpanel-${index}`,
+            // disabled: index > step ? true : false
         };
     }
     const handleChange = (event, newValue) => {
         setStep(newValue);
     };
+
+
+    const onSubmit = (data) => {
+        data.QQAddress = { ...qqValue, detail: getValues("QQChiTiet") };
+        data.DCTTAddress = { ...dcttValue, detail: getValues("DCTTChiTiet") };
+        data.NOHTAddress = { ...nohtValue, detail: getValues("NOHTChiTiet") };
+        // if (step != 2)
+        //     setStep(previewStep => previewStep + 1);
+        // else {
+        edit ?
+            updatePartyMember(partyMemberDispatch, data, openSnackbarDispatch) :
+            addPartyMember(partyMemberDispatch, data, openSnackbarDispatch);
+        // }
+        setOpen(false)
+    }
+
+    useEffect(() => {
+        if (edit) {
+            Object.keys(data).forEach(key => {
+                function isEmpty(obj) {
+                    return Object.keys(obj).length === 0;
+                }
+                if (key == "NgoaiNgu") {
+                    let arr = [];
+                    data[key].map((el, index) => {
+                        setValue(`MaNgoaiNgu${index}`, el.MaNgoaiNgu)
+                        setValue(`MaTrinhDo${index}`, el.MaTrinhDo)
+                        arr.push({ MaNgoaiNgu: el.MaNgoaiNgu, MaTrinhDo: el.MaTrinhDo });
+                    })
+                    setFlArray(arr);
+                } else if (key == "DiaChi") {
+                    const getProvinceArr = async () => {
+                        const resQQP = await axios.get('https://provinces.open-api.vn/api/')
+                        const resQQD = await axios.get(`https://provinces.open-api.vn/api/p/${data["DiaChi"].QueQuan.provinceValue}/?depth=2`)
+                        const resQQW = await axios.get(`https://provinces.open-api.vn/api/d/${data["DiaChi"].QueQuan.districtValue}/?depth=2`)
+                        const resDCTTP = await axios.get('https://provinces.open-api.vn/api/')
+                        const resDCTTD = await axios.get(`https://provinces.open-api.vn/api/p/${data["DiaChi"].DiaChiThuongTru.provinceValue}/?depth=2`)
+                        const resDCTTW = await axios.get(`https://provinces.open-api.vn/api/d/${data["DiaChi"].DiaChiThuongTru.districtValue}/?depth=2`)
+                        const resNOHTP = await axios.get('https://provinces.open-api.vn/api/')
+                        const resNOHTD = await axios.get(`https://provinces.open-api.vn/api/p/${data["DiaChi"].NoiOHienTai.provinceValue}/?depth=2`)
+                        const resNOHTW = await axios.get(`https://provinces.open-api.vn/api/d/${data["DiaChi"].NoiOHienTai.districtValue}/?depth=2`)
+                        setQqArr({ ...qqArr, provinceArr: resQQP.data, districtArr: resQQD.data.districts, wardArr: resQQW.data.wards })
+                        setDcttArr({ ...dcttArr, provinceArr: resDCTTP.data, districtArr: resDCTTD.data.districts, wardArr: resDCTTW.data.wards })
+                        setNohtArr({ ...nohtArr, provinceArr: resNOHTP.data, districtArr: resNOHTD.data.districts, wardArr: resNOHTW.data.wards })
+                        setQqValue({
+                            ...qqValue,
+                            provinceValue: data["DiaChi"].QueQuan.provinceValue,
+                            districtValue: data["DiaChi"].QueQuan.districtValue,
+                            wardValue: data["DiaChi"].QueQuan.wardValue,
+                        })
+                        setDcttValue({
+                            ...dcttValue,
+                            provinceValue: data["DiaChi"].DiaChiThuongTru.provinceValue,
+                            districtValue: data["DiaChi"].DiaChiThuongTru.districtValue,
+                            wardValue: data["DiaChi"].DiaChiThuongTru.wardValue,
+                        })
+                        setNohtValue({
+                            ...nohtValue,
+                            provinceValue: data["DiaChi"].NoiOHienTai.provinceValue,
+                            districtValue: data["DiaChi"].NoiOHienTai.districtValue,
+                            wardValue: data["DiaChi"].NoiOHienTai.wardValue,
+                        })
+                        setValue('QQTinh', data["DiaChi"].QueQuan.provinceValue)
+                        setValue('QQHuyen', data["DiaChi"].QueQuan.districtValue)
+                        setValue('QQXa', data["DiaChi"].QueQuan.wardValue)
+                        setValue('QQChiTiet', data["DiaChi"].QueQuan.detail)
+                        setValue('DCTTTinh', data["DiaChi"].DiaChiThuongTru.provinceValue)
+                        setValue('DCTTHuyen', data["DiaChi"].DiaChiThuongTru.districtValue)
+                        setValue('DCTTXa', data["DiaChi"].DiaChiThuongTru.wardValue)
+                        setValue('DCTTChiTiet', data["DiaChi"].DiaChiThuongTru.detail)
+                        setValue('NOHTTinh', data["DiaChi"].NoiOHienTai.provinceValue)
+                        setValue('NOHTHuyen', data["DiaChi"].NoiOHienTai.districtValue)
+                        setValue('NOHTXa', data["DiaChi"].NoiOHienTai.wardValue)
+                        setValue('NOHTChiTiet', data["DiaChi"].NoiOHienTai.detail)
+                    }
+                    if (!isEmpty(data["DiaChi"]))
+                        getProvinceArr();
+                } else {
+                    setValue(key, data[key])
+                }
+            })
+            setLoading(false);
+        } else {
+            const fetchAPI = async () => {
+                const res = await axios.get('https://provinces.open-api.vn/api/')
+                setQqArr({ ...qqArr, provinceArr: res.data })
+                setDcttArr({ ...dcttArr, provinceArr: res.data })
+                setNohtArr({ ...nohtArr, provinceArr: res.data })
+                setLoading(false);
+            }
+            setLoading(true)
+            fetchAPI();
+        }
+    }, [])
+
+    useEffect(() => {
+        const setA = async () => {
+            let arr = [];
+            await Promise.all(flArray.map(async (el, index) => {
+                if (el.MaNgoaiNgu != "0") {
+                    const res = await getFlanguageLevel(el.MaNgoaiNgu);
+                    setValue(`MaNgoaiNgu${index}`, el.MaNgoaiNgu);
+                    setValue(`MaTrinhDo${index}`, el.MaTrinhDo);
+                    arr[index] = res
+                }
+            }))
+            setLevelArray(arr);
+            setValue("NgoaiNgu", flArray)
+        }
+        if (flArray.length > 0)
+            setA();
+    }, [flArray])
+
     return (
         <div className="add-form">
-            <MyButton onClick={handleOpen} success><AddIcon />Thêm</MyButton>
+            <>
+                {
+                    edit ?
+                        <div className={classes.iconWrapper} onClick={handleOpen}>
+                            <EditIcon className={classes.icon} />Chỉnh sửa
+                        </div>
+                        :
+                        <MyButton onClick={handleOpen} success><AddIcon />Thêm</MyButton>
+                }
+            </>
             <Dialog PaperProps={{ style: { minWidth: '1100px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">Thêm Đảng viên</DialogTitle>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -164,202 +317,59 @@ const AddForm = (props) => {
                 </Box>
                 <form className="add-form">
                     <TabPanel value={step} index={0}>
-                        <InfoForm data={props.data} />
+                        <InfoForm
+                            control={control}
+                            errors={errors}
+                            setValue={setValue}
+                            clearErrors={clearErrors}
+                            getValues={getValues}
+                            qqArr={qqArr}
+                            setQqArr={setQqArr}
+                            dcttArr={dcttArr}
+                            setDcttArr={setDcttArr}
+                            nohtArr={nohtArr}
+                            setNohtArr={setNohtArr}
+                            qqValue={qqValue}
+                            setQqValue={setQqValue}
+                            dcttValue={dcttValue}
+                            setDcttValue={setDcttValue}
+                            nohtValue={nohtValue}
+                            setNohtValue={setNohtValue}
+                        />
                     </TabPanel>
                     <TabPanel value={step} index={1}>
-                        <LevelForm />
+                        <LevelForm
+                            control={control}
+                            errors={errors}
+                            setValue={setValue}
+                            flArray={flArray}
+                            setFlArray={setFlArray}
+                            levelArray={levelArray}
+                            setLevelArray={setLevelArray}
+                            edit={edit}
+                            clearErrors={clearErrors}
+                        />
                     </TabPanel>
                     <TabPanel value={step} index={2}>
-                        <ParticipateForm />
+                        <PartyForm
+                            control={control}
+                            errors={errors}
+                            setValue={setValue}
+                        />
                     </TabPanel>
                 </form>
-                <DialogContent>
-                    <form>
-                        {/*<FormControl margin="dense" fullWidth>
-                            <Grid container spacing={4}>
-                                <Grid item xs={5}>
-                                    <Grid container alignItems="center">
-                                        <Grid xs={5}>
-                                            <Typography>Họ và tên đang dùng</Typography>
-                                        </Grid>
-                                        <Grid xs={7}>
-                                            <TextField fullWidth size="small" variant="outlined" />
-                                        </Grid>
-                                    </Grid>
-                                </Grid>
-                                <Grid item alignItems="center" xs={5}>
-                                    <Grid container alignItems="center">
-                                        <Grid xs={5}>
-                                            <Typography>Họ và tên khai sinh</Typography>
-                                        </Grid>
-                                        <Grid xs={7}>
-                                            <TextField fullWidth size="small" variant="outlined" />
-                                        </Grid>
-                                    </Grid>
-                                </Grid>
-                                <Grid item xs={2}>
-                                    <div className={classes.imageWrapper} >
-                                        {imageUpload.length > 0 ?
-                                            imageUpload.map((img) => {
-                                                return (
-                                                    <>
-                                                        <img className={classes.fileUpload} style={{ height: '100%' }}
-                                                            src={img.url}
-                                                            alt=""
-                                                        />
-                                                        <IconButton className={classes.closeBtn} size="small" onClick={handleRemove}>
-                                                            <DeleteIcon />
-                                                        </IconButton>
-                                                    </>)
-                                            })
-                                            :
-                                            <>
-                                                {loading ?
-                                                    <div className={classes.loadingWrapper}>
-                                                        <CircularProgress className={classes.loading} />
-                                                    </div>
-                                                    :
-                                                    <input type="file" multiple className={classes.fileUpload} onChange={handleUpload} />
-                                                }
-                                            </>
-                                        }
-                                    </div>
-                                </Grid>
-                                {/* <Grid className={classes.input} item xs={6}>
-                                    <div className={classes.imageWrapper} >
-                                        {imageUpload.length > 0 ?
-                                            imageUpload.map((img) => {
-                                                return (
-                                                    <>
-                                                        <img className={classes.fileUpload} style={{ height: '100%' }}
-                                                            src={img.url}
-                                                            alt=""
-                                                        />
-                                                        <IconButton className={classes.closeBtn} size="small" onClick={handleRemove}>
-                                                            <DeleteIcon />
-                                                        </IconButton>
-                                                    </>)
-                                            })
-                                            :
-                                            <>
-                                                {loading ?
-                                                    <div className={classes.loadingWrapper}>
-                                                        <CircularProgress className={classes.loading} />
-                                                    </div>
-                                                    :
-                                                    <input type="file" multiple className={classes.fileUpload} onChange={handleUpload} />
-                                                }
-                                            </>
-                                        }
-                                    </div>
-                                </Grid>
-                                <Grid item xs={6} container>
-                                    <Grid className={classes.input} item xs={12}>
-                                        <TextField
-                                            {...register("name", {
-                                                required: true,
-                                                pattern: /^[A-Za-z]+$/i,
-                                            })}
-                                            fullWidth
-                                            label="Họ Tên"
-                                            variant="standard"
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            placeholder="Nguyễn Văn A"
-                                        />
-                                        {errors?.name?.type === "required" &&
-                                            <FormHelperText error>Vui lòng nhập trường này!</FormHelperText>
-                                        }
-                                    </Grid>
-                                    <Grid className={classes.input} item xs={12}>
-                                        <TextField
-                                            {...register("birth", {
-                                                required: true,
-                                                pattern: /^[A-Za-z]+$/i,
-                                            })}
-                                            type="date"
-                                            fullWidth
-                                            label="Ngày sinh"
-                                            variant="standard"
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-
-                                        />
-                                        {errors?.birth?.type === "required" &&
-                                            <FormHelperText error>Vui lòng nhập trường này!</FormHelperText>
-                                        }
-                                    </Grid>
-
-                                    <Grid className={classes.input} item xs={12}>
-                                        <TextField
-                                            {...register("address", {
-                                                required: true,
-                                                pattern: /^[A-Za-z]+$/i,
-                                            })}
-                                            fullWidth
-                                            label="Địa chỉ cụ thể"
-                                            variant="standard"
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            placeholder="Số nhà..., đường..., quận..."
-
-                                        />
-                                        {errors?.address?.type === "required" &&
-                                            <FormHelperText error>Vui lòng nhập trường này!</FormHelperText>
-                                        }
-                                    </Grid>
-                                    <Grid className={classes.input} item xs={6}>
-                                        <TextField
-                                            {...register("phone", {
-                                                required: true,
-                                                pattern: /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/,
-                                            })}
-                                            fullWidth
-                                            label="Số điện thoại"
-                                            variant="standard"
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            placeholder="0123456789"
-
-                                        />
-                                        {errors?.phone?.type === "required" &&
-                                            <FormHelperText error>Vui lòng nhập số điện thoại!</FormHelperText>
-                                        }
-                                        {errors?.phone?.type === "pattern" &&
-                                            <FormHelperText error>Số điện thoại không hợp lệ!</FormHelperText>
-                                        }
-                                    </Grid>
-                                    <Grid className={classes.input} item xs={6}>
-                                        <TextField
-                                            {...register("email", {
-                                                required: true,
-                                                pattern: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-                                            })}
-                                            fullWidth
-                                            label="Email"
-                                            variant="standard"
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            placeholder="example@gmail.com"
-                                        />
-                                        {errors?.email?.type === "required" &&
-                                            <FormHelperText error>Vui lòng nhập email!</FormHelperText>
-                                        }
-                                        {errors?.email?.type === "pattern" &&
-                                            <FormHelperText error>Email không hợp lệ!</FormHelperText>
-                                        }
-                                    </Grid>
-                                </Grid>
-
-                            </Grid> 
-                        </FormControl>*/}
-                    </form>
-                </DialogContent>
+                {/* {...register("name", {
+                            required: true,
+                            pattern: /^[A-Za-z]+$/i,
+                        })}
+                        {...register("phone", {
+                            required: true,
+                            pattern: /\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/,
+                        })}
+                        {...register("email", {
+                            required: true,
+                            pattern: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                        })} */}
                 <DialogActions>
                     <Button onClick={handleClose} >
                         Cancel

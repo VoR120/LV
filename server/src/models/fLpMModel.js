@@ -3,21 +3,64 @@ const sql = require('../configs/db');
 
 const fLpM = {
     getAll: (callback) => {
-        sql.query(`SELECT * FROM ngoaingudangvien`,
+        sql.query(`SELECT *.ngoaingudangvien, ngoaingu.TenNgoaiNgu, trinhdo.TenTrinhDo
+        FROM ngoaingudangvien, ngoaingu, trinhdongoaingu
+        WHERE ngoaingudangvien.MaNgoaiNgu = ngoaingu.MaNgoaiNgu
+        AND ngoaingudangvien.MaTrinhDo = trinhdo.MaTrinhDo
+        `,
             (err, res) => {
                 if (err) {
                     console.log("error: ", err);
-                    callback(null, err);
+                    callback(err, null);
                     return;
                 }
                 console.log("All: ", res);
                 callback(null, { data: res });
             })
     },
-    findById: findById("ngoaingudangvien", "MaDangVien"),
-    create: create("ngoaingudangvien"),
-    updateById: updateById("ngoaingudangvien", "MaDangVien"),
-    remove: remove("ngoaingudangvien", "MaDangVien"),
+    findById: (id, callback) => {
+        sql.query(`SELECT ngoaingudangvien.*, ngoaingu.TenNgoaiNgu, trinhdongoaingu.TenTrinhDo
+        FROM ngoaingudangvien, ngoaingu, trinhdongoaingu
+        WHERE ngoaingudangvien.MaNgoaiNgu = ngoaingu.MaNgoaiNgu
+        AND ngoaingudangvien.MaTrinhDo = trinhdongoaingu.MaTrinhDo
+        AND ngoaingudangvien.MaSoDangVien = "${id}"`,
+            (err, res) => {
+                if (err) {
+                    console.log("error: ", err);
+                    callback(err, null);
+                    return;
+                }
+                console.log("All: ", res);
+                callback(null, { data: res });
+            })
+    },
+    create: (newValue, callback) => {
+        sql.query(`INSERT INTO ngoaingudangvien SET ?`, newValue, (err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                callback(err, null);
+                return;
+            }
+            sql.query(`SELECT ngoaingudangvien.*, ngoaingu.TenNgoaiNgu, trinhdongoaingu.TenTrinhDo
+                FROM ngoaingudangvien, ngoaingu, trinhdongoaingu
+                WHERE ngoaingudangvien.MaNgoaiNgu = ngoaingu.MaNgoaiNgu
+                AND ngoaingudangvien.MaTrinhDo = trinhdongoaingu.MaTrinhDo
+                AND ngoaingudangvien.MaSoDangVien = "${newValue.MaSoDangVien}"
+                AND ngoaingudangvien.MaNgoaiNgu = "${newValue.MaNgoaiNgu}"
+                `,
+                (err, res) => {
+                    if (err) {
+                        console.log("error: ", err);
+                        callback(err, null);
+                        return;
+                    }
+                    console.log("Created: ", res);
+                    callback(null, { data: res });
+                })
+        })
+    },
+    updateById: updateById("ngoaingudangvien", "MaSoDangVien"),
+    remove: remove("ngoaingudangvien", "MaSoDangVien"),
     removeAll: removeAll("ngoaingudangvien")
 }
 

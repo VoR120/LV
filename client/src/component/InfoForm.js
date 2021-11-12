@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment, useContext, useEffect } from 'react';
 import {
     Button,
     Dialog,
@@ -20,10 +20,18 @@ import {
     Radio,
     FormControlLabel,
     RadioGroup,
+    MenuItem,
+    Divider,
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import InputGrid from './InputGrid';
+import { CategoryContext } from '../contextAPI/CategoryContext';
+import { getAllCategory } from '../action/categoryAction';
+import MySelectReactHookForm from './UI/MySelectReactHookForm';
+import axios from '../helper/axios';
 
 const useStyles = makeStyles(theme => ({
     addBtn: {
@@ -62,12 +70,12 @@ const useStyles = makeStyles(theme => ({
     },
     closeBtn: {
         position: 'absolute',
-        top: '10px',
-        right: '10px',
-        backgroundColor: theme.palette.secondary.main,
+        top: '2px',
+        right: '2px',
+        backgroundColor: theme.palette.common.white,
         color: theme.palette.primary.main,
         '&:hover': {
-            backgroundColor: theme.palette.secondary.main,
+            backgroundColor: theme.palette.common.white,
             color: theme.palette.primary.main
         }
     },
@@ -92,163 +100,616 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const InfoForm = (props) => {
-    console.log(props);
+    const { control, errors, setValue, setError, clearErrors, getValues,
+        open, setOpen, setMessage,
+        qqArr, setQqArr,
+        dcttArr, setDcttArr,
+        nohtArr, setNohtArr,
+        qqValue, setQqValue,
+        dcttValue, setDcttValue,
+        nohtValue, setNohtValue, } = props
     const classes = useStyles();
+
+    // State
     const [imageUpload, setImageUpload] = useState('');
-    const [gender, setGender] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [birth, setBirth] = useState(props.update ? props.data.birth : '');
+    // const [qqArr, setQqArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
+    // const [dcttArr, setDcttArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
+    // const [nohtArr, setNohtArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
+    // const [qqValue, setQqValue] = useState({ provinceValue: '', districtValue: '', wardValue: '' })
+    // const [dcttValue, setDcttValue] = useState({ provinceValue: '', districtValue: '', wardValue: '' })
+    // const [nohtValue, setNohtValue] = useState({ provinceValue: '', districtValue: '', wardValue: '' })
+
+    // ContextAPI
+    const { category, categoryDispatch } = useContext(CategoryContext);
+
+    // Function
     const handleRemove = () => {
+        setImageUpload('');
+        setValue("ImageUpload", "");
+    }
+    const handleUpload = (e) => {
+        const file = e.target.files[0];
+        file.preview = URL.createObjectURL(file)
+        setImageUpload(file);
+        setValue("ImageUpload", file);
+    }
+    const handleChangeSelect = (e) => {
+        setValue(e.target.name, e.target.value)
+        if (e.target.value != "0") {
+            clearErrors(e.target.name)
+        }
+    }
 
+    const handleChangeInput = (e) => {
+        const { name, value } = e.target;
+        setValue(name, value);
     }
-    const handleUpload = () => {
 
+    const handleChangeProvince = (e, type) => {
+        const { name, value } = e.target;
+        setValue(name, value);
+        if (value != "0") {
+            clearErrors(e.target.name)
+        }
+        switch (type) {
+            case "qq":
+                setQqValue({ ...qqValue, provinceValue: value });
+                const fetchApiSetQq = async () => {
+                    const res = await axios.get(`https://provinces.open-api.vn/api/p/${value}/?depth=2`)
+                    setQqArr({ ...qqArr, districtArr: res.data.districts })
+                }
+                if (value != '0') {
+                    fetchApiSetQq();
+                } else
+                    setQqArr({ ...qqArr, districtArr: [], wardArr: [] });
+                setValue("QQHuyen", "0");
+                setValue("QQXa", "0");
+                break;
+            case "dctt":
+                setDcttValue({ ...dcttValue, provinceValue: value });
+                const fetchApiSetDctt = async () => {
+                    const res = await axios.get(`https://provinces.open-api.vn/api/p/${value}/?depth=2`)
+                    setDcttArr({ ...dcttArr, districtArr: res.data.districts })
+                }
+                if (value != '0') {
+                    fetchApiSetDctt();
+                } else
+                    setDcttArr({ ...dcttArr, districtArr: [], wardArr: [] });
+                setValue("DCTTHuyen", "0");
+                setValue("DCTTXa", "0");
+                break;
+            case "noht":
+                setNohtValue({ ...nohtValue, provinceValue: value });
+                const fetchApiSetNoht = async () => {
+                    const res = await axios.get(`https://provinces.open-api.vn/api/p/${value}/?depth=2`)
+                    setNohtArr({ ...nohtArr, districtArr: res.data.districts })
+                }
+                if (value != '0') {
+                    fetchApiSetNoht();
+                } else
+                    setNohtArr({ ...nohtArr, districtArr: [], wardArr: [] });
+                setValue("NOHTHuyen", "0");
+                setValue("NOHTXa", "0");
+            default:
+                break;
+        }
     }
-    const handleChangeGender = (e) => {
-        setGender(e.target.value);
+
+    const handleChangeDistrict = (e, type) => {
+        const { name, value } = e.target;
+        setValue(name, value);
+        if (value != "0") {
+            clearErrors(e.target.name)
+        }
+        switch (type) {
+            case "qq":
+                setQqValue({ ...qqValue, districtValue: value });
+                const fetchApiSetQq = async () => {
+                    const res = await axios.get(`https://provinces.open-api.vn/api/d/${value}/?depth=2`)
+                    setQqArr({ ...qqArr, wardArr: res.data.wards })
+                }
+                if (value != '0') {
+                    fetchApiSetQq();
+                } else
+                    setQqArr({ ...qqArr, wardArr: [] })
+                setValue("QQXa", "0")
+                break;
+            case "dctt":
+                setDcttValue({ ...dcttValue, districtValue: value });
+                const fetchApiSetDctt = async () => {
+                    const res = await axios.get(`https://provinces.open-api.vn/api/d/${value}/?depth=2`)
+                    setDcttArr({ ...dcttArr, wardArr: res.data.wards })
+                }
+                if (value != '0') {
+                    fetchApiSetDctt();
+                } else
+                    setDcttArr({ ...dcttArr, wardArr: [] })
+                setValue("DCTTXa", "0")
+                break;
+            case "noht":
+                setNohtValue({ ...nohtValue, districtValue: value });
+                const fetchApiSetNoht = async () => {
+                    const res = await axios.get(`https://provinces.open-api.vn/api/d/${value}/?depth=2`)
+                    setNohtArr({ ...nohtArr, wardArr: res.data.wards })
+                }
+                if (value != '0') {
+                    fetchApiSetNoht();
+                } else
+                    setNohtArr({ ...nohtArr, wardArr: [] })
+                setValue("NOHTXa", "0")
+                break;
+            default:
+                break;
+        }
     }
+
+    const handleChangeWard = (e, type) => {
+        const { name, value } = e.target;
+        setValue(name, value);
+        if (value != "0") {
+            clearErrors(e.target.name)
+        }
+        switch (type) {
+            case "qq":
+                if (value != 0)
+                    setQqValue({ ...qqValue, wardValue: value });
+                break;
+            case "dctt":
+                if (value != 0)
+                    setDcttValue({ ...dcttValue, wardValue: value });
+                break;
+            case "noht":
+                if (value != 0)
+                    setNohtValue({ ...nohtValue, wardValue: value });
+            default:
+                break;
+        }
+    }
+
+    // useEffect
+
+    useEffect(() => {
+        if (getValues("HinhAnh")) {
+            let file = {};
+            file.preview = getValues("HinhAnh");
+            setImageUpload(file);
+        }
+    }, [])
+
+    useEffect(() => {
+        return () => {
+            if (!getValues("HinhAnh")) {
+                imageUpload && URL.revokeObjectURL(imageUpload.preview)
+            }
+        }
+    }, [imageUpload])
+
     return (
         <FormControl margin="dense" fullWidth>
-            <Grid container spacing={4}>
-                <Grid item xs={5}>
-                    <Grid className={classes.inputItem} container alignItems="center">
-                        <Grid xs={5}>
-                            <Typography>Họ và tên đang dùng</Typography>
-                        </Grid>
-                        <Grid xs={7}>
-                            <TextField fullWidth size="small" variant="outlined" />
-                        </Grid>
+            <Grid container spacing={1}>
+                <Grid item container xs={9} spacing={1}>
+                    <Grid item xs={6}>
+                        <InputGrid
+                            nameTitle={`Họ tên`}
+                            name={"HoTen"}
+                            defaultValue={""}
+                            control={control}
+                            errors={errors}
+                        // rules={{ required: "Vui lòng nhập trường này!" }}
+                        />
+                        <InputGrid
+                            nameTitle={`Mã Đảng viên`}
+                            name={"MaSoDangVien"}
+                            control={control}
+                            errors={errors}
+                            disabled={true}
+                        />
+                        <InputGrid
+                            type="date"
+                            nameTitle={`Ngày sinh`}
+                            name={"NgaySinh"}
+                            control={control}
+                            errors={errors}
+                        />
+                        <InputGrid
+                            nameTitle={`Nơi sinh`}
+                            name={"NoiSinh"}
+                            control={control}
+                            errors={errors}
+                        />
+                        <InputGrid
+                            nameTitle={`CMND`}
+                            name={"CMND"}
+                            control={control}
+                            errors={errors}
+                        />
+                        <InputGrid
+                            nameTitle={`Quốc tịch`}
+                            name={"QuocTich"}
+                            control={control}
+                            errors={errors}
+                        />
                     </Grid>
-                    <Grid className={classes.inputItem} container alignItems="center">
-                        <Grid xs={5}>
-                            <Typography>Họ và tên khai sinh</Typography>
-                        </Grid>
-                        <Grid xs={7}>
-                            <TextField fullWidth size="small" variant="outlined" value={props.data.HoTen}/>
-                        </Grid>
-                    </Grid>
-                    <Grid className={classes.inputItem} container alignItems="center">
-                        <Grid xs={5}>
-                            <Typography>Ngày sinh</Typography>
-                        </Grid>
-                        <Grid xs={7}>
-                            <TextField value={birth} type="date" fullWidth size="small" variant="outlined" />
-                        </Grid>
-                    </Grid>
-                    <Grid className={classes.inputItem} container alignItems="center">
-                        <Grid xs={5}>
-                            <Typography>Quê quán</Typography>
-                        </Grid>
-                        <Grid xs={7}>
-                            <TextField fullWidth size="small" variant="outlined" />
-                        </Grid>
-                    </Grid>
-                    <Grid className={classes.inputItem} container alignItems="center">
-                        <Grid xs={5}>
-                            <Typography>Nơi thường trú</Typography>
-                        </Grid>
-                        <Grid xs={7}>
-                            <TextField fullWidth size="small" variant="outlined" />
-                        </Grid>
-                    </Grid>
-                    <Grid className={classes.inputItem} container alignItems="center">
-                        <Grid xs={5}>
-                            <Typography>Nơi tạm trú</Typography>
-                        </Grid>
-                        <Grid xs={7}>
-                            <TextField fullWidth size="small" variant="outlined" />
-                        </Grid>
-                    </Grid>
-                </Grid>
-                <Grid item alignItems="center" xs={4}>
-                    <Grid className={classes.inputRadioItem} container alignItems="center">
-                        <Grid xs={5}>
-                            <Typography>Giới tính</Typography>
-                        </Grid>
-                        <Grid xs={7} >
-                            {/* <TextField fullWidth size="small" variant="outlined" /> */}
-                            <RadioGroup style={{ flexDirection: 'row' }} aria-label="gender" name="gender1" value={gender} onChange={handleChangeGender}>
-                                <FormControlLabel value="female" control={<Radio color="primary" />} label="Nữ" />
-                                <FormControlLabel value="male" control={<Radio color="primary" />} label="Nam" />
-                            </RadioGroup>
-                        </Grid>
-                    </Grid>
-                    <Grid className={classes.inputItem} container alignItems="center">
-                        <Grid xs={5}>
-                            <Typography>Bí danh</Typography>
-                        </Grid>
-                        <Grid xs={7}>
-                            <TextField fullWidth size="small" variant="outlined" />
-                        </Grid>
-                    </Grid>
-                    <Grid className={classes.inputItem} container alignItems="center">
-                        <Grid xs={5}>
-                            <Typography>Nơi sinh</Typography>
-                        </Grid>
-                        <Grid xs={7}>
-                            <TextField fullWidth size="small" variant="outlined" />
-                        </Grid>
-                    </Grid>
-                    <Grid className={classes.inputItem} container alignItems="center">
-                        <Grid xs={5}>
-                            <Typography>Dân tộc</Typography>
-                        </Grid>
-                        <Grid xs={7}>
-                            <TextField fullWidth size="small" variant="outlined" />
-                        </Grid>
-                    </Grid>
-                    <Grid className={classes.inputItem} container alignItems="center">
-                        <Grid xs={5}>
-                            <Typography>Tôn giáo</Typography>
-                        </Grid>
-                        <Grid xs={7}>
-                            <TextField fullWidth size="small" variant="outlined" />
-                        </Grid>
+                    <Grid item xs={6}>
+                        <InputGrid
+                            select
+                            onChange={handleChangeSelect}
+                            nameTitle={"Chi bộ"}
+                            name={`MaChiBo`}
+                            defaultValue={"0"}
+                            rules={{
+                                validate: value =>
+                                    value != "0" || "Vui lòng nhập trường này!"
+                            }}
+                            control={control}
+                            errors={errors}
+                        >
+                            <MenuItem value="0">Chọn chi bộ</MenuItem>
+                            {category.categories.partycell.length > 0 &&
+                                category.categories.partycell.map(el =>
+                                    <MenuItem key={el.MaChiBo} value={el.MaChiBo}>{el.TenChiBo}</MenuItem>
+                                )
+                            }
+                        </InputGrid>
+                        <InputGrid
+                            select
+                            onChange={handleChangeSelect}
+                            nameTitle={"Chức vụ"}
+                            name={`MaChucVu`}
+                            defaultValue={"0"}
+                            rules={{
+                                validate: value =>
+                                    value != "0" || "Vui lòng nhập trường này!"
+                            }}
+                            control={control}
+                            errors={errors}
+                        >
+                            <MenuItem value="0">Chọn chức vụ</MenuItem>
+                            {category.categories.position.length > 0 &&
+                                category.categories.position.map(el =>
+                                    <MenuItem key={el.MaChucVu} value={el.MaChucVu}>{el.TenChucVu}</MenuItem>
+                                )
+                            }
+                        </InputGrid>
+                        <InputGrid
+                            select
+                            onChange={handleChangeSelect}
+                            nameTitle={"Giới tính"}
+                            name={`GioiTinh`}
+                            defaultValue={"0"}
+                            rules={{
+                                validate: value =>
+                                    value != "0" || "Vui lòng nhập trường này!"
+                            }}
+                            control={control}
+                            errors={errors}
+                        >
+                            <MenuItem value="0">Chọn giới tính</MenuItem>
+                            <MenuItem value="m">Nam</MenuItem>
+                            <MenuItem value="f">Nữ</MenuItem>
+                            <MenuItem value="u">Khác</MenuItem>
+                        </InputGrid>
+                        <InputGrid
+                            select
+                            onChange={handleChangeSelect}
+                            nameTitle={"Dân tộc"}
+                            name={`MaDanToc`}
+                            rules={{
+                                validate: value =>
+                                    value != "0" || "Vui lòng nhập trường này!"
+                            }}
+                            defaultValue={"0"}
+                            control={control}
+                            errors={errors}
+                        >
+                            <MenuItem value={"0"}>Chọn dân tộc</MenuItem>
+                            {category.categories.ethnic.length > 0 &&
+                                category.categories.ethnic.map(el =>
+                                    <MenuItem key={el.MaDanToc} value={el.MaDanToc}>{el.TenDanToc}</MenuItem>
+                                )
+                            }
+                        </InputGrid>
+                        <InputGrid
+                            select
+                            onChange={handleChangeSelect}
+                            nameTitle={"Tôn giáo"}
+                            name={`MaTonGiao`}
+                            defaultValue={"0005"}
+                            control={control}
+                            errors={errors}
+                        >
+                            {category.categories.religion.length > 0 &&
+                                category.categories.religion.map(el =>
+                                    <MenuItem key={el.MaTonGiao} value={el.MaTonGiao}>{el.TenTonGiao}</MenuItem>
+                                )
+                            }
+                        </InputGrid>
                     </Grid>
                 </Grid>
                 <Grid item xs={3}>
                     <div className={classes.imageWrapper} >
-                        {imageUpload.length > 0 ?
-                            imageUpload.map((img) => {
-                                return (
-                                    <>
-                                        <img className={classes.fileUpload} style={{ height: '100%' }}
-                                            src={img.url}
-                                            alt=""
-                                        />
-                                        <IconButton className={classes.closeBtn} size="small" onClick={handleRemove}>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </>)
-                            })
-                            :
-                            <>
-                                {loading ?
-                                    <div className={classes.loadingWrapper}>
-                                        <CircularProgress className={classes.loading} />
-                                    </div>
-                                    :
+                        <>
+                            {imageUpload ?
+                                <>
+                                    <img className={classes.fileUpload} style={{ height: '100%' }}
+                                        src={imageUpload.preview}
+                                        alt=""
+                                    />
+                                    <IconButton className={classes.closeBtn} size="small" onClick={handleRemove}>
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </>
+                                :
+                                <>
                                     <input type="file" multiple className={classes.fileUpload} onChange={handleUpload} />
-                                }
-                            </>
-                        }
+                                    {/* <FormHelperText error style={{ position: "absolute" }}>Vui lòng chọn ảnh!</FormHelperText> */}
+                                </>
+                            }
+                        </>
                     </div>
                     <Grid className={classes.inputItem} direction="column" container>
-                        <Grid xs={12}>
+                        <Grid item xs={12}>
                             <Typography>Email</Typography>
                         </Grid>
-                        <Grid xs={12} style={{ marginBottom: '10px' }}>
-                            <TextField fullWidth size="small" variant="outlined" />
-                        </Grid>
-                        <Grid xs={12}>
+                        <InputGrid
+                            noTitle
+                            name={"Email"}
+                            control={control}
+                            errors={errors}
+                        />
+                        <Grid item xs={12}>
                             <Typography>Số điện thoại</Typography>
                         </Grid>
-                        <Grid xs={12}>
-                            <TextField fullWidth size="small" variant="outlined" />
+                        <InputGrid
+                            noTitle
+                            name={"SoDienThoai"}
+                            control={control}
+                            errors={errors}
+                        />
+                    </Grid>
+                </Grid>
+            </Grid>
+            <Grid container spacing={1}>
+                <Grid container item xs={9}>
+                    <Grid item style={{ width: '150px' }}>
+                        <Typography>Quê quán</Typography>
+                    </Grid>
+                    <Grid item container flex={1} spacing={1}>
+                        <Grid item xs={4}>
+                            <MySelectReactHookForm
+                                nameTitle={"Tỉnh"}
+                                name={"QQTinh"}
+                                defaultValue={"0"}
+                                control={control}
+                                errors={errors}
+                                rules={{
+                                    validate: value =>
+                                        value != "0" || "Vui lòng nhập trường này!"
+                                }}
+                                onChange={e => handleChangeProvince(e, "qq")}
+                            >
+                                <MenuItem value="0">Tỉnh</MenuItem>
+                                {qqArr.provinceArr.map(pro =>
+                                    <MenuItem value={pro.code} key={pro.code}>{pro.name}</MenuItem>
+                                )}
+                            </MySelectReactHookForm>
+                        </Grid>
+                        <Grid item xs={4}>
+                            <MySelectReactHookForm
+                                nameTitle={"Huyện"}
+                                name={"QQHuyen"}
+                                defaultValue={"0"}
+                                control={control}
+                                errors={errors}
+                                rules={{
+                                    validate: value =>
+                                        value != "0" || "Vui lòng nhập trường này!"
+                                }}
+                                onChange={e => handleChangeDistrict(e, "qq")}
+
+                            >
+                                <MenuItem value="0">Huyện</MenuItem>
+                                {qqArr.districtArr.map(dis =>
+                                    <MenuItem value={dis.code} key={dis.code}>{dis.name}</MenuItem>
+                                )}
+                            </MySelectReactHookForm>
+                        </Grid>
+                        <Grid item xs={4}>
+                            <MySelectReactHookForm
+                                nameTitle={"Xã"}
+                                name={"QQXa"}
+                                defaultValue={"0"}
+                                control={control}
+                                errors={errors}
+                                rules={{
+                                    validate: value =>
+                                        value != "0" || "Vui lòng nhập trường này!"
+                                }}
+                                onChange={e => handleChangeWard(e, "qq")}
+                            >
+                                <MenuItem value="0">Xã</MenuItem>
+                                {qqArr.wardArr.map(w =>
+                                    <MenuItem value={w.code} key={w.code}>{w.name}</MenuItem>
+                                )}
+                            </MySelectReactHookForm>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <InputGrid
+                                onChange={handleChangeInput}
+                                placeholder={"Số nhà, Đường..."}
+                                noTitle
+                                name={"QQChiTiet"}
+                                defaultValue={""}
+                                control={control}
+                                errors={errors}
+                            // rules={{ required: "Vui lòng nhập trường này!" }}
+                            />
                         </Grid>
                     </Grid>
                 </Grid>
-                {/* <Grid className={classes.input} item xs={6}>
+                <Grid container item xs={9}>
+                    <Grid item style={{ width: '150px' }}>
+                        <Typography>Địa chỉ thường trú</Typography>
+                    </Grid>
+                    <Grid item container flex={1} spacing={1}>
+                        <Grid item xs={4}>
+                            <MySelectReactHookForm
+                                nameTitle={"Tỉnh"}
+                                name={"DCTTTinh"}
+                                defaultValue={"0"}
+                                control={control}
+                                errors={errors}
+                                rules={{
+                                    validate: value =>
+                                        value != "0" || "Vui lòng nhập trường này!"
+                                }}
+                                onChange={e => handleChangeProvince(e, "dctt")}
+                            >
+                                <MenuItem value="0">Tỉnh</MenuItem>
+                                {dcttArr.provinceArr.map(pro =>
+                                    <MenuItem value={pro.code} key={pro.code}>{pro.name}</MenuItem>
+                                )}
+                            </MySelectReactHookForm>
+                        </Grid>
+                        <Grid item xs={4}>
+                            <MySelectReactHookForm
+                                nameTitle={"Huyện"}
+                                name={"DCTTHuyen"}
+                                defaultValue={"0"}
+                                control={control}
+                                errors={errors}
+                                rules={{
+                                    validate: value =>
+                                        value != "0" || "Vui lòng nhập trường này!"
+                                }}
+                                onChange={e => handleChangeDistrict(e, "dctt")}
+
+                            >
+                                <MenuItem value="0">Huyện</MenuItem>
+                                {dcttArr.districtArr.map(dis =>
+                                    <MenuItem value={dis.code} key={dis.code}>{dis.name}</MenuItem>
+                                )}
+                            </MySelectReactHookForm>
+                        </Grid>
+                        <Grid item xs={4}>
+                            <MySelectReactHookForm
+                                nameTitle={"Xã"}
+                                name={"DCTTXa"}
+                                defaultValue={"0"}
+                                control={control}
+                                errors={errors}
+                                rules={{
+                                    validate: value =>
+                                        value != "0" || "Vui lòng nhập trường này!"
+                                }}
+                                onChange={e => handleChangeWard(e, "dctt")}
+                            >
+                                <MenuItem value="0">Xã</MenuItem>
+                                {dcttArr.wardArr.map(w =>
+                                    <MenuItem value={w.code} key={w.code}>{w.name}</MenuItem>
+                                )}
+                            </MySelectReactHookForm>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <InputGrid
+                                onChange={handleChangeInput}
+                                placeholder={"Số nhà, Đường..."}
+                                noTitle
+                                name={"DCTTChiTiet"}
+                                defaultValue={""}
+                                control={control}
+                                errors={errors}
+                            // rules={{ required: "Vui lòng nhập trường này!" }}
+                            />
+                        </Grid>
+                    </Grid>
+                </Grid>
+                <Grid container item xs={9}>
+                    <Grid item style={{ width: '150px' }}>
+                        <Typography>Nơi ở hiện tại</Typography>
+                    </Grid>
+                    <Grid item container flex={1} spacing={1}>
+                        <Grid item xs={4}>
+                            <MySelectReactHookForm
+                                nameTitle={"Tỉnh"}
+                                name={"NOHTTinh"}
+                                defaultValue={"0"}
+                                control={control}
+                                errors={errors}
+                                rules={{
+                                    validate: value =>
+                                        value != "0" || "Vui lòng nhập trường này!"
+                                }}
+                                onChange={e => handleChangeProvince(e, "noht")}
+                            >
+                                <MenuItem value="0">Tỉnh</MenuItem>
+                                {nohtArr.provinceArr.map(pro =>
+                                    <MenuItem value={pro.code} key={pro.code}>{pro.name}</MenuItem>
+                                )}
+                            </MySelectReactHookForm>
+                        </Grid>
+                        <Grid item xs={4}>
+                            <MySelectReactHookForm
+                                nameTitle={"Huyện"}
+                                name={"NOHTHuyen"}
+                                defaultValue={"0"}
+                                control={control}
+                                errors={errors}
+                                rules={{
+                                    validate: value =>
+                                        value != "0" || "Vui lòng nhập trường này!"
+                                }}
+                                onChange={e => handleChangeDistrict(e, "noht")}
+
+                            >
+                                <MenuItem value="0">Huyện</MenuItem>
+                                {nohtArr.districtArr.map(dis =>
+                                    <MenuItem value={dis.code} key={dis.code}>{dis.name}</MenuItem>
+                                )}
+                            </MySelectReactHookForm>
+                        </Grid>
+                        <Grid item xs={4}>
+                            <MySelectReactHookForm
+                                nameTitle={"Xã"}
+                                name={"NOHTXa"}
+                                defaultValue={"0"}
+                                control={control}
+                                errors={errors}
+                                rules={{
+                                    validate: value =>
+                                        value != "0" || "Vui lòng nhập trường này!"
+                                }}
+                                onChange={e => handleChangeWard(e, "noht")}
+                            >
+                                <MenuItem value="0">Xã</MenuItem>
+                                {nohtArr.wardArr.map(w =>
+                                    <MenuItem value={w.code} key={w.code}>{w.name}</MenuItem>
+                                )}
+                            </MySelectReactHookForm>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <InputGrid
+                                onChange={handleChangeInput}
+                                placeholder={"Số nhà, Đường..."}
+                                noTitle
+                                name={"NOHTChiTiet"}
+                                defaultValue={""}
+                                control={control}
+                                errors={errors}
+                            // rules={{ required: "Vui lòng nhập trường này!" }}
+                            />
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </FormControl >
+    );
+};
+
+export default InfoForm;
+
+/* <Grid className={classes.input} item xs={6}>
                                     <div className={classes.imageWrapper} >
                                         {imageUpload.length > 0 ?
                                             imageUpload.map((img) => {
@@ -377,11 +838,4 @@ const InfoForm = (props) => {
                                             <FormHelperText error>Email không hợp lệ!</FormHelperText>
                                         }
                                     </Grid>
-                                </Grid>*/}
-
-            </Grid>
-        </FormControl>
-    );
-};
-
-export default InfoForm;
+                                </Grid>*/

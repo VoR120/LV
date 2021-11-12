@@ -1,6 +1,9 @@
 const express = require('express');
+const env = require('dotenv');
 const mysql = require('mysql');
 const cors = require('cors');
+
+env.config();
 
 //Connect Database
 const sql = require('./configs/db');

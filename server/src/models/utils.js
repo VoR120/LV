@@ -16,7 +16,7 @@ exports.getAll = (table, id, name, columnName) => {
                     GROUP BY ${table}.${id}`, (err, res) => {
             if (err) {
                 console.log("error: ", err);
-                callback(null, err);
+                callback(err, null);
                 return;
             }
             console.log("All: ", res);
@@ -27,10 +27,13 @@ exports.getAll = (table, id, name, columnName) => {
 
 exports.findById = (table, key) => {
     return (id, callback) => {
-        sql.query(`SELECT * FROM ${table} WHERE ${key} = ?`, [id], (err, res) => {
+        const sqlQuery = typeof (id) === "number" ?
+            `SELECT * FROM ${table} WHERE ${key} = ${id}` :
+            `SELECT * FROM ${table} WHERE ${key} = "${id}"`
+        sql.query(sqlQuery, [id], (err, res) => {
             if (err) {
                 console.log("error: ", err);
-                callback(null, err);
+                callback(err, null);
                 return;
             }
             if (res.length) {
@@ -48,7 +51,7 @@ exports.create = (table, key) => {
         sql.query(`INSERT INTO ${table} SET ?`, newValue, (err, res) => {
             if (err) {
                 console.log("error: ", err);
-                callback(null, err);
+                callback(err, null);
                 return;
             }
             console.log("Created: ", { [key]: this.zeroFill(res.insertId), ...newValue });
@@ -59,10 +62,13 @@ exports.create = (table, key) => {
 
 exports.updateById = (table, key) => {
     return (id, newValue, callback) => {
-        sql.query(`UPDATE ${table} SET ? WHERE ${key} = ${id}`, newValue, ((err, res) => {
+        const sqlQuery = typeof (id) === "number" ?
+            `UPDATE ${table} SET ? WHERE ${key} = ${id}` :
+            `UPDATE ${table} SET ? WHERE ${key} = "${id}"`
+        sql.query(sqlQuery, newValue, ((err, res) => {
             if (err) {
                 console.log("error: ", err);
-                callback(null, err);
+                callback(err, null);
                 return;
             }
 
@@ -70,25 +76,28 @@ exports.updateById = (table, key) => {
                 callback({ type: "not_found" }, null);
                 return;
             }
-            console.log("Updated: ", { [key]: id, ...newValue });
-            callback(null, { [key]: id, ...newValue });
+            console.log("Updated: ", { newValue });
+            callback(null, { newValue });
         }))
     }
 }
 
 exports.remove = (table, key) => {
     return (id, callback) => {
-        sql.query(`DELETE FROM ${table} WHERE ${key} = ?`, id, ((err, res) => {
+        const sqlQuery = typeof (id) === "number" ?
+            `DELETE FROM ${table} WHERE ${key} = ${id}` :
+            `DELETE FROM ${table} WHERE ${key} = "${id}"`;
+        sql.query(sqlQuery, id, ((err, res) => {
             if (err) {
                 console.log("error: ", err);
-                callback(null, err);
+                callback(err, null);
                 return;
             }
 
-            if (res.affectedRows == 0) {
-                callback({ type: "not_found" }, null);
-                return;
-            }
+            // if (res.affectedRows == 0) {
+            //     callback({ type: "not_found" }, null);
+            //     return;
+            // }
 
             console.log("Deleted: ", id);
             callback(null, res);
@@ -101,17 +110,24 @@ exports.removeAll = (table) => {
         sql.query(`DELETE * FROM ${table}`, ((err, res) => {
             if (err) {
                 console.log("error: ", err);
-                callback(null, err);
+                callback(err, null);
                 return;
             }
 
-            if (res.affectedRows == 0) {
-                callback({ type: "not_found" }, null);
-                return;
-            }
+            // if (res.affectedRows == 0) {
+            //     callback({ type: "not_found" }, null);
+            //     return;
+            // }
 
             console.log("Deleted: ", id);
             callback(null, res);
         }))
     }
+}
+
+exports.getDate = (date) => {
+    const offset = date.getTimezoneOffset()
+    newDate = new Date(date.getTime() - (offset * 60 * 1000))
+    console.log(newDate.toISOString().split('T')[0]);
+    return newDate.toISOString().split('T')[0]
 }

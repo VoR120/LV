@@ -11,34 +11,57 @@ const useStyles = makeStyles(theme => ({
 
 const MySelectReactHookForm = (props) => {
     const classes = useStyles();
-    const { children, name, errors, disabled, id, onChange, ref, ...other } = props
+    const { children, name, errors, disabled, id, onChange, value, ...other } = props
     return (
         <Controller
             name={name}
             id={id}
+            r
             {...other}
             render={({ field }) => (
-                <TextField
-                    {...field}
-                    onChange={onChange}
-                    inputRef={ref}
-                    select
-                    fullWidth
-                    disabled={disabled}
-                    size="small"
-                    variant="outlined"
-                    error={!!errors[name]}
-                    helperText={errors[name]?.message}
-                    SelectProps={{
-                        MenuProps: {
-                            MenuListProps: {
-                                className: classes.menuList
+                value ?
+                    <TextField
+                        select
+                        {...field}
+                        onChange={onChange}
+                        value={value}
+                        fullWidth
+                        disabled={disabled}
+                        size="small"
+                        variant="outlined"
+                        error={!!errors[name]}
+                        helperText={errors[name]?.message}
+                        SelectProps={{
+                            MenuProps: {
+                                MenuListProps: {
+                                    className: classes.menuList
+                                }
                             }
-                        }
-                    }}
-                >
-                    {children}
-                </TextField>
+                        }}
+                    >
+                        {children}
+                    </TextField>
+                    :
+                    <TextField
+                        select
+                        {...field}
+                        onChange={onChange}
+                        fullWidth
+                        disabled={disabled}
+                        size="small"
+                        variant="outlined"
+                        error={!!errors[name]}
+                        helperText={errors[name]?.message}
+                        SelectProps={{
+                            MenuProps: {
+                                MenuListProps: {
+                                    className: classes.menuList
+                                }
+                            }
+                        }}
+                    >
+                        {children}
+                    </TextField>
             )}
         />
     );

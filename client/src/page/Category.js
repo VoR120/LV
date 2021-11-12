@@ -10,7 +10,7 @@ import MySelect from '../component/UI/MySelect';
 import { CategoryContext } from '../contextAPI/CategoryContext';
 import { downloadExcel, getKeyField } from '../utils/utils';
 import CategoryForm from '../component/CategoryForm';
-import GradeForm from '../component/GradeForm';
+import AddGradeForm from '../component/AddGradeForm';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -83,7 +83,7 @@ const Category = () => {
                     <>
                         {categoryField == "grade" ?
                             (
-                                <GradeForm
+                                <AddGradeForm
                                     edit
                                     year={params["Nam"]}
                                 />
@@ -100,6 +100,8 @@ const Category = () => {
                                         keyField={key}
                                     />
                                     <DeleteFormCategory
+                                        id={dataArr[`${key[0]}`]}
+                                        name={dataArr[`${key[1]}`]}
                                         title={categoryName}
                                         dataArr={dataArr}
                                         categoryField={categoryField}
@@ -163,6 +165,7 @@ const Category = () => {
                         <MenuItem value="ethnic">Dân tộc</MenuItem>
                         <MenuItem value="religion">Tôn giáo</MenuItem>
                         <MenuItem value="position">Chức vụ</MenuItem>
+                        <MenuItem value="term">Nhiệm kỳ</MenuItem>
                         <MenuItem value="flanguage">Ngoại ngữ</MenuItem>
                         <MenuItem value="flanguagelevel">Trình độ ngoại ngữ</MenuItem>
                         <MenuItem value="it">Trình độ tin học</MenuItem>
@@ -173,7 +176,7 @@ const Category = () => {
 
                 {/* Add form Category */}
                 {categoryField == "grade" ? (
-                    <GradeForm />
+                    <AddGradeForm />
                 ) :
                     (
                         <CategoryForm

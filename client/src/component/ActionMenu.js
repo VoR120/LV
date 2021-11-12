@@ -1,13 +1,13 @@
+import SettingsIcon from '@mui/icons-material/Settings';
 import { Button, Menu, MenuItem } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useState } from 'react';
-import SettingsIcon from '@mui/icons-material/Settings';
-import EditIcon from '@mui/icons-material/Edit';
-import CheckIcon from '@mui/icons-material/Check';
-import EditForm from './EditForm';
+import React, { useContext, useState } from 'react';
+import { CategoryContext } from '../contextAPI/CategoryContext';
+import AddForm from './AddForm';
 import DeleteForm from './DeleteForm';
+import GradeForm from './GradeForm';
 import MoveForm from './MoveForm';
-import DecentralizationForm from './DecentralizationForm';
+import RewardDisciplineForm from './RewardDisciplineForm';
 
 const useStyles = makeStyles(theme => ({
     icon: {
@@ -38,12 +38,11 @@ const ActionMenu = (props) => {
         update: false,
         createVotings: true
     }
-    // const handleOpen = () => {
-    //     setOpen(true)
-    // }
+
     const handleOpen = (event) => {
         setOpen(event.currentTarget);
     };
+
     return (
         <div className={classes.root}>
             <Button aria-controls="action-menu" aria-haspopup="true" color="primary" variant="contained" onClick={handleOpen}>
@@ -51,7 +50,6 @@ const ActionMenu = (props) => {
             </Button>
             <Menu
                 className={classes.menu}
-                getContentAnchorEl={null}
                 id="action-menu"
                 open={Boolean(open)}
                 keepMounted
@@ -67,11 +65,13 @@ const ActionMenu = (props) => {
                 }}
                 MenuListProps={{ className: classes.menuList }}
             >
-                <MenuItem onClick={handleClose}><EditForm data={data} /></MenuItem>
-                <MenuItem onClick={handleClose}><DeleteForm data={data} /></MenuItem>
-                <MenuItem onClick={handleClose}><MoveForm /></MenuItem>
-                <MenuItem onClick={handleClose}><DecentralizationForm data={d} />
-                </MenuItem>
+                <MenuItem onClick={handleClose}><AddForm edit data={data} /></MenuItem>
+                <MenuItem onClick={handleClose}><DeleteForm name={data.HoTen} id={data.MaSoDangVien} /></MenuItem>
+                <MenuItem onClick={handleClose}><MoveForm id={data.MaSoDangVien} partycell={data.TenChiBo} /></MenuItem>
+                <MenuItem onClick={handleClose}><GradeForm id={data.MaSoDangVien} name={data.HoTen} partycell={data.TenChiBo} /></MenuItem>
+                <MenuItem onClick={handleClose}><RewardDisciplineForm name={data.HoTen} id={data.MaSoDangVien} reward /></MenuItem>
+                <MenuItem onClick={handleClose}><RewardDisciplineForm name={data.HoTen} id={data.MaSoDangVien} /></MenuItem>
+                {/*<MenuItem onClick={handleClose}><DecentralizationForm data={d} />                </MenuItem> */}
             </Menu>
         </div>
     );

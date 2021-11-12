@@ -10,6 +10,7 @@ import { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { createCategory, getfLanguageId, updateCategory } from '../action/categoryAction';
 import { CategoryContext } from '../contextAPI/CategoryContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import InputGrid from './InputGrid';
 import MyButton from './UI/MyButton';
 
@@ -19,15 +20,14 @@ const useStyles = makeStyles(theme => ({
 const CategoryForm = (props) => {
     const classes = useStyles();
     const { category, categoryDispatch } = useContext(CategoryContext);
+    const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
     const { dataArr, flanguage, languageSelect, categoryName, categoryField, edit, keyField } = props
     const [open, setOpen] = useState(false);
 
     const {
         handleSubmit,
-        unregister,
         control,
         setValue,
-        register,
         formState: { errors },
         reset,
     } = useForm();
@@ -38,22 +38,24 @@ const CategoryForm = (props) => {
     const handleOpen = () => {
         setOpen(true)
     }
+
+    const handleChangeSelect = (e) => {
+        setValue(e.target.name, e.target.value)
+    }
+
     const onSubmit = (data) => {
         Object.keys(data).forEach(key => (data[key] == undefined || data[key] == '0') && delete data[key])
         if (edit) {
-            updateCategory(categoryDispatch, { categoryField, id: dataArr[`${keyField[0]}`], data })
+            updateCategory(categoryDispatch, { categoryField, id: dataArr[`${keyField[0]}`], data }, openSnackbarDispatch)
         } else {
-            createCategory(categoryDispatch, { categoryField, data })
+            createCategory(categoryDispatch, { categoryField, data }, openSnackbarDispatch)
         }
-        Object.keys(data).forEach(key => key == "MaNgoaiNgu" ? setValue(key, '0') : setValue(key, undefined))
         handleClose();
     }
 
     useEffect(() => {
         if (edit) {
             Object.keys(dataArr).forEach(key => setValue(key, dataArr[key]));
-            // setValue(`${keyField[0]}`, id);
-            // setValue(`${keyField[1]}`, name);
         }
         const getId = async () => {
             const res = await getfLanguageId({ name: flanguage })
@@ -62,8 +64,18 @@ const CategoryForm = (props) => {
             }
         }
         if (categoryField == "flanguagelevel")
-            getId()
+            getId();
     }, [])
+
+    useEffect(() => {
+        if (!edit)
+            if (open == false)
+                if (categoryField == "flanguagelevel") {
+                    setValue("MaNgoaiNgu", '0');
+                    setValue("TenTrinhDo", undefined)
+                } else
+                    reset();
+    }, [open])
 
     return (
         <>
@@ -106,6 +118,7 @@ const CategoryForm = (props) => {
                             defaultValue={"0"}
                             control={control}
                             errors={errors}
+                            onChange={handleChangeSelect}
                         >
                             <MenuItem value="0">Chọn ngoại ngữ</MenuItem>
                             {languageSelect.map(

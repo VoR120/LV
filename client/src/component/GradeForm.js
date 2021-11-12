@@ -1,66 +1,85 @@
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import CloseIcon from '@mui/icons-material/Close';
 import {
     Button,
-    Dialog, DialogActions,
-    DialogContent, DialogTitle
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    FormControl,
+    Grid,
+    Menu,
+    MenuItem,
+    TextField,
+    Typography,
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import RedoIcon from '@mui/icons-material/Redo';
+import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
+import GradeIcon from '@mui/icons-material/Grade';
 import { useForm } from 'react-hook-form';
-import { CategoryContext } from '../contextAPI/CategoryContext';
-import InputGrid from './InputGrid';
+import MySelect from './UI/MySelect';
 import MyButton from './UI/MyButton';
-import { nanoid } from 'nanoid'
-import { actionGrade } from '../action/categoryAction';
+import InputGrid from './InputGrid';
+import { createRewardDiscipline } from '../action/rewardDisciplineAction';
+import { createGrade, getGrade, getYearGrade } from '../action/gradeAction';
+import { CategoryContext } from '../contextAPI/CategoryContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
 
 const useStyles = makeStyles(theme => ({
-    inputWrapper: {
-        position: 'relative',
+    icon: {
+        margin: theme.spacing(0.5, 1, 0.5, 0),
+        fontSize: '1.2rem'
     },
-    closeIcon: {
-        position: 'absolute',
-        top: '8px',
-        right: '8px',
-        backgroundColor: theme.palette.common.white,
-        cursor: 'pointer'
-    }
+    iconWrapper: {
+        display: 'flex',
+        alignItems: 'center',
+        width: '100%',
+        height: '100%'
+    },
+    divider: {
+        marginTop: '20px'
+    },
 }))
 
 const GradeForm = (props) => {
     const classes = useStyles();
-    const { edit, year } = props
-    const [open, setOpen] = useState(false)
-    const { category, categoryDispatch } = useContext(CategoryContext);
-    const [valueArray, setValueArray] = useState([])
-    const [update, setUpdate] = useState([])
-    const [add, setAdd] = useState(edit ? [] : [{ name: "", value: "", id: "" }])
-    const [remove, setRemove] = useState([])
+    const [open, setOpen] = useState(false);
 
-    const getData = () => {
-        category.categories.grade.map(c => {
-            if (c.Nam == year)
-                if (c.Data.length > 0) {
-                    let arr = [];
-                    c.Data.forEach((data, index) => {
-                        setValue("Nam", year)
-                        setValue(`Loai${index + 1}`, data.TenLoai);
-                        arr.push({ name: `Loai${index + 1}`, value: data.TenLoai, id: data.MaLoai });
-                    })
-                    console.log(arr);
-                    setValueArray(arr);
-                }
-        })
+    const handleOpen = () => {
+        setOpen(true)
     }
+
+    return (
+        <>
+            <div className={classes.iconWrapper} onClick={handleOpen}>
+                <GradeIcon className={classes.icon} />Xếp loại
+            </div>
+            {open &&
+                <DialogGradeForm open={open} setOpen={setOpen} data={props} />
+            }
+        </>
+    );
+};
+
+export default GradeForm;
+
+const DialogGradeForm = ({ open, setOpen, data }) => {
+
+    const { id, name, reward } = data
+    const [gradeArr, setGradeArr] = useState([]);
+    const [gradeS, setGradeS] = useState([]);
+    const [yearArr, setYearArr] = useState([]);
+    const [yearChoose, setYearChoose] = useState("");
+    const { category, categoryDispatch } = useContext(CategoryContext);
+    const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
 
     const {
         handleSubmit,
         control,
         setValue,
-        formState: { errors },
         getValues,
-        reset,
+        formState: { errors }
     } = useForm();
 
     const handleClose = () => {
@@ -69,142 +88,128 @@ const GradeForm = (props) => {
     const handleOpen = () => {
         setOpen(true)
     }
-    const handleChangeInput = (e, id) => {
+    const handleChangeYearSelect = (e) => {
         setValue(e.target.name, e.target.value);
-        let index = -1;
-        update.forEach((el, i) => index = el["MaLoai"] == id ? i : -1)
-        if (index != -1) {
-            let UpdateEl = [...update];
-            UpdateEl[index] = { MaLoai: id, TenLoai: e.target.value }
-            setUpdate(UpdateEl)
-        } else
-            setUpdate([...update, { MaLoai: id, TenLoai: e.target.value }])
+        setYearChoose(e.target.value);
     }
-    const handleChangAddInput = (e, index) => {
-        const { name, value } = e.target
-        setValue(name, value);
-        const list = [...add];
-        list[index].name = name;
-        list[index].value = value;
-        setAdd(list);
-    }
-    const handleAddInput = () => {
-        setAdd([...add, { name: "", value: "" }])
-    }
-    const handleRemoveInput = (id, index) => {
-        let newData = [...valueArray];
-        setValue(`Loai${index + 1}`, '');
-        newData.splice(index, 1);
-        setValueArray(newData);
 
-        remove.includes(id) || setRemove([...remove, id])
+    const handleChangeSelect = (e) => {
+        setValue(e.target.name, e.target.value);
     }
-    const handleRemoveAddInput = (index) => {
-        let list = [...add];
-        setAdd(list[index], "")
-        list.splice(index, 1);
-        setAdd(list);
-    }
-    const onSubmit = () => {
-        let year = getValues("Nam");
-        let addArr = [];
-        add.forEach(el => addArr.push(el["value"]));
-        actionGrade(categoryDispatch, { add: addArr, update, remove, year });
-        reset();
-        handleClose();
+
+    const onSubmit = (data) => {
+        createGrade(data, openSnackbarDispatch)
+        setOpen(false);
     }
 
     useEffect(() => {
-        if (category.categories.grade.length > 0 && edit)
-            getData();
+        const getGradeAPI = async () => {
+            const resYear = await getYearGrade();
+            const res = await getGrade({ id });
+            console.log(res);
+            setGradeS(res);
+            setYearArr(resYear);
+            setYearChoose(new Date().getFullYear())
+            setValue("Nam", new Date().getFullYear());
+            const result = category.categories.grade.filter(el => el.Nam == new Date().getFullYear());
+            setGradeArr(result[0].Data);
+        }
+        setValue("MaSoDangVien", id)
+        setValue("HoTen", name)
+        getGradeAPI();
     }, [])
 
     useEffect(() => {
-        add.forEach(a => setValue(a.name, a.value))
-    }, [add])
-
-    useEffect(() => {
-        valueArray.forEach(d => setValue(d.name, d.value))
-    }, [valueArray])
+        console.log(yearChoose);
+        if (yearChoose) {
+            const result = category.categories.grade.filter(el => el.Nam == yearChoose);
+            setGradeArr(result[0].Data);
+            if (gradeS.length > 0) {
+                const res = gradeS.find(el => el.Nam == yearChoose)
+                res ? setValue("MaLoai", res.MaLoai) : setValue("MaLoai", "0")
+            } else
+                setValue("MaLoai", "0")
+        }
+    }, [yearChoose])
 
     return (
-        <>
-            {edit ?
-                (
-                    <MyButton onClick={handleOpen} style={{ marginRight: '8px' }} info small><EditIcon />Sửa</MyButton>
-                ) :
-                (
-                    <MyButton onClick={handleOpen} success ><AddIcon />Thêm</MyButton>
-                )
-            }
-            <Dialog PaperProps={{ style: { minWidth: '300px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-                <DialogTitle id="form-dialog-title">{`Cập nhật loại Đảng viên`}</DialogTitle>
-                <DialogContent>
-                    <InputGrid
-                        onChange={(e) => setValue('Nam', e.target.value)}
-                        disabled={edit}
-                        nameTitle={`Năm`}
-                        name={"Nam"}
-                        control={control}
-                        rules={{ required: "Vui lòng nhập trường này!" }}
-                        errors={errors}
-                    />
-                    {valueArray.length > 0 &&
-                        valueArray.map((c, index) => {
-                            return (
-                                <div key={c.id} className={classes.inputWrapper}>
+        <Dialog PaperProps={{ style: { minWidth: '800px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+            <DialogTitle id="form-dialog-title">Xếp loại</DialogTitle>
+            <DialogContent>
+                <FormControl margin="dense" fullWidth>
+                    <Grid container spacing={1}>
+                        <Grid item xs={6}>
+                            <InputGrid
+                                nameTitle={`Mã số Đảng viên`}
+                                name={"MaSoDangVien"}
+                                defaultValue={""}
+                                control={control}
+                                errors={errors}
+                                disabled
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <InputGrid
+                                nameTitle={`Họ tên`}
+                                name={"HoTen"}
+                                defaultValue={""}
+                                control={control}
+                                errors={errors}
+                                disabled
+                            />
+                        </Grid>
+                        {
+                            yearArr.length > 0 &&
+                            <>
+                                <Grid item xs={6}>
                                     <InputGrid
-                                        id={c.id}
-                                        onChange={(e) => handleChangeInput(e, c.id)}
-                                        nameTitle={`Tên loại`}
-                                        name={c.name}
+                                        select
+                                        onChange={handleChangeYearSelect}
+                                        nameTitle={"Năm"}
+                                        name={"Nam"}
+                                        defaultValue={""}
                                         control={control}
-                                        rules={{ required: "Vui lòng nhập trường này!" }}
                                         errors={errors}
-                                    />
-                                    <CloseIcon id="close-icon"
-                                        className={classes.closeIcon}
-                                        onClick={() => handleRemoveInput(c.id, index)}
-                                    />
-                                </div>
-                            )
-                        })
-                    }
-                    {add.length > 0 &&
-                        add.map((input, index) => {
-                            let id = nanoid()
-                            let inputName = input.name || `LoaiThem${id}`;
-                            let inputValue = input.value || ""
-                            return (
-                                <div className={classes.inputWrapper}>
+                                    >
+                                        {yearArr.map(el =>
+                                            <MenuItem key={el.Nam} value={el.Nam}>{el.Nam}</MenuItem>
+                                        )}
+                                    </InputGrid>
+                                </Grid>
+                                <Grid item xs={6}>
                                     <InputGrid
-                                        onChange={(e) => handleChangAddInput(e, index)}
-                                        nameTitle={"Tên loại"}
-                                        name={inputName}
+                                        select
+                                        onChange={handleChangeSelect}
+                                        nameTitle={"Loại"}
+                                        name={"MaLoai"}
+                                        defaultValue={"0"}
+                                        rules={{
+                                            validate: value =>
+                                                value != "0" || "Vui lòng nhập trường này!"
+                                        }}
                                         control={control}
-                                        rules={{ required: "Vui lòng nhập trường này!" }}
                                         errors={errors}
-                                    />
-                                    <CloseIcon id="chandleRemoveAddInputlose-icon"
-                                        className={classes.closeIcon}
-                                        onClick={() => handleRemoveAddInput(index)}
-                                    />
-                                </div>
-                            )
-                        })}
-                    <Button style={{ marginTop: '18px' }} id="add-btn" onClick={handleAddInput} variant="outlined" fullWidth><AddIcon /></Button>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose} >
-                        Hủy
-                    </Button>
-                    <MyButton onClick={handleSubmit(onSubmit)} info>
-                        Lưu
-                    </MyButton>
-                </DialogActions>
-            </Dialog>
-        </>
+                                    >
+                                        <MenuItem value="0">Chọn loại</MenuItem>
+                                        {
+                                            gradeArr.map(el =>
+                                                <MenuItem key={el.MaLoai} value={el.MaLoai}>{el.TenLoai}</MenuItem>
+                                            )}
+                                    </InputGrid>
+                                </Grid>
+                            </>
+                        }
+                    </Grid>
+                </FormControl>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleClose} >
+                    Hủy
+                </Button>
+                <MyButton onClick={handleSubmit(onSubmit)} info>
+                    Lưu
+                </MyButton>
+            </DialogActions>
+        </Dialog >
     );
-};
-
-export default GradeForm;
+}
