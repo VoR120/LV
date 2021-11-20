@@ -61,6 +61,9 @@ const MoveForm = (props) => {
         setOpen(true)
     }
     const handleChangeSelect = (e) => {
+        if(e.target.value != "") {
+            clearErrors(e.target.name)
+        }
         setValue(e.target.name, e.target.value)
     }
     const onSubmit = (data) => {

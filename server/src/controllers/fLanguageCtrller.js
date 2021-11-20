@@ -5,7 +5,7 @@ exports.getAllFLanguage = getAll(FLanguage);
 
 exports.findByIdFLanguage = findById(FLanguage);
 
-exports.createFLanguage = create(FLanguage)
+exports.createFLanguage = create(FLanguage, "Tên ngoại ngữ")
 
 exports.updateByIdFLanguage = updateById(FLanguage);
 

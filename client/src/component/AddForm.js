@@ -1,39 +1,24 @@
-import {
-    Button,
-    Dialog,
-    DialogTitle,
-    DialogActions,
-    DialogContent,
-    Grid,
-    TextField,
-    FormHelperText,
-    FormControl,
-    InputLabel,
-    IconButton,
-    CircularProgress,
-    Typography,
-    AppBar,
-    Tabs,
-    Tab,
-    Box,
-} from '@mui/material';
-import makeStyles from '@mui/styles/makeStyles';
-import React, { useState, useContext, useEffect } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
+import {
+    Box, Button,
+    Dialog, DialogActions, DialogTitle, Tab, Tabs
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import '../public/css/Form.scss'
+import { getAllCategory, getFlanguageLevel } from '../action/categoryAction';
+import { addPartyMember, updatePartyMember } from '../action/partyMemberAction';
+import { CategoryContext } from '../contextAPI/CategoryContext';
+import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import axios from '../helper/axios';
+import '../public/css/Form.scss';
+import Loading from './CustomLoadingOverlay';
 import InfoForm from './InfoForm';
 import LevelForm from './LevelForm';
 import PartyForm from './PartyForm';
 import MyButton from './UI/MyButton';
-import { getAllCategory, getFlanguageLevel } from '../action/categoryAction';
-import { CategoryContext } from '../contextAPI/CategoryContext';
-import { addPartyMember, updatePartyMember } from '../action/partyMemberAction';
-import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
-import axios from '../helper/axios';
-import CustomizedSnackbars from './CustomizedSnackbars';
-import { SnackbarContext } from '../contextAPI/SnackbarContext';
 
 const useStyles = makeStyles(theme => ({
     btn: {
@@ -113,13 +98,11 @@ const AddForm = (props) => {
     const { edit, data } = props
     const classes = useStyles();
     const [open, setOpen] = useState(false);
-    const [imageUpload, setImageUpload] = useState('');
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState('');
     const [step, setStep] = useState(0);
     const { category, categoryDispatch } = useContext(CategoryContext);
-    const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
-    const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
+    const { partyMemberDispatch } = useContext(PartyMemberContext);
+    const { openSnackbarDispatch } = useContext(SnackbarContext)
     const [flArray, setFlArray] = useState([{ MaNgoaiNgu: "0", MaTrinhDo: "0" }]);
     const [levelArray, setLevelArray] = useState([]);
 
@@ -178,6 +161,8 @@ const AddForm = (props) => {
 
 
     const onSubmit = (data) => {
+        // setLoading(true)
+        setOpen(false)
         data.QQAddress = { ...qqValue, detail: getValues("QQChiTiet") };
         data.DCTTAddress = { ...dcttValue, detail: getValues("DCTTChiTiet") };
         data.NOHTAddress = { ...nohtValue, detail: getValues("NOHTChiTiet") };
@@ -188,7 +173,6 @@ const AddForm = (props) => {
             updatePartyMember(partyMemberDispatch, data, openSnackbarDispatch) :
             addPartyMember(partyMemberDispatch, data, openSnackbarDispatch);
         // }
-        setOpen(false)
     }
 
     useEffect(() => {
@@ -256,7 +240,6 @@ const AddForm = (props) => {
                     setValue(key, data[key])
                 }
             })
-            setLoading(false);
         } else {
             const fetchAPI = async () => {
                 const res = await axios.get('https://provinces.open-api.vn/api/')
@@ -265,7 +248,6 @@ const AddForm = (props) => {
                 setNohtArr({ ...nohtArr, provinceArr: res.data })
                 setLoading(false);
             }
-            setLoading(true)
             fetchAPI();
         }
     }, [])
@@ -289,7 +271,7 @@ const AddForm = (props) => {
     }, [flArray])
 
     return (
-        <div className="add-form">
+        <>
             <>
                 {
                     edit ?
@@ -318,6 +300,7 @@ const AddForm = (props) => {
                 <form className="add-form">
                     <TabPanel value={step} index={0}>
                         <InfoForm
+                            edit={edit}
                             control={control}
                             errors={errors}
                             setValue={setValue}
@@ -372,14 +355,15 @@ const AddForm = (props) => {
                         })} */}
                 <DialogActions>
                     <Button onClick={handleClose} >
-                        Cancel
+                        Hủy
                     </Button>
                     <MyButton onClick={handleSubmit(onSubmit)} success>
-                        Add
+                        Lưu
                     </MyButton>
                 </DialogActions>
             </Dialog>
-        </div>
+            <Loading loading={loading} />
+        </>
     );
 };
 

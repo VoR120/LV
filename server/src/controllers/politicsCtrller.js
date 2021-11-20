@@ -5,7 +5,7 @@ exports.getAllPolitics = getAll(Politics);
 
 exports.findByIdPolitics = findById(Politics);
 
-exports.createPolitics = create(Politics)
+exports.createPolitics = create(Politics, "Tên chính trị")
 
 exports.updateByIdPolitics = updateById(Politics);
 

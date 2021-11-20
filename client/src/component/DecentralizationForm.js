@@ -10,11 +10,12 @@ import {
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import '../public/css/Form.scss';
 import MyButton from './UI/MyButton';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import { updatePermissionPosition } from '../action/permissionAction';
 
 
 const useStyles = makeStyles(theme => ({
@@ -43,20 +44,11 @@ const useStyles = makeStyles(theme => ({
 
 
 const DecentralizationForm = (props) => {
+    const { dataName, value, setRows } = props
     const classes = useStyles();
     const [open, setOpen] = useState(false);
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
-    const [fullPowers, setFullPowers] = useState(props.data.fullPowers);
-    const [createVotings, setCreateVotings] = useState(props.data.createVotings);
-    const [update, setUpdate] = useState(props.data.update);
-    const {
-        register,
-        handleSubmit,
-        control,
-        setValue,
-        watch,
-        formState: { errors }
-    } = useForm();
+    const [quyen, setQuyen] = useState({});
 
     const handleClose = () => {
         setOpen(false)
@@ -64,19 +56,74 @@ const DecentralizationForm = (props) => {
     const handleOpen = () => {
         setOpen(true)
     }
-    const onSubmit = () => {
-        alert("abc")
-        openSnackbarDispatch({
-            type: 'SET_OPEN',
-            payload: {
-                msg: "Đã cập nhật!",
-                type: "success"
-            }
+    const checkAllPermission = (obj) => {
+        let isAll = true
+        Object.keys(obj).forEach(el => {
+            if (obj[el] == 0)
+                isAll = false
         })
+        return isAll
     }
-    const handleChangeCheckBox = () => {
 
+    const handleChangeCheckBox = (e) => {
+        setQuyen({ ...quyen, [e.target.name]: Number(e.target.checked) })
     };
+
+    const handleSelectAll = (e) => {
+        let obj = { ...quyen }
+        Object.keys(quyen).map(el => {
+            e.target.checked
+                ? obj[el] = 1
+                : obj[el] = 0
+        })
+        setQuyen(obj)
+    }
+
+    const handleSubmit = () => {
+        const setRow = async () => {
+            let newData = { ...quyen };
+            Object.keys(quyen).map(el => newData[el] = Number(quyen[el]));
+            const res = await updatePermissionPosition({ MaChucVu: value.MaChucVu, data: newData }, openSnackbarDispatch)
+            let newRes = [...res];
+            res.map((obj, index) => {
+                newRes[index]["all"] = checkAllPermission(obj) ? 1 : 0
+            })
+            if (res) {
+                setRows(newRes);
+                setOpen(false)
+                openSnackbarDispatch({
+                    type: 'SET_OPEN',
+                    payload: {
+                        msg: "Đã cập nhật!",
+                        type: "success"
+                    }
+                })
+            } else {
+                setOpen(false)
+                openSnackbarDispatch({
+                    type: 'SET_OPEN',
+                    payload: {
+                        msg: "Đã xảy ra lỗi!",
+                        type: "error"
+                    }
+                })
+            }
+        }
+        setRow();
+    }
+
+    useEffect(() => {
+        if (value) {
+            let obj = {}
+            Object.keys(value).map(el => {
+                if (el != "MaChucVu" && el != "TenChucVu" && el != "tableData" && el != "all") {
+                    obj[el] = value[el]
+                }
+            })
+            setQuyen(obj)
+        }
+    }, [])
+
     return (
         <>
             {props.button ? (
@@ -92,24 +139,36 @@ const DecentralizationForm = (props) => {
                 <DialogContent>
                     <FormGroup>
                         <FormControlLabel
-                            control={<Checkbox checked={fullPowers} onChange={handleChangeCheckBox} color="primary" name="fullPowers" />}
-                            label="Toàn quyền"
+                            control={
+                                <Checkbox
+                                    checked={!!checkAllPermission(quyen)}
+                                    onChange={handleSelectAll}
+                                    color="primary"
+                                    name={"all"}
+                                />}
+                            label={"Toàn quyền'"}
                         />
-                        <FormControlLabel
-                            control={<Checkbox checked={update} onChange={handleChangeCheckBox} color="primary" name="update" />}
-                            label="Chỉnh sửa hồ sơ Đảng viên"
-                        />
-                        <FormControlLabel
-                            control={<Checkbox checked={createVotings} onChange={handleChangeCheckBox} color="primary" name="createVotings" />}
-                            label="Tạo biểu quyết"
-                        />
+                        {dataName.length > 0 &&
+                            dataName.map(el =>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={!!quyen[el.MaQuyen]}
+                                            onChange={handleChangeCheckBox}
+                                            color="primary"
+                                            name={el.MaQuyen + ''}
+                                        />}
+                                    label={el.TenQuyen}
+                                    key={el.MaQuyen}
+                                />
+                            )}
                     </FormGroup>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} >
                         Cancel
                     </Button>
-                    <MyButton onClick={handleSubmit(onSubmit)} success>
+                    <MyButton onClick={handleSubmit} success>
                         Add
                     </MyButton>
                 </DialogActions>

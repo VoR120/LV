@@ -101,7 +101,7 @@ const useStyles = makeStyles(theme => ({
 
 const InfoForm = (props) => {
     const { control, errors, setValue, setError, clearErrors, getValues,
-        open, setOpen, setMessage,
+        open, setOpen, setMessage, edit,
         qqArr, setQqArr,
         dcttArr, setDcttArr,
         nohtArr, setNohtArr,
@@ -113,12 +113,7 @@ const InfoForm = (props) => {
     // State
     const [imageUpload, setImageUpload] = useState('');
     const [loading, setLoading] = useState(false);
-    // const [qqArr, setQqArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
-    // const [dcttArr, setDcttArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
-    // const [nohtArr, setNohtArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
-    // const [qqValue, setQqValue] = useState({ provinceValue: '', districtValue: '', wardValue: '' })
-    // const [dcttValue, setDcttValue] = useState({ provinceValue: '', districtValue: '', wardValue: '' })
-    // const [nohtValue, setNohtValue] = useState({ provinceValue: '', districtValue: '', wardValue: '' })
+    const [position, setPosition] = useState('');
 
     // ContextAPI
     const { category, categoryDispatch } = useContext(CategoryContext);
@@ -144,6 +139,11 @@ const InfoForm = (props) => {
     const handleChangeInput = (e) => {
         const { name, value } = e.target;
         setValue(name, value);
+    }
+    const handleChangePosition = (e) => {
+        const { name, value } = e.target;
+        setValue(name, value);
+        setPosition(value)
     }
 
     const handleChangeProvince = (e, type) => {
@@ -275,7 +275,14 @@ const InfoForm = (props) => {
             file.preview = getValues("HinhAnh");
             setImageUpload(file);
         }
+        console.log("Mount");
     }, [])
+
+    useEffect(() => {
+        return () => {
+            console.log("Unmount");
+        }
+    })
 
     useEffect(() => {
         return () => {
@@ -303,7 +310,7 @@ const InfoForm = (props) => {
                             name={"MaSoDangVien"}
                             control={control}
                             errors={errors}
-                            disabled={true}
+                            disabled={edit}
                         />
                         <InputGrid
                             type="date"
@@ -354,7 +361,7 @@ const InfoForm = (props) => {
                         </InputGrid>
                         <InputGrid
                             select
-                            onChange={handleChangeSelect}
+                            onChange={handleChangePosition}
                             nameTitle={"Chức vụ"}
                             name={`MaChucVu`}
                             defaultValue={"0"}
@@ -415,7 +422,7 @@ const InfoForm = (props) => {
                             onChange={handleChangeSelect}
                             nameTitle={"Tôn giáo"}
                             name={`MaTonGiao`}
-                            defaultValue={"0005"}
+                            defaultValue={"1"}
                             control={control}
                             errors={errors}
                         >

@@ -14,6 +14,8 @@ import { useForm } from 'react-hook-form';
 import { filterPartyMember } from '../action/partyMemberAction';
 import { CategoryContext } from '../contextAPI/CategoryContext';
 import axios from '../helper/axios';
+import { InfoContext } from '../contextAPI/InfoContext';
+import { getAllCategory } from '../action/categoryAction';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -45,13 +47,14 @@ const useStyles = makeStyles(theme => ({
 const Search = () => {
 
     const [rows, setRows] = useState([])
-    const [columns] = useState(allInfoColumn)
+    const [columns] = useState(allInfoColumn.slice(0, -1))
     const classes = useStyles({ rows: rows });
     const [gender, setGender] = useState('2');
     const [loadingTable, setLoadingTable] = useState(false);
     const [provinceArr, setProvinceArr] = useState([]);
 
     const { category, categoryDispatch } = useContext(CategoryContext);
+    const { info } = useContext(InfoContext);
 
     const {
         handleSubmit,
@@ -67,6 +70,8 @@ const Search = () => {
     }
 
     const onSubmit = async (data) => {
+        if (info.info.Quyen["12"] != 1)
+            data.partycell = info.info.MaChiBo
         setLoadingTable(true)
         const res = await filterPartyMember(data)
         setRows(res);
@@ -74,6 +79,9 @@ const Search = () => {
     }
 
     useEffect(() => {
+        getAllCategory(categoryDispatch, "ethnic")
+        getAllCategory(categoryDispatch, "religion")
+        getAllCategory(categoryDispatch, "partycell")
         const fetchAPISetArr = async () => {
             const res = await axios.get('https://provinces.open-api.vn/api/')
             setProvinceArr(res.data);
@@ -91,24 +99,27 @@ const Search = () => {
                 </div>
                 <Paper variant="outlined" className={classes.paper}>
                     <Grid container spacing={2}>
-                        <Grid item xs={4}>
-                            <InputGrid
-                                select
-                                onChange={handleChangeSelect}
-                                nameTitle={"Chi bộ"}
-                                name="partycell"
-                                defaultValue="0"
-                                control={control}
-                                errors={errors}
-                            >
-                                <MenuItem value="0">Tất cả</MenuItem>
-                                {
-                                    category.categories["partycell"].map(el =>
-                                        <MenuItem key={el.MaChiBo} value={el.MaChiBo} >{el.TenChiBo}</MenuItem>
-                                    )
-                                }
-                            </InputGrid>
-                        </Grid>
+                        {
+                            info.info.Quyen["12"] == 1 &&
+                            <Grid item xs={4}>
+                                <InputGrid
+                                    select
+                                    onChange={handleChangeSelect}
+                                    nameTitle={"Chi bộ"}
+                                    name="partycell"
+                                    defaultValue="0"
+                                    control={control}
+                                    errors={errors}
+                                >
+                                    <MenuItem value="0">Tất cả</MenuItem>
+                                    {
+                                        category.categories["partycell"].map(el =>
+                                            <MenuItem key={el.MaChiBo} value={el.MaChiBo} >{el.TenChiBo}</MenuItem>
+                                        )
+                                    }
+                                </InputGrid>
+                            </Grid>
+                        }
                         <Grid item xs={4}>
                             <InputGrid
                                 select
@@ -207,7 +218,7 @@ const Search = () => {
                     </Grid>
                 </Paper>
                 <MyButton primary onClick={handleSubmit(onSubmit)} >Xem</MyButton>
-                <TableContainer style={{ maxWidth: "1170px", }} >
+                <TableContainer className="search-table" style={{ maxWidth: "1170px", }} >
                     <MaterialTable
                         components={{
                             Container: (props) =>
@@ -221,7 +232,7 @@ const Search = () => {
                         columns={columns}
                         data={rows}
                         options={{
-                            padding: 'dense'
+                            padding: 'dense',
                         }}
                         actions={[
                             {

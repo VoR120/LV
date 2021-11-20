@@ -15,12 +15,16 @@ import Layout from '../component/Layout';
 import PaperStatistic from '../component/PaperStatistic';
 import MyButton from '../component/UI/MyButton';
 import MySelect from '../component/UI/MySelect';
-import { allInfoColumn, downloadExcel, getKeyField } from '../utils/utils';
+import { allInfoColumn, downloadExcel, getExportData, getKeyField } from '../utils/utils';
 import { filterPartyMember, getAllPartyMember } from '../action/partyMemberAction';
 import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
 import { getAllCategory } from '../action/categoryAction';
 import { CategoryContext } from '../contextAPI/CategoryContext';
 import Loading from '../component/CustomLoadingOverlay'
+import { InfoContext } from '../contextAPI/InfoContext';
+import { CSVLink } from 'react-csv'
+import SaveAltIcon from '@mui/icons-material/SaveAlt';
+import axios from '../helper/axios';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -62,6 +66,7 @@ const Statistic = () => {
     // ContextAPI
     const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
     const { category, categoryDispatch } = useContext(CategoryContext);
+    const { info } = useContext(InfoContext);
 
     // State
     const [field, setField] = useState("partycell");
@@ -77,28 +82,17 @@ const Statistic = () => {
 
     const [columns] = useState(allInfoColumn);
 
+    const data = getExportData(rows, columns)
+
     // Variable
-    const genderS = [
-        { label: 'Nam', quantity: '200' },
-        { label: 'Nữ', quantity: '200' }
-    ];
-    const partyCellS = [
-        { label: 'Sinh viên', quantity: '123' },
-        { label: 'Đảng viên', quantity: '123' }
-    ];
-    const ethnicS = [
-        { label: 'Kinh', quantity: '2000' },
-        { label: 'Khmer', quantity: '500' },
-        { label: 'Chăm', quantity: '50' },
-        { label: 'Hoa', quantity: '30' },
-    ];
-    const ageS = [
-        { label: '18 - 30', quantity: '200' },
-        { label: ' 31 - 40', quantity: '200' },
-        { label: ' 41 - 50', quantity: '200' },
-        { label: ' 51 - 60', quantity: '200' },
-        { label: ' Trên 60', quantity: '200' },
-    ]
+    const [genderS, setGenderS] = useState([]);
+    const [partyCellS, setPartyCellS] = useState([])
+    const [positionS, setPositionS] = useState([])
+    const [ethnicS, setEthnicS] = useState([])
+    const [religionS, setReligionS] = useState([])
+    const [ageS, setAgeS] = useState([])
+    const [itS, setItS] = useState([])
+    const [politicsS, setPoliticsS] = useState([])
 
     // Handle Function
     const handleChangeField = (e) => {
@@ -122,15 +116,56 @@ const Statistic = () => {
     }
 
     const handleSubmit = async () => {
+        let filterObj = { [field]: fieldValue };
+        if (info.info.Quyen["12"] != 1)
+            filterObj.partycell = info.info.ChucVu
         setLoadingTable(true)
         const res = await filterPartyMember({ [field]: fieldValue });
         setRows(res);
         setLoadingTable(false)
     }
 
+    const getGender = (gender) => {
+        const obj = {
+            m: "Nam",
+            f: "Nữ",
+            u: "Khác"
+        }
+        return obj[gender];
+    }
+
     // UseEffect
     useEffect(() => {
-        getAllPartyMember(partyMemberDispatch);
+        const getStatistic = async () => {
+            const res = await axios.get('/api/statistic/gender');
+            const newres = res.data.data.map(el => ({ label: getGender(el.GioiTinh), quantity: el.SoLuong }))
+            setGenderS(newres);
+            const res1 = await axios.get('/api/statistic/partycell');
+            const newres1 = res1.data.data.map(el => ({ label: el.TenChiBo, quantity: el.SoLuong }))
+            setPartyCellS(newres1);
+            const res2 = await axios.get('/api/statistic/position');
+            const newres2 = res2.data.data.map(el => ({ label: el.TenChucVu, quantity: el.SoLuong }))
+            setPositionS(newres2);
+            const res3 = await axios.get('/api/statistic/ethnic');
+            const newres3 = res3.data.data.map(el => ({ label: el.TenDanToc, quantity: el.SoLuong }))
+            setEthnicS(newres3);
+            const res4 = await axios.get('/api/statistic/religion');
+            const newres4 = res4.data.data.map(el => ({ label: el.TenTonGiao, quantity: el.SoLuong }))
+            setReligionS(newres4);
+            const res5 = await axios.get('/api/statistic/age');
+            const newres5 = Object.keys(res5.data.data[0]).map((el, ìndex) => {
+                return ({ label: el, quantity: res5.data.data[0][el] })
+            })
+            setAgeS(newres5);
+            const res6 = await axios.get('/api/statistic/it');
+            const newres6 = res6.data.data.map(el => ({ label: el.TenTinHoc, quantity: el.SoLuong }))
+            setItS(newres6);
+            const res7 = await axios.get('/api/statistic/politics');
+            const newres7 = res7.data.data.map(el => ({ label: el.TenChinhTri, quantity: el.SoLuong }))
+            setPoliticsS(newres7);
+        }
+        getStatistic();
+        // getAllPartyMember(partyMemberDispatch);
     }, [])
 
     useEffect(() => {
@@ -189,8 +224,12 @@ const Statistic = () => {
                         <div className={classes.paperWrapper}>
                             <PaperStatistic title={"Giới tính"} data={genderS} />
                             <PaperStatistic title={"Chi bộ"} data={partyCellS} />
+                            <PaperStatistic title={"Chức vụ"} data={positionS} />
                             <PaperStatistic title={"Dân tộc"} data={ethnicS} />
-                            <PaperStatistic title={"Độ tuổi"} data={ageS} />
+                            <PaperStatistic title={"Tôn giáo"} data={religionS} />
+                            <PaperStatistic title={"Tuổi"} data={ageS} />
+                            <PaperStatistic title={"TĐ Tin học"} data={itS} />
+                            <PaperStatistic title={"TĐ Chính trị"} data={politicsS} />
                         </div>
                     </AccordionDetails>
                 </Accordion>
@@ -202,7 +241,9 @@ const Statistic = () => {
                         value={field}
                         autowidth
                     >
-                        <MenuItem value="partycell">Chi bộ</MenuItem>
+                        {info.info.Quyen["12"] == 1 &&
+                            <MenuItem value="partycell">Chi bộ</MenuItem>
+                        }
                         <MenuItem value="position">Chức vụ</MenuItem>
                         <MenuItem value="grade">Xếp Loại</MenuItem>
                         <MenuItem value="age">Tuổi</MenuItem>
@@ -267,6 +308,13 @@ const Statistic = () => {
                     }
                 </Paper>
                 <MyButton onClick={handleSubmit} primary>Xem</MyButton>
+                {data.length > 0 &&
+                    <CSVLink data={data} filename={"export.csv"}>
+                        <MyButton style={{ marginLeft: 8 }} success>
+                            <SaveAltIcon style={{ marginRight: 4 }} />Excel
+                        </MyButton>
+                    </CSVLink>
+                }
                 <TableContainer style={{ maxWidth: "1170px", }} >
                     <MaterialTable
                         components={{

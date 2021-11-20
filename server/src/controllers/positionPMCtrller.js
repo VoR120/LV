@@ -5,7 +5,7 @@ exports.getAllPositionPM = getAll(PositionPM);
 
 exports.findByIdPositionPM = findById(PositionPM);
 
-exports.createPositionPM = create(PositionPM)
+exports.createPositionPM = create(PositionPM, "Chức vụ Đảng viên này")
 
 exports.updateByIdPositionPM = updateById(PositionPM);
 

@@ -26,10 +26,10 @@ exports.login = async (req, res) => {
             async (err, result) => {
                 if (err) {
                     res.status(500).json({ err })
+                    return;
                 }
                 if (result.length) {
                     const isMatch = await bcrypt.compareSync(password, result[0]["HashPassword"]);
-
                     if (isMatch) {
                         let resultFinal = [...result];
                         sql.query(query.getFLanguageWithName(result[0]["MaSoDangVien"]),
@@ -46,6 +46,7 @@ exports.login = async (req, res) => {
                                     const token = jwt.sign({ id: result[0]["MaSoSinhVien"] }, process.env.TOKEN_SECRET)
                                     res.cookie('token', token);
                                     res.status(200).json({ msg: "Đã đăng nhập", info: resultFinal[0], token: token })
+                                    return;
                                 }
                             })
                     } else
@@ -67,3 +68,43 @@ exports.logout = async (req, res) => {
         return res.status(500).json({ msg: error.message });
     }
 }
+
+exports.changePassword = async (req, res) => {
+    try {
+        const { password, newPassword, MaSoDangVien } = req.body
+        sql.query(`SELECT * FROM dangvien WHERE MaSoDangVien = "${MaSoDangVien}"`,
+            async (err, result) => {
+                if (err) {
+                    res.status(500).json({ err })
+                    return;
+                }
+                if (result.length) {
+                    const isMatch = await bcrypt.compareSync(password, result[0]["HashPassword"]);
+                    if (isMatch) {
+                        if (password == newPassword) {
+                            res.status(400).json({
+                                msg: "Mật khẩu mới không được trùng với mật khẩu cũ!",
+                                type: "newPassword"
+                            })
+                        }
+                        else {
+                            const passHash = await bcrypt.hash(newPassword, 10);
+                            sql.query(`UPDATE dangvien SET HashPassword = "${passHash}" WHERE MaSoDangVien = "${MaSoDangVien}"`,
+                                (err, result1) => {
+                                    if (err) {
+                                        res.status(500).json({ err })
+                                        return;
+                                    }
+                                    res.status(200).json({ msg: "Đổi mật khẩu thành công!" })
+                                })
+                        }
+                    } else
+                        res.status(400).json({ msg: "Mật khẩu không chính xác!", type: "password" })
+                }
+            })
+    } catch (error) {
+        return res.status(500).json({ msg: error.message })
+    }
+}
+
+

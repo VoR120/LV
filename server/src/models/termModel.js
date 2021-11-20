@@ -17,7 +17,12 @@ const Term = {
     create: (newValue, callback) => {
         sql.query(`SELECT * FROM nhiemky WHERE NamBatDau = "${newValue.NamBatDau}" AND NamKetThuc = "${newValue.NamKetThuc}"`,
             (err, res) => {
-                if (res.length > 0) {
+                if (err) {
+                    console.log("error: ", err);
+                    callback(err, null);
+                    return;
+                }
+                if (res.length) {
                     console.log("Duplicated!");
                     callback({ message: "Duplicated" }, null);
                     return;
@@ -28,8 +33,8 @@ const Term = {
                         callback(err, null);
                         return;
                     } else {
-                        console.log("Created: ", { MaNhiemKy: zeroFill(res.insertId), ...newValue });
-                        callback(null, { MaNhiemKy: zeroFill(res.insertId), ...newValue });
+                        console.log("Created: ", { MaNhiemKy: res.insertId, ...newValue });
+                        callback(null, { MaNhiemKy: res.insertId, ...newValue });
                     }
                 })
             }

@@ -3,10 +3,13 @@ import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import { Paper, TableContainer, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import DecentralizationForm from '../component/DecentralizationForm';
 import Layout from '../component/Layout';
+import { getAllCategory } from '../action/categoryAction'
 import MyButton from '../component/UI/MyButton';
+import { CategoryContext } from '../contextAPI/CategoryContext';
+import { getPermissionPosition } from '../action/permissionAction';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -56,73 +59,72 @@ const useStyles = makeStyles(theme => ({
 const Decentralization = () => {
     const classes = useStyles();
     const [categoryField, setCategoryField] = useState("chibo");
-
+    const { category, categoryDispatch } = useContext(CategoryContext);
+    const [loading, setLoading] = useState(false);
     const handleChangeField = (e) => {
         setCategoryField(e.target.value);
     }
 
-    const [rows] = useState([
-        { id: 'CV1', name: 'Ủy viên BCH', fullPowers: true, update: true, createVotings: true },
-        { id: 'CV2', name: 'Ủy viên BTV', fullPowers: true, update: true, createVotings: true },
-        { id: 'CV3', name: 'Bí thư', fullPowers: true, update: true, createVotings: true },
-        { id: 'CV4', name: 'Phó bí thư', fullPowers: false, createVotings: true },
-        { id: 'CV5', name: 'Đảng viên chính thức ', fullPowers: false, },
-        { id: 'CV6', name: 'Đảng viên dự bị', fullPowers: false },
-    ])
+    const [rows, setRows] = useState([])
 
-    const [columns] = useState([
-        { title: "Mã chức vụ", field: "id", maxWidth: 150 },
-        { title: "Tên chức vụ", field: "name", },
-        {
-            title: "Toàn quyền", field: "fullPowers",
-            headerStyle: { width: 150, minWidth: 150 },
-            cellStyle: { width: 150, minWidth: 150, },
-            render: (params) => {
-                return (
-                    <>
-                        {params.fullPowers ? <CheckIcon className={classes.checkIcon} /> : <ClearIcon color="error" />}
-                    </>
-                )
+    const [columns, setColumns] = useState([])
+    // <DecentralizationForm data={params} button />
+
+    useEffect(() => {
+        setLoading(true)
+        getAllCategory(categoryDispatch, "position");
+        getAllCategory(categoryDispatch, "permission")
+    }, [])
+
+    const checkAllPermission = (obj) => {
+        let isAll = true
+        Object.keys(obj).forEach(el => {
+            if (obj[el] == 0)
+                isAll = false
+        })
+        return isAll
+    }
+
+    useEffect(() => {
+        const fetchAPI = async () => {
+            const res = await getPermissionPosition();
+            let newRes = [...res];
+            res.map((obj, index) => {
+                newRes[index]["all"] = checkAllPermission(obj) ? 1 : 0
+            })
+            setRows(newRes);
+            setLoading(false)
+        }
+        let newColumn = [
+            { title: "Chức vụ", field: "TenChucVu", minWidth: 150 },
+            {
+                title: "Toàn quyền",
+                field: "all",
+                render: (params) =>
+                    checkAllPermission(params) ? <CheckIcon className={classes.checkIcon} /> : <ClearIcon color="error" />
             }
-        },
-        {
-            title: "Sửa hồ sơ Đảng viên", field: "update",
-            headerStyle: { width: 200, minWidth: 200 },
-            cellStyle: { width: 200, minWidth: 200, },
-            render: (params) => {
-                return (
-                    <>
-                        {params.update ? <CheckIcon className={classes.checkIcon} /> : <ClearIcon color="error" />}
-                    </>
-                )
-            }
-        },
-        {
-            title: "Tạo biểu quyết", field: "createVotings",
-            headerStyle: { width: 150, minWidth: 150 },
-            cellStyle: { width: 150, minWidth: 150, },
-            render: (params) => {
-                return (
-                    <>
-                        {params.createVotings ? <CheckIcon className={classes.checkIcon} /> : <ClearIcon color="error" />}
-                    </>
-                )
-            }
-        },
-        {
-            title: "Phân quyền", field: "action",
-            headerStyle: { width: 150, minWidth: 150 },
-            cellStyle: { width: 150, minWidth: 150, },
-            render: (params) => {
-                console.log(params);
-                return (
-                    <>
-                        <DecentralizationForm data={params} button />
-                    </>
-                )
-            }
-        },
-    ])
+        ]
+        category.categories["permission"].map(el => {
+            newColumn.push({
+                title: el.TenQuyen,
+                field: el.MaQuyen + "",
+                render: (params) =>
+                    params[el.MaQuyen] == 1 ? <CheckIcon className={classes.checkIcon} /> : <ClearIcon color="error" />
+            })
+        })
+        newColumn.push({
+            title: "Phân quyền",
+            field: "PhanQuyen",
+            render: (params) =>
+                <DecentralizationForm
+                    dataName={category.categories["permission"]}
+                    value={params} button
+                    setRows={setRows}
+                />
+        })
+        setColumns(newColumn)
+        fetchAPI();
+    }, [category.categories])
 
     return (
         <>
@@ -132,7 +134,7 @@ const Decentralization = () => {
                         Phân quyền
                     </Typography>
                 </div>
-                <TableContainer style={{ maxWidth: "1170px", }} >
+                <TableContainer className="decentralization-table" style={{ maxWidth: "1170px", }} >
                     <MaterialTable
                         components={{
                             Container: (props) => <Paper
@@ -147,6 +149,7 @@ const Decentralization = () => {
                         title={"Phân quyền"}
                         columns={columns}
                         data={rows}
+                        isLoading={loading}
                     />
                 </TableContainer>
             </Layout>

@@ -1,5 +1,5 @@
 const sql = require('../configs/db');
-const { getAll, findById, updateById, removeAll, remove } = require('./utils');
+const { getAll, findById, updateById, removeAll, remove, zeroFill } = require('./utils');
 
 const Grade = {
     getAll: (callback) => {
@@ -27,7 +27,7 @@ const Grade = {
                 })
                 yearWithQuan.push({ Nam: year, quantity: q })
             })
-            
+
             // Lấy số lượng lớn nhất
             yearWithQuan.forEach(y => {
                 max = y.quantity > max ? y.quantity : max;
@@ -54,14 +54,16 @@ const Grade = {
     },
     findById: findById("loai", "MaLoai"),
     create: (newValue, callback) => {
-        sql.query(`SELECT count(MaLoai) as isDuplicate FROM loai WHERE TenLoai = "${newValue["TenLoai"]}" AND Nam = "${newValue["Nam"]}" `,
+        sql.query(`SELECT MaLoai FROM loai 
+            WHERE TenLoai = "${newValue["TenLoai"]}" 
+            AND Nam = "${newValue["Nam"]}" `,
             (err, res) => {
                 if (err) {
                     console.log("error: ", err);
                     callback(null, err);
                     return;
                 }
-                if (res[0].isDuplicate > 0) {
+                if (res.length) {
                     console.log(res[0].isDuplicate)
                     callback({ type: "duplicated" }, null)
                     return;
@@ -72,8 +74,8 @@ const Grade = {
                         callback(null, err);
                         return;
                     }
-                    console.log("Created: ", { ...newValue });
-                    callback(null, { ...newValue });
+                    console.log("Created: ", { MaHinhThuc: res.insertId, ...newValue });
+                    callback(null, { MaHinhThuc: res.insertId, ...newValue });
                 })
             })
     },

@@ -12,6 +12,7 @@ export const initialState = {
         politics: [],
         flanguagelevel: [],
         grade: [],
+        permission: [],
     },
     categoryNames: {
         partycell: [],
@@ -24,9 +25,10 @@ export const initialState = {
         politics: [],
         flanguagelevel: [],
         grade: [],
+        permission: [],
     },
     loading: false,
-    error: null
+    error: null,
 }
 
 const CategoryReducer = (state, action) => {
@@ -35,6 +37,28 @@ const CategoryReducer = (state, action) => {
     let newCName = { ...state.categoryNames };
     let result;
     switch (action.type) {
+        case categoryConstant.GET_ALL_CATEGORYPM_REQUEST:
+            return {
+                ...state,
+                loading: true
+            }
+        case categoryConstant.GET_ALL_CATEGORYPM_SUCCESS:
+            Object.keys(action.payload).map(el => {
+                newCategory[el] = action.payload[el]["data"]
+                newCName[el] = action.payload[el]["columnName"]
+            })
+            return {
+                ...state,
+                categories: newCategory,
+                categoryNames: newCName,
+                loading: false
+            }
+        case categoryConstant.GET_ALL_CATEGORYPM_FAILURE:
+            return {
+                ...state,
+                error: action.payload.error,
+                loading: false
+            }
         case categoryConstant.GET_ALL_CATEGORY_REQUEST:
             return {
                 ...state,
@@ -70,8 +94,8 @@ const CategoryReducer = (state, action) => {
         case categoryConstant.ADD_CATEGORY_FAILURE:
             return {
                 ...state,
-                error: action.payload.error,
-                loading: false
+                loading: false,
+                error: action.payload.error
             }
         case categoryConstant.UPDATE_CATEGORY_REQUEST:
             return {

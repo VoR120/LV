@@ -13,6 +13,7 @@ const route = (app) => {
     app.use('/api', require('./fLpMRoute'));
     app.use('/api', require('./permissionRoute'));
     app.use('/api', require('./permissionPMRoute'));
+    app.use('/api', require('./permissionPSRoute'));
     app.use('/api', require('./gradeRoute'));
     app.use('/api', require('./gradepMRoute'));
     app.use('/api', require('./moveRoute'));
@@ -22,6 +23,7 @@ const route = (app) => {
     app.use('/api', require('./addressRoute'));
     app.use('/upload', require('./uploadRoute'));
     app.use('/auth/', require('./authRoute'));
+    app.use('/api/', require('./statisticRoute'));
 }
 
 module.exports = route;

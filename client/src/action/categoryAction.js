@@ -2,14 +2,28 @@ import { categoryConstant } from '../constant';
 import axios from '../helper/axios';
 import { getKeyField } from '../utils/utils';
 
-// export const getAllCategoryPM = async (dispatch, payload) => {
-//     const categoryArr = ["ethnic", "religion", "partycell", "position", ""]
-//     try {
-
-//     } catch (error) {
-
-//     }
-// }
+export const getAllCategoryPM = async (dispatch) => {
+    const categoryArr = [
+        "ethnic", "religion", "partycell", "position", "flanguage",
+        "flanguagelevel", "politics", "it", "grade", "term"
+    ]
+    try {
+        dispatch({ type: categoryConstant.GET_ALL_CATEGORYPM_REQUEST })
+        let result = {};
+        await Promise.all(categoryArr.map(async el => {
+            const res = await axios.get('/api/' + el);
+            result[el] = res.data
+        }))
+        console.log(result);
+        dispatch({
+            type: categoryConstant.GET_ALL_CATEGORYPM_SUCCESS,
+            payload: result
+        })
+        console.log(result);
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 export const getAllCategory = async (dispatch, payload) => {
     try {
@@ -105,7 +119,7 @@ export const actionGrade = async (dispatch, payload, open) => {
         dispatch({ type: categoryConstant.GET_ALL_CATEGORY_REQUEST })
         const res = await axios.get('/api/grade');
         console.log(res);
-        if (res.status == 200)
+        if (res.status == 200) {
             dispatch({
                 type: categoryConstant.GET_ALL_CATEGORY_SUCCESS,
                 payload: {
@@ -114,6 +128,7 @@ export const actionGrade = async (dispatch, payload, open) => {
                     key: 'grade',
                 }
             })
+        }
         open({
             type: 'SET_OPEN',
             payload: {
@@ -136,29 +151,40 @@ export const createCategory = async (dispatch, payload, open) => {
         if (payload.categoryField == 'flanguagelevel') {
             newData = await getfLanguageName(res.data);
         }
-
+        if (res.status == 201) {
+            if (payload.categoryField == "position") {
+                const resP = await axios.post('/api/permissionps/create', { MaChucVu: newData.MaChucVu })
+                console.log("Add Permission: ", resP);
+            }
+            dispatch({
+                type: categoryConstant.ADD_CATEGORY_SUCCESS,
+                payload: {
+                    data: newData,
+                    key: payload.categoryField,
+                }
+            })
+            open({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Đã cập nhật!",
+                    type: "success"
+                }
+            })
+        }
+    } catch (error) {
         dispatch({
-            type: categoryConstant.ADD_CATEGORY_SUCCESS,
+            type: categoryConstant.ADD_CATEGORY_FAILURE,
             payload: {
-                data: newData,
-                key: payload.categoryField,
+                error: error.response.data.msg
             }
         })
         open({
             type: 'SET_OPEN',
             payload: {
-                msg: "Đã cập nhật!",
-                type: "success"
+                msg: error.response.data.msg,
+                type: "error"
             }
         })
-    } catch (error) {
-        throw new Error(error)
-        // dispatch({
-        //     type: categoryConstant.ADD_CATEGORY_FAILURE,
-        //     payload: {
-        //         error: error.response.data
-        //     }
-        // })
     }
 }
 

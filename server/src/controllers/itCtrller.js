@@ -5,7 +5,7 @@ exports.getAllIT = getAll(IT);
 
 exports.findByIdIT = findById(IT);
 
-exports.createIT = create(IT);
+exports.createIT = create(IT, "Tên tin học");
 
 exports.updateByIdIT = updateById(IT);
 

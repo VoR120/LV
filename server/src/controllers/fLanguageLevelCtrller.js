@@ -16,7 +16,7 @@ exports.findByFlIdFLanguageLevel = (req, res) => {
     })
 };
 
-exports.createFLanguageLevel = create(FLanguageLevel)
+exports.createFLanguageLevel = create(FLanguageLevel, "Tên trình độ")
 
 exports.updateByIdFLanguageLevel = updateById(FLanguageLevel);
 

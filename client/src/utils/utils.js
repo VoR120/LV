@@ -50,6 +50,7 @@ export const allInfoColumn = [
     { title: "Mã Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
     { title: "Họ tên", field: "HoTen", minWidth: 200 },
     { title: "Chi bộ", field: "TenChiBo", },
+    { title: "Chức vụ", field: "TenChucVu", },
     { title: "CMND", field: "CMND", },
     { title: "Giới tính", field: "TenGioiTinh", },
     { title: "Ngày sinh", field: "NgaySinh", type: 'date' },
@@ -77,3 +78,16 @@ export const allInfoColumn = [
         }
     },
 ]
+
+export const getExportData = (rows, columns) => {
+    const headers = columns.map(el => el.field);
+    const newRows = rows.map(el => {
+        let newEl = {};
+        Object.keys(el).map(key => {
+            if (headers.includes(key))
+                newEl[key] = el[key]
+        })
+        return newEl;
+    })
+    return newRows
+}

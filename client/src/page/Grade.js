@@ -15,7 +15,7 @@ import Layout from '../component/Layout';
 import PaperStatistic from '../component/PaperStatistic';
 import MyButton from '../component/UI/MyButton';
 import MySelect from '../component/UI/MySelect';
-import { allInfoColumn, downloadExcel, getKeyField } from '../utils/utils';
+import { allInfoColumn, downloadExcel, getExportData, getKeyField } from '../utils/utils';
 import { filterPartyMember, getAllPartyMember } from '../action/partyMemberAction';
 import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
 import { getAllCategory } from '../action/categoryAction';
@@ -25,6 +25,8 @@ import { getGrade, getGradeByYear } from '../action/gradeAction';
 import InputGrid from '../component/InputGrid';
 import { useForm } from 'react-hook-form';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import { CSVLink } from 'react-csv'
+import SaveAltIcon from '@mui/icons-material/SaveAlt';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -84,6 +86,8 @@ const Grade = () => {
         { title: "Tên loại", field: "TenLoai", },
         { title: "Năm", field: "Nam", },
     ]);
+
+    const data = getExportData(rows, columns)
 
     const {
         handleSubmit,
@@ -177,6 +181,13 @@ const Grade = () => {
                     }
                 </Paper>
                 <MyButton onClick={handleSubmit(onSubmit)} primary>Xem</MyButton>
+                {data.length > 0 &&
+                    <CSVLink data={data} filename={"export.csv"}>
+                        <MyButton style={{ marginLeft: 8 }} success>
+                            <SaveAltIcon style={{ marginRight: 4 }} />Excel
+                        </MyButton>
+                    </CSVLink>
+                }
                 <TableContainer style={{ maxWidth: "1170px", }} >
                     <MaterialTable
                         components={{

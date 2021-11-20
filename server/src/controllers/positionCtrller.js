@@ -5,7 +5,7 @@ exports.getAllPosition = getAll(Position);
 
 exports.findByIdPosition = findById(Position);
 
-exports.createPosition = create(Position)
+exports.createPosition = create(Position, "Tên chức vụ")
 
 exports.updateByIdPosition = updateById(Position);
 

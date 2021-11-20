@@ -5,7 +5,7 @@ exports.getAllReligion = getAll(Religion);
 
 exports.findByIdReligion = findById(Religion);
 
-exports.createReligion = create(Religion)
+exports.createReligion = create(Religion, "Tên tôn giáo")
 
 exports.updateByIdReligion = updateById(Religion);
 

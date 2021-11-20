@@ -50,12 +50,16 @@ exports.create = (table, key) => {
     return (newValue, callback) => {
         sql.query(`INSERT INTO ${table} SET ?`, newValue, (err, res) => {
             if (err) {
+                if (err.errno == 1062) {
+                    callback({ type: "duplicated" }, null)
+                    return;
+                }
                 console.log("error: ", err);
                 callback(err, null);
                 return;
             }
-            console.log("Created: ", { [key]: this.zeroFill(res.insertId), ...newValue });
-            callback(null, { [key]: this.zeroFill(res.insertId), ...newValue, SoDangVien: 0 });
+            console.log("Created: ", { [key]: res.insertId, ...newValue });
+            callback(null, { [key]: res.insertId, ...newValue, SoDangVien: 0 });
         })
     }
 }
@@ -76,8 +80,8 @@ exports.updateById = (table, key) => {
                 callback({ type: "not_found" }, null);
                 return;
             }
-            console.log("Updated: ", { newValue });
-            callback(null, { newValue });
+            console.log("Updated: ", { [key]: id, ...newValue });
+            callback(null, { [key]: id, ...newValue });
         }))
     }
 }
@@ -94,10 +98,10 @@ exports.remove = (table, key) => {
                 return;
             }
 
-            // if (res.affectedRows == 0) {
-            //     callback({ type: "not_found" }, null);
-            //     return;
-            // }
+            if (res.affectedRows == 0) {
+                callback({ type: "not_found" }, null);
+                return;
+            }
 
             console.log("Deleted: ", id);
             callback(null, res);
@@ -127,7 +131,7 @@ exports.removeAll = (table) => {
 
 exports.getDate = (date) => {
     const offset = date.getTimezoneOffset()
-    newDate = new Date(date.getTime() - (offset * 60 * 1000))
+    let newDate = new Date(date.getTime() - (offset * 60 * 1000))
     console.log(newDate.toISOString().split('T')[0]);
     return newDate.toISOString().split('T')[0]
 }

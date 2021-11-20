@@ -5,7 +5,7 @@ exports.getAllGrade = getAll(Grade);
 
 exports.findByIdGrade = findById(Grade);
 
-exports.createGrade = create(Grade)
+exports.createGrade = create(Grade, "Tên loại")
 
 exports.updateByIdGrade = updateById(Grade);
 

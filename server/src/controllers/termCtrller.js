@@ -5,7 +5,7 @@ exports.getAllTerm = getAll(Term);
 
 exports.findByIdTerm = findById(Term);
 
-exports.createTerm = create(Term);
+exports.createTerm = create(Term, "Nhiệm kỳ");
 
 exports.updateByIdTerm = updateById(Term);
 

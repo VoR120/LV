@@ -40,7 +40,7 @@ exports.filterPartyMember = (req, res) => {
     })
 }
 
-exports.createPartyMember = create(PartyMember)
+exports.createPartyMember = create(PartyMember, "Mã số Đảng viên")
 
 exports.updateByIdPartyMember = updateById(PartyMember);
 

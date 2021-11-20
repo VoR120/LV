@@ -13,13 +13,16 @@ export const createMove = async (payload, open) => {
         }
         const res = await axios.post('/api/move/create', newPayload)
         if (res.data) {
-            open({
-                type: 'SET_OPEN',
-                payload: {
-                    msg: "Đã cập nhật!",
-                    type: "success"
-                }
-            })
+            const resPM = await axios.put('/api/partymember/' + MaSoDangVien, { TrangThai: 0 });
+            if (resPM.data) {
+                open({
+                    type: 'SET_OPEN',
+                    payload: {
+                        msg: "Đã cập nhật!",
+                        type: "success"
+                    }
+                })
+            }
         }
         console.log(res);
     } catch (error) {
@@ -39,5 +42,31 @@ export const getMoveByType = async (payload) => {
         return res.data
     } catch (error) {
         console.log(error);
+    }
+}
+
+export const updateMove = async (payload, open) => {
+    const { MaChuyenSinhHoat, NgayChuyenDen } = payload
+    try {
+        const res = await axios.put('/api/move/' + MaChuyenSinhHoat, { NgayChuyenDen })
+        console.log(res);
+        if(res.data) {
+            open({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Đã cập nhật!",
+                    type: "success"
+                }
+            })
+        }
+        return res.data
+    } catch (error) {
+        open({
+            type: 'SET_OPEN',
+            payload: {
+                msg: "Đã xảy ra lỗi!",
+                type: "error"
+            }
+        })
     }
 }

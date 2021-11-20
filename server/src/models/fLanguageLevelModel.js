@@ -21,7 +21,32 @@ const FLanguageLevel = {
     },
     findById: findById("trinhdongoaingu", "MaTrinhDo"),
     findByFlId: findById("trinhdongoaingu", "MaNgoaiNgu"),
-    create: create("trinhdongoaingu", "MaTrinhDo"),
+    create: (newValue, callback) => {
+        sql.query(`SELECT MaTrinhDo FROM trinhdongoaingu 
+            WHERE MaNgoaiNgu = ${newValue.MaNgoaiNgu}
+            AND TenTrinhDo = "${newValue.TenTrinhDo}"`,
+            (err, res) => {
+                if (err) {
+                    console.log("error: ", err);
+                    callback(err, null);
+                    return;
+                }
+                if (res.length) {
+                    callback({ type: "duplicated" }, null)
+                    return;
+                }
+                sql.query(`INSERT INTO trinhdongoaingu SET ?`, newValue, (err, res) => {
+                    if (err) {
+                        console.log("error: ", err);
+                        callback(err, null);
+                        return;
+                    }
+                    console.log("Created: ", { MaTrinhDo: res.insertId, ...newValue });
+                    callback(null, { MaTrinhDo: res.insertId, ...newValue });
+                })
+            }
+        )
+    },
     updateById: updateById("trinhdongoaingu", "MaTrinhDo"),
     remove: remove("trinhdongoaingu", "MaTrinhDo"),
     removeAll: removeAll("trinhdongoaingu"),

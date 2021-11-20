@@ -5,7 +5,7 @@ exports.getAllPartyCell = getAll(PartyCell);
 
 exports.findByIdPartyCell = findById(PartyCell);
 
-exports.createPartyCell = create(PartyCell)
+exports.createPartyCell = create(PartyCell, "Tên chi bộ");
 
 exports.updateByIdPartyCell = updateById(PartyCell);
 

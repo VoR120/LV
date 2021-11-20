@@ -3,7 +3,7 @@ import { Box, Button, Grid, IconButton, MenuItem, Paper, Tab, Tabs, Typography }
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { getAllCategory, getFlanguageLevel } from '../action/categoryAction';
+import { getAllCategory, getAllCategoryPM, getFlanguageLevel } from '../action/categoryAction';
 import { getInfo, updateInfo } from '../action/infoAction';
 import CustomLoadingOverlay from '../component/CustomLoadingOverlay';
 import InputGrid from '../component/InputGrid';
@@ -285,15 +285,16 @@ const MyFile = () => {
     }, [flArray])
 
     useEffect(() => {
-        getAllCategory(categoryDispatch, "ethnic")
-        getAllCategory(categoryDispatch, "religion")
-        getAllCategory(categoryDispatch, "partycell")
-        getAllCategory(categoryDispatch, "position")
-        getAllCategory(categoryDispatch, "flanguage");
-        getAllCategory(categoryDispatch, "flanguagelevel");
-        getAllCategory(categoryDispatch, "politics");
-        getAllCategory(categoryDispatch, "it");
-        getAllCategory(categoryDispatch, "grade");
+        // getAllCategory(categoryDispatch, "ethnic")
+        // getAllCategory(categoryDispatch, "religion")
+        // getAllCategory(categoryDispatch, "partycell")
+        // getAllCategory(categoryDispatch, "position")
+        // getAllCategory(categoryDispatch, "flanguage");
+        // getAllCategory(categoryDispatch, "flanguagelevel");
+        // getAllCategory(categoryDispatch, "politics");
+        // getAllCategory(categoryDispatch, "it");
+        // getAllCategory(categoryDispatch, "grade");
+        getAllCategoryPM(categoryDispatch);
     }, [])
 
     return (
@@ -345,7 +346,7 @@ const MyFile = () => {
                                 name={"MaSoDangVien"}
                                 control={control}
                                 errors={errors}
-                                disabled={disable}
+                                disabled={true}
                             />
                             <InputGrid
                                 nameTitle={`Họ tên`}
@@ -361,12 +362,28 @@ const MyFile = () => {
                                 defaultValue=""
                                 control={control}
                                 errors={errors}
-                                disabled={disable}
+                                disabled={true}
                                 onChange={handleChangeSelect}
                             >
                                 {
                                     category.categories.partycell.map(el =>
                                         <MenuItem key={el.MaChiBo} value={el.MaChiBo}>{el.TenChiBo}</MenuItem>
+                                    )
+                                }
+                            </InputGrid>
+                            <InputGrid
+                                select
+                                nameTitle={"Chức vụ"}
+                                name={"MaChucVu"}
+                                defaultValue=""
+                                control={control}
+                                errors={errors}
+                                disabled={true}
+                                onChange={handleChangeSelect}
+                            >
+                                {
+                                    category.categories.position.map(el =>
+                                        <MenuItem key={el.MaChucVu} value={el.MaChucVu}>{el.TenChucVu}</MenuItem>
                                     )
                                 }
                             </InputGrid>

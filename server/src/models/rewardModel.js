@@ -3,13 +3,14 @@ const sql = require('../configs/db');
 
 const Reward = {
     getAll: (callback) => {
-        const sqlQuery = `SELECT khenthuong.*, dangvien.HoTen , hinhthuc.TenHinhThuc
-            FROM khenthuong, dangvien, hinhthuc
-            WHERE khenthuong.MaHinhThuc IN (
+        const sqlQuery = `SELECT kt.MaSoDangVien, dv.HoTen, kt.TenKhenThuong, kt.NgayKhenThuong, ht.TenHinhThuc,
+            kt.MaKhenThuong, kt.MaHinhThuc
+            FROM khenthuong kt, dangvien dv, hinhthuc ht
+            WHERE kt.MaHinhThuc IN (
             SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "Khen thưởng"
             )
-            AND khenthuong.MaHinhThuc = hinhthuc.MaHinhThuc
-            AND khenthuong.MaSoDangVien = dangvien.MaSoDangVien`;
+            AND kt.MaHinhThuc = ht.MaHinhThuc
+            AND kt.MaSoDangVien = dv.MaSoDangVien`;
         sql.query(sqlQuery, (err, res) => {
             if (err) {
                 console.log("error: ", err);

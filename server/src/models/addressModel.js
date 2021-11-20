@@ -1,5 +1,4 @@
 const sql = require('../configs/db');
-const { zeroFill } = require('./utils');
 
 const Address = {
     create: (newValue, callback) => {
@@ -12,9 +11,9 @@ const Address = {
                     callback(err, null);
                     return;
                 }
-                const addressId = zeroFill(res.insertId)
+                const addressId = res.insertId
                 console.log("Created Address: ", { MaDiaChi: addressId, ...newValue });
-                sql.query(`INSERT INTO diachidangvien SET MaSoDangVien = "${MaSoDangVien}", MaDiaChi = ${zeroFill(res.insertId)},
+                sql.query(`INSERT INTO diachidangvien SET MaSoDangVien = "${MaSoDangVien}", MaDiaChi = ${res.insertId},
                 MaLoaiDiaChi = ${MaLoaiDiaChi} 
             `, (err, res) => {
                     if (err) {

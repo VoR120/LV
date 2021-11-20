@@ -8,8 +8,9 @@ import Loading from '../component/CustomLoadingOverlay';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
 import MySelect from '../component/UI/MySelect';
-import { downloadExcel } from '../utils/utils';
-
+import { downloadExcel, getExportData } from '../utils/utils';
+import { CSVLink } from 'react-csv'
+import SaveAltIcon from '@mui/icons-material/SaveAlt';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -75,6 +76,8 @@ const RewardDiscipline = () => {
 
     const [columns, setColumns] = useState(columnArr["Khen thưởng"])
 
+    const data = getExportData(rows, columns)
+
     const handleChangeType = (e) => {
         setType("all");
         setTypeChoose(e.target.value)
@@ -94,6 +97,11 @@ const RewardDiscipline = () => {
         setLoadingTable(true)
         fetchApi();
     }
+
+    useEffect(() => {
+        setLoadingTable(true)
+        fetchApi();
+    }, [])
 
     return (
         <>
@@ -140,6 +148,13 @@ const RewardDiscipline = () => {
                     }
                 </Paper>
                 <MyButton onClick={handleSubmit} primary>Xem</MyButton>
+                {data.length > 0 &&
+                    <CSVLink data={data} filename={"export.csv"}>
+                        <MyButton style={{ marginLeft: 8 }} success>
+                            <SaveAltIcon style={{ marginRight: 4 }} />Excel
+                        </MyButton>
+                    </CSVLink>
+                }
                 <TableContainer style={{ maxWidth: "1170px", }} >
                     <MaterialTable
                         components={{

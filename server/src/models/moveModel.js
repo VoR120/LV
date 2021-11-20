@@ -5,11 +5,14 @@ const Move = {
     getAll: getAll("chuyensinhhoat"),
     findById: findById("chuyensinhhoat", "MaSoDangVien"),
     findByTypeId: (id, callback) => {
-        const sqlQuery = `SELECT chuyensinhhoat.*, dangvien.HoTen, hinhthuc.TenHinhThuc
-            FROM chuyensinhhoat, dangvien, hinhthuc
-            WHERE chuyensinhhoat.MaHinhThuc = "${id}"
-            AND chuyensinhhoat.MaHinhThuc = hinhthuc.MaHinhThuc
-            AND chuyensinhhoat.MaSoDangVien = dangvien.MaSoDangVien
+        const sqlQuery = `SELECT 
+        csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, csh.ChuyenTu, 
+        csh.ChuyenDen, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
+        ht.TenHinhThuc
+            FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht
+            WHERE csh.MaHinhThuc = "${id}"
+            AND csh.MaHinhThuc = ht.MaHinhThuc
+            AND csh.MaSoDangVien = dv.MaSoDangVien
         `;
         sql.query(sqlQuery, (err, res) => {
             if (err) {
@@ -28,13 +31,16 @@ const Move = {
         })
     },
     findByType: (type, callback) => {
-        const sqlQuery = `SELECT chuyensinhhoat.*, dangvien.HoTen , hinhthuc.TenHinhThuc
-            FROM chuyensinhhoat, dangvien, hinhthuc
-            WHERE chuyensinhhoat.MaHinhThuc IN (
+        const sqlQuery = `SELECT 
+            csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, csh.ChuyenTu, 
+            csh.ChuyenDen, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
+            ht.TenHinhThuc
+            FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht
+            WHERE csh.MaHinhThuc IN (
             SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "${type}"
             )
-            AND chuyensinhhoat.MaHinhThuc = hinhthuc.MaHinhThuc
-            AND chuyensinhhoat.MaSoDangVien = dangvien.MaSoDangVien`;
+            AND csh.MaHinhThuc = ht.MaHinhThuc
+            AND csh.MaSoDangVien = dv.MaSoDangVien`;
         sql.query(sqlQuery, (err, res) => {
             if (err) {
                 console.log("error: ", err);
@@ -58,11 +64,11 @@ const Move = {
                 callback(err, null);
                 return;
             }
-            console.log("Created: ", { newValue });
-            callback(null, { newValue });
+            console.log("Created: ", { MaChuyenSinhHoat: res.insertId, ...newValue });
+            callback(null, { MaChuyenSinhHoat: res.insertId, ...newValue });
         })
     },
-    updateById: updateById("chuyensinhhoat", "MaSoDangVien"),
+    updateById: updateById("chuyensinhhoat", "MaChuyenSinhHoat"),
     remove: remove("chuyensinhhoat", "MaSoDangVien"),
     removeAll: removeAll("chuyensinhhoat")
 }

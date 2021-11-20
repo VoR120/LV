@@ -5,7 +5,7 @@ exports.getAllEthnic = getAll(Ethnic);
 
 exports.findByIdEthnic = findById(Ethnic);
 
-exports.createEthnic = create(Ethnic)
+exports.createEthnic = create(Ethnic, "Tên dân tộc")
 
 exports.updateByIdEthnic = updateById(Ethnic);
 

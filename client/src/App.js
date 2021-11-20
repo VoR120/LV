@@ -1,6 +1,6 @@
 import { Backdrop, CircularProgress, CssBaseline } from '@mui/material';
 import React, { Suspense, useContext, useEffect, useState } from 'react';
-import { BrowserRouter as Router, Switch, useHistory } from "react-router-dom";
+import { BrowserRouter as Router, Switch, useHistory, Redirect } from "react-router-dom";
 import { isLogin } from './action/infoAction';
 import './App.scss';
 import RouteList from './config/routeConfig';
@@ -20,7 +20,7 @@ function App() {
   useEffect(() => {
     console.log(!info.isAuthenticated);
     if (!info.isAuthenticated) {
-      return <Login />
+      return <Redirect to="/login" />
     }
   }, [info.isAuthenticated])
 
@@ -36,20 +36,20 @@ function App() {
 
   return (
     <div className="App">
-        <CssBaseline />
-        <Router>
-          <Switch>
-            <Suspense
-              fallback={
-                <Backdrop style={{ backgroundColor: '#fff' }} open={true}>
-                  <CircularProgress color="primary" />
-                </Backdrop>
-              }
-            >
-              <RouteList routes={routes} />
-            </Suspense>
-          </Switch>
-        </Router>
+      <CssBaseline />
+      <Router>
+        <Switch>
+          <Suspense
+            fallback={
+              <Backdrop style={{ backgroundColor: '#fff' }} open={true}>
+                <CircularProgress color="primary" />
+              </Backdrop>
+            }
+          >
+            <RouteList routes={routes} />
+          </Suspense>
+        </Switch>
+      </Router>
     </div>
   );
 }

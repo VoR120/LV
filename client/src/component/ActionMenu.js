@@ -2,7 +2,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { Button, Menu, MenuItem } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useState } from 'react';
-import { CategoryContext } from '../contextAPI/CategoryContext';
+import { InfoContext } from '../contextAPI/InfoContext';
 import AddForm from './AddForm';
 import DeleteForm from './DeleteForm';
 import GradeForm from './GradeForm';
@@ -29,14 +29,10 @@ const useStyles = makeStyles(theme => ({
 const ActionMenu = (props) => {
     const classes = useStyles();
     const [open, setOpen] = useState(null);
+    const { info } = useContext(InfoContext)
     const { data } = props
     const handleClose = () => {
         setOpen(null)
-    }
-    const d = {
-        fullPowers: false,
-        update: false,
-        createVotings: true
     }
 
     const handleOpen = (event) => {
@@ -65,13 +61,27 @@ const ActionMenu = (props) => {
                 }}
                 MenuListProps={{ className: classes.menuList }}
             >
-                <MenuItem onClick={handleClose}><AddForm edit data={data} /></MenuItem>
-                <MenuItem onClick={handleClose}><DeleteForm name={data.HoTen} id={data.MaSoDangVien} /></MenuItem>
-                <MenuItem onClick={handleClose}><MoveForm id={data.MaSoDangVien} partycell={data.TenChiBo} /></MenuItem>
-                <MenuItem onClick={handleClose}><GradeForm id={data.MaSoDangVien} name={data.HoTen} partycell={data.TenChiBo} /></MenuItem>
-                <MenuItem onClick={handleClose}><RewardDisciplineForm name={data.HoTen} id={data.MaSoDangVien} reward /></MenuItem>
-                <MenuItem onClick={handleClose}><RewardDisciplineForm name={data.HoTen} id={data.MaSoDangVien} /></MenuItem>
-                {/*<MenuItem onClick={handleClose}><DecentralizationForm data={d} />                </MenuItem> */}
+                {info.info.Quyen["2"] == 1 &&
+                    <MenuItem onClick={handleClose}><AddForm edit data={data} /></MenuItem>
+                }
+                {info.info.Quyen["2"] == 1 &&
+                    <MenuItem onClick={handleClose}><DeleteForm name={data.HoTen} id={data.MaSoDangVien} /></MenuItem>
+                }
+                {info.info.Quyen["3"] == 1 &&
+                    <MenuItem onClick={handleClose}><MoveForm id={data.MaSoDangVien} partycell={data.TenChiBo} /></MenuItem>
+                }
+                {info.info.Quyen["4"] == 1 &&
+                    <MenuItem onClick={handleClose}><GradeForm id={data.MaSoDangVien} name={data.HoTen} partycell={data.TenChiBo} /></MenuItem>
+                }
+                {info.info.Quyen["5"] == 1 &&
+                    <MenuItem onClick={handleClose}><RewardDisciplineForm name={data.HoTen} id={data.MaSoDangVien} reward /></MenuItem>
+                }
+                {info.info.Quyen["5"] == 1 &&
+                    <MenuItem onClick={handleClose}><RewardDisciplineForm name={data.HoTen} id={data.MaSoDangVien} /></MenuItem>
+                }
+                {/* {info.info.Quyen["11"] == 1 &&
+                    <MenuItem onClick={handleClose}><DecentralizationForm data={d} />                </MenuItem>
+                } */}
             </Menu>
         </div>
     );

@@ -17,7 +17,7 @@ export const login = async (dispatch, payload) => {
                 const resPro = await axios.get(`https://provinces.open-api.vn/api/p/${el.MaTinh}?depth=1`);
                 const resDis = await axios.get(`https://provinces.open-api.vn/api/d/${el.MaHuyen}?depth=1`);
                 const resWard = await axios.get(`https://provinces.open-api.vn/api/w/${el.MaXa}?depth=1`);
-                if (el.MaLoaiDiaChi == "0001") {
+                if (el.MaLoaiDiaChi == "1") {
                     addressArr.QueQuan = {
                         provinceValue: el.MaTinh,
                         districtValue: el.MaHuyen,
@@ -47,17 +47,17 @@ export const login = async (dispatch, payload) => {
 
 
             }))
-
+            const resPer = await axios.get('/api/permissionps/' + info.MaChucVu);
+            console.log(resPer.data.data);
+            newInfo.Quyen = resPer.data.data
             newInfo.DiaChi = addressArr;
             console.log(newInfo);
             dispatch({ type: userConstant.LOGIN_SUCCESS, payload: { token, info: newInfo } });
             localStorage.setItem('token', JSON.stringify(token));
             localStorage.setItem('info', JSON.stringify(newInfo));
-            // axios.defaults.headers.common['Authorization'] = token;
-            // axios.defaults.headers("Access-Control-Allow-Origin", "*");
-            // axios.defaults.headers("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
         }
     } catch (error) {
+        // console.log(error);
         dispatch({ type: userConstant.LOGIN_FAILURE, error: error.response.data });
     }
 }
@@ -102,7 +102,7 @@ export const getInfo = async (dispatch, payload) => {
             const resPro = await axios.get(`https://provinces.open-api.vn/api/p/${el.MaTinh}?depth=1`);
             const resDis = await axios.get(`https://provinces.open-api.vn/api/d/${el.MaHuyen}?depth=1`);
             const resWard = await axios.get(`https://provinces.open-api.vn/api/w/${el.MaXa}?depth=1`);
-            if (el.MaLoaiDiaChi == "0001") {
+            if (el.MaLoaiDiaChi == "1") {
                 addressArr.QueQuan = {
                     provinceValue: el.MaTinh,
                     districtValue: el.MaHuyen,
@@ -197,7 +197,7 @@ export const updateInfo = async (dispatch, payload, open) => {
             MaHuyen: QQAddress.districtValue,
             MaXa: QQAddress.wardValue,
             DiaChiCuThe: QQAddress.detail,
-            MaLoaiDiaChi: "0001"
+            MaLoaiDiaChi: "1"
         })
         const resDCTT = await axios.put('/api/address/' + MaSoDangVien, {
             MaTinh: DCTTAddress.provinceValue,
@@ -253,7 +253,12 @@ export const updateInfo = async (dispatch, payload, open) => {
         addressFull.NoiOHienTai = `${resNOHT.data.DiaChiCuThe}, ${resNOHTP.data.name}, ${resNOHTD.data.name}, ${resNOHTW.data.name}`
         const res = await axios.put('/api/partymember/' + MaSoDangVien, newPayload);
         let result = [...res.data];
+
         console.log(res);
+
+        const resPer = await axios.get('/api/permissionps/' + MaChucVu);
+        console.log(resPer.data.data);
+        result[0].Quyen = resPer.data.data
         result[0].DiaChi = addressArr;
         result[0].QueQuan = addressFull.QueQuan;
         result[0].DiaChiThuongTru = addressFull.DiaChiThuongTru;
@@ -277,5 +282,18 @@ export const updateInfo = async (dispatch, payload, open) => {
         localStorage.setItem('info', JSON.stringify(result[0]));
     } catch (error) {
         console.log(error);
+    }
+}
+
+export const changePassword = async (payload, open) => {
+    const { password, newPassword, MaSoDangVien } = payload
+    try {
+        const res = await axios.put('/auth/changepassword', { password, newPassword, MaSoDangVien })
+        console.log(res);
+        if (res.status == 200) {
+            return { msg: res.data.msg }
+        }
+    } catch (error) {
+        return { error: error.response.data.msg, type: error.response.data.type }
     }
 }

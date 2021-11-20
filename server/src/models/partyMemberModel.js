@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 
 const query = {
-    getDataWithName: (id) => `SELECT dangvien.*, chibo.TenChiBo, dantoc.TenDanToc, tongiao.TenTonGiao, tinhoc.TenTinHoc,  chinhtri.TenChinhTri
+    getDataWithName: (id) => `SELECT dangvien.*, chibo.TenChiBo, dantoc.TenDanToc, tongiao.TenTonGiao, tinhoc.TenTinHoc,  chinhtri.TenChinhTri, chucvu.TenChucVu
         FROM dangvien
         INNER JOIN chibo ON dangvien.MaChiBo = chibo.MaChiBo
         INNER JOIN chucvu ON dangvien.MaChucVu = chucvu.MaChucVu
@@ -22,7 +22,7 @@ const query = {
 
 const PartyMember = {
     getAll: (callback) => {
-        sql.query(`SELECT dangvien.*, chibo.TenChiBo, dantoc.TenDanToc, tongiao.TenTonGiao, tinhoc.TenTinHoc,  chinhtri.TenChinhTri
+        sql.query(`SELECT dangvien.*, chibo.TenChiBo, dantoc.TenDanToc, tongiao.TenTonGiao, tinhoc.TenTinHoc,  chinhtri.TenChinhTri, chucvu.TenChucVu
             FROM dangvien
             INNER JOIN chibo ON dangvien.MaChiBo = chibo.MaChiBo
             INNER JOIN chucvu ON dangvien.MaChucVu = chucvu.MaChucVu
@@ -39,6 +39,7 @@ const PartyMember = {
                 let result = [...res]
                 if (res.length) {
                     res.map((el, index) => {
+                        delete result[index].HashPassword;
                         result[index].NgaySinh = getDate(result[index].NgaySinh);
                         result[index].NgayVaoDoan = getDate(result[index].NgayVaoDoan);
                         result[index].NgayVaoDang = getDate(result[index].NgayVaoDang);
@@ -67,7 +68,7 @@ const PartyMember = {
                                 return;
                             }
                             if (res.length) {
-                                sql.query(`SELECT * FROM quyendangvien WHERE `)
+                                delete result[0].HashPassword;
                                 result[0].NgoaiNgu = res;
                                 result[0].NgaySinh = getDate(result[0].NgaySinh);
                                 result[0].NgayVaoDoan = getDate(result[0].NgayVaoDoan);
@@ -89,12 +90,27 @@ const PartyMember = {
         const newPassword = generator.generate({
             length: 8,
             numbers: true,
-            symbols: true,
         })
         console.log(newPassword);
         newValue.HashPassword = await bcrypt.hash(newPassword, 10);
         sql.query(`INSERT INTO dangvien SET ?`, newValue, (err, res) => {
             if (err) {
+                if (err.errno == 1062) {
+                    if (err.message.includes("CMND")) {
+                        callback({ type: "duplicated", value: "CMND" })
+                        return;
+                    }
+                    if (err.message.includes("Email")) {
+                        callback({ type: "duplicated", value: "Email" })
+                        return;
+                    }
+                    if (err.message.includes("SoDienThoai")) {
+                        callback({ type: "duplicated", value: "Số điện thoại" })
+                        return;
+                    }
+                    callback({ type: "duplicated", value: "CMND" }, null)
+                    return;
+                }
                 console.log("error: ", err);
                 callback(err, null);
                 return;
@@ -104,7 +120,7 @@ const PartyMember = {
                 service: 'gmail',
                 auth: {
                     user: 'vob1706895@student.ctu.edu.vn',
-                    pass: 'aj7EAM38'
+                    pass: `${process.env.PASSWORD}`
                 }
             })
 
@@ -132,6 +148,7 @@ const PartyMember = {
                     }
                     if (res.length) {
                         let result = [...res]
+                        delete result[0].HashPassword;
                         result[0].NgaySinh = getDate(result[0].NgaySinh);
                         result[0].NgayVaoDoan = getDate(result[0].NgayVaoDoan);
                         result[0].NgayVaoDang = getDate(result[0].NgayVaoDang);
@@ -175,6 +192,7 @@ const PartyMember = {
                                     return;
                                 }
                                 if (res.length) {
+                                    delete result[0].HashPassword
                                     result[0].NgoaiNgu = res;
                                     result[0].NgaySinh = getDate(result[0].NgaySinh);
                                     result[0].NgayVaoDoan = getDate(result[0].NgayVaoDoan);
@@ -215,10 +233,10 @@ const PartyMember = {
             } else if (el == "HoTen") {
                 dataStr = dataStr + ` AND HoTen LIKE "%${data[el]}%"`
             } else {
-                dataStr = dataStr + ` AND dangvien.${el} = ${data[el]}`
+                dataStr = dataStr + ` AND dangvien.${el} = "${data[el]}"`
             }
         })
-        const query = `SELECT dangvien.*, chibo.TenChiBo, dantoc.TenDanToc, tongiao.TenTonGiao, tinhoc.TenTinHoc,  chinhtri.TenChinhTri
+        const query = `SELECT dangvien.*, chibo.TenChiBo, dantoc.TenDanToc, tongiao.TenTonGiao, tinhoc.TenTinHoc,  chinhtri.TenChinhTri, chucvu.TenChucVu
                 FROM dangvien
                 INNER JOIN chibo ON dangvien.MaChiBo = chibo.MaChiBo
                 INNER JOIN chucvu ON dangvien.MaChucVu = chucvu.MaChucVu
@@ -237,6 +255,7 @@ const PartyMember = {
                 let result = [...res]
                 if (res.length) {
                     res.map((el, index) => {
+                        delete result[index].HashPassword
                         result[index].NgaySinh = getDate(result[index].NgaySinh);
                         result[index].NgayVaoDoan = getDate(result[index].NgayVaoDoan);
                         result[index].NgayVaoDang = getDate(result[index].NgayVaoDang);
@@ -247,9 +266,36 @@ const PartyMember = {
                 callback(null, { data: result });
                 return;
             })
-    }
+    },
 };
 
 module.exports = PartyMember;
 
 
+// {
+//     "HoTen":"Nguyễn Văn Vỏ",
+//     "MaSoDangVien":"B1706895",
+//     "GioiTinh":"m",
+//     "CMND":"089099120154",
+//     "NgaySinh":"1999-08-19",
+//     "NoiSinh":"An Giang",
+//     "QuocTich":"Việt Nam",
+//     "SoDienThoai":"0981000000",
+//     "Email":"vonguyen2.vn@gmail.com",
+//     "NgheNghiep":"Sinh viên",
+//     "TrinhDoHocVan":"12/12",
+//     "NgayVaoDoan":"2015-12-12",
+//     "NoiVaoDoan":"An Giang",
+//     "NgayVaoDang":"2017-12-12",
+//     "NoiVaoDangLanDau":"Cần Thơ",
+//     "NgayChinhThuc":"2018-12-12",
+//     "NoiVaoDangChinhThuc":"Cần Thơ",
+//     "NguoiGioiThieu":"",
+//     "MaChiBo":"0001",
+//     "MaChinhTri":"0001",
+//     "MaChucVu":"0001",
+//     "MaDanToc":"0001",
+//     "MaTinHoc":"0001",
+//     "MaTonGiao":"0007",
+//     "TrangThai": 1
+// }

@@ -28,10 +28,14 @@ const getParamsAge = (value) => {
     return paramsAge[value];
 }
 
-export const getAllPartyMember = async (dispatch) => {
+export const getAllPartyMember = async (dispatch, partycell) => {
     try {
         dispatch({ type: partyMemberConstant.GET_ALL_PARTYMEMBER_REQUEST })
-        const res = await axios.get('/api/partymember');
+        let res;
+        if (partycell) {
+            res = await axios.get(`/api/partymember?MaChucVu=${partycell}`);
+        } else
+            res = await axios.get('/api/partymember');
         if (res.status == 200) {
             let result = [...res.data.data]
             await Promise.all(result.map(async (data, index) => {
@@ -49,7 +53,7 @@ export const getAllPartyMember = async (dispatch) => {
                     const resPro = await axios.get(`https://provinces.open-api.vn/api/p/${el.MaTinh}?depth=1`);
                     const resDis = await axios.get(`https://provinces.open-api.vn/api/d/${el.MaHuyen}?depth=1`);
                     const resWard = await axios.get(`https://provinces.open-api.vn/api/w/${el.MaXa}?depth=1`);
-                    if (el.MaLoaiDiaChi == "0001") {
+                    if (el.MaLoaiDiaChi == "1") {
                         addressArr.QueQuan = {
                             provinceValue: el.MaTinh,
                             districtValue: el.MaHuyen,
@@ -58,7 +62,7 @@ export const getAllPartyMember = async (dispatch) => {
                         }
                         addressFull.QueQuan = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
                     }
-                    if (el.MaLoaiDiaChi == "0002") {
+                    if (el.MaLoaiDiaChi == "2") {
                         addressArr.DiaChiThuongTru = {
                             provinceValue: el.MaTinh,
                             districtValue: el.MaHuyen,
@@ -67,7 +71,7 @@ export const getAllPartyMember = async (dispatch) => {
                         }
                         addressFull.DiaChiThuongTru = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
                     }
-                    if (el.MaLoaiDiaChi == "0003") {
+                    if (el.MaLoaiDiaChi == "3") {
                         addressArr.NoiOHienTai = {
                             provinceValue: el.MaTinh,
                             districtValue: el.MaHuyen,
@@ -76,7 +80,6 @@ export const getAllPartyMember = async (dispatch) => {
                         }
                         addressFull.NoiOHienTai = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
                     }
-
                 }))
                 result[index].NgoaiNgu = lArr;
                 result[index].NgoaiNguTrinhDo = lpArr.join(", ")
@@ -102,15 +105,15 @@ export const addPartyMember = async (dispatch, payload, open) => {
         MaChiBo, MaChinhTri, MaChucVu, MaDanToc, MaTinHoc, MaTonGiao,
         NgayVaoDang, NoiVaoDangLanDau, NgayChinhThuc, NoiVaoDangChinhThuc, NguoiGioiThieu,
         ChuyenDenChiBo, ChuyenTuChiBo, ChuyenTuDangBo, NgayChuyenDen, GhiChu,
-        NgoaiNgu, HinhThucThem, QQAddress, DCTTAddress, NOHTAddress, ImageUpload
+        NgoaiNgu, HinhThucThem, QQAddress, DCTTAddress, NOHTAddress, ImageUpload, MaNhiemKy
     } = payload
     try {
-        // dispatch({ type: partyMemberConstant.ADD_PARTYMEMBER_REQUEST })
+        dispatch({ type: partyMemberConstant.ADD_PARTYMEMBER_REQUEST })
         let newPayload = {
             HoTen, MaSoDangVien, GioiTinh, CMND, NgaySinh, NoiSinh, QuocTich,
             SoDienThoai, Email, NgheNghiep, TrinhDoHocVan, NgayVaoDoan, NoiVaoDoan,
             NgayVaoDang, NoiVaoDangLanDau, NgayChinhThuc, NoiVaoDangChinhThuc, NguoiGioiThieu,
-            MaChiBo, MaChinhTri, MaChucVu, MaDanToc, MaTinHoc, MaTonGiao,
+            MaChiBo, MaChinhTri, MaDanToc, MaTinHoc, MaTonGiao, MaChucVu,
             TrangThai: 1
         }
 
@@ -121,8 +124,9 @@ export const addPartyMember = async (dispatch, payload, open) => {
 
         newPayload.HinhAnh = resUpload.data.file[0].url;
         const res = await axios.post('/api/partymember/create', newPayload)
+        let result = [...res.data.data];
 
-        if (HinhThucThem == "0003" || HinhThucThem == "0004") {
+        if (HinhThucThem == "3" || HinhThucThem == "4") {
             const res = await axios.post('/api/move/create', {
                 MaSoDangVien,
                 MaHinhThuc: HinhThucThem,
@@ -131,13 +135,14 @@ export const addPartyMember = async (dispatch, payload, open) => {
             })
             console.log(res);
         }
+
         const resAddQQ = await axios.post('/api/address/create', {
             MaSoDangVien,
             MaTinh: QQAddress.provinceValue,
             MaHuyen: QQAddress.districtValue,
             MaXa: QQAddress.wardValue,
             DiaChiCuThe: QQAddress.detail,
-            MaLoaiDiaChi: "0001"
+            MaLoaiDiaChi: "1"
         })
         const resAddDCTT = await axios.post('/api/address/create', {
             MaSoDangVien,
@@ -145,7 +150,7 @@ export const addPartyMember = async (dispatch, payload, open) => {
             MaHuyen: DCTTAddress.districtValue,
             MaXa: DCTTAddress.wardValue,
             DiaChiCuThe: DCTTAddress.detail,
-            MaLoaiDiaChi: "0002"
+            MaLoaiDiaChi: "2"
         })
         const resAddNOHT = await axios.post('/api/address/create', {
             MaSoDangVien,
@@ -153,7 +158,7 @@ export const addPartyMember = async (dispatch, payload, open) => {
             MaHuyen: NOHTAddress.districtValue,
             MaXa: NOHTAddress.wardValue,
             DiaChiCuThe: NOHTAddress.detail,
-            MaLoaiDiaChi: "0003"
+            MaLoaiDiaChi: "3"
         })
 
         console.group()
@@ -179,25 +184,24 @@ export const addPartyMember = async (dispatch, payload, open) => {
             wardValue: resAddQQ.data.MaXa,
             detail: resAddQQ.data.DiaChiCuThe
         }
-        addressFull.QueQuan = `${resAddQQ.data.DiaChiCuThe}, ${resAddQQP.data.name}, ${resAddQQD.data.name}, ${resAddQQW.data.name}`
+        addressFull.QueQuan = `${resAddQQ.data.DiaChiCuThe}, ${resAddQQW.data.name}, ${resAddQQD.data.name}, ${resAddQQP.data.name}`
         addressArr.DiaChiThuongTru = {
             provinceValue: resAddDCTT.data.MaTinh,
             districtValue: resAddDCTT.data.MaHuyen,
             wardValue: resAddDCTT.data.MaXa,
             detail: resAddDCTT.data.DiaChiCuThe
         }
-        addressFull.DiaChiThuongTru = `${resAddDCTT.data.DiaChiCuThe}, ${resAddDCTTP.data.name}, ${resAddDCTTD.data.name}, ${resAddDCTTW.data.name}`
+        addressFull.DiaChiThuongTru = `${resAddDCTT.data.DiaChiCuThe}, ${resAddDCTTW.data.name}, ${resAddDCTTD.data.name}, ${resAddDCTTP.data.name}`
         addressArr.NoiOHienTai = {
             provinceValue: resAddNOHT.data.MaTinh,
             districtValue: resAddNOHT.data.MaHuyen,
             wardValue: resAddNOHT.data.MaXa,
             detail: resAddNOHT.data.DiaChiCuThe
         }
-        addressFull.NoiOHienTai = `${resAddNOHT.data.DiaChiCuThe}, ${resAddNOHTP.data.name}, ${resAddNOHTD.data.name}, ${resAddNOHTW.data.name}`
+        addressFull.NoiOHienTai = `${resAddNOHT.data.DiaChiCuThe}, ${resAddNOHTW.data.name}, ${resAddNOHTD.data.name}, ${resAddNOHTP.data.name}`
 
         console.log("Add: ", res)
 
-        let result = [...res.data.data];
         let lArr = [];
         let lpArr = [];
 
@@ -235,20 +239,24 @@ export const addPartyMember = async (dispatch, payload, open) => {
                 }
             })
         }
-        if (res.status == 400)
-            dispatch({
-                type: partyMemberConstant.ADD_PARTYMEMBER_FAILURE,
-                payload: {
-                    error: res
-                }
-            })
-
     } catch (error) {
-        console.log(error)
+        dispatch({
+            type: partyMemberConstant.ADD_PARTYMEMBER_FAILURE,
+            payload: {
+                error: error.response.data.msg
+            }
+        })
+        open({
+            type: 'SET_OPEN',
+            payload: {
+                msg: error.response.data.msg,
+                type: "error"
+            }
+        })
     }
 }
 
-export const updatePartyMember = async (dispatch, payload, open) => {
+export const updatePartyMember = async (dispatch, payload, open, setOpen) => {
     let { HoTen, MaSoDangVien, GioiTinh, CMND, NgaySinh, NoiSinh, QuocTich,
         SoDienThoai, Email, NgheNghiep, TrinhDoHocVan, NgayVaoDoan, NoiVaoDoan,
         MaChiBo, MaChinhTri, MaChucVu, MaDanToc, MaTinHoc, MaTonGiao,
@@ -294,21 +302,21 @@ export const updatePartyMember = async (dispatch, payload, open) => {
             MaHuyen: QQAddress.districtValue,
             MaXa: QQAddress.wardValue,
             DiaChiCuThe: QQAddress.detail,
-            MaLoaiDiaChi: "0001"
+            MaLoaiDiaChi: "1"
         })
         const resDCTT = await axios.put('/api/address/' + newPayload.MaSoDangVien, {
             MaTinh: DCTTAddress.provinceValue,
             MaHuyen: DCTTAddress.districtValue,
             MaXa: DCTTAddress.wardValue,
             DiaChiCuThe: DCTTAddress.detail,
-            MaLoaiDiaChi: "0002"
+            MaLoaiDiaChi: "2"
         })
         const resNOHT = await axios.put('/api/address/' + newPayload.MaSoDangVien, {
             MaTinh: NOHTAddress.provinceValue,
             MaHuyen: NOHTAddress.districtValue,
             MaXa: NOHTAddress.wardValue,
             DiaChiCuThe: NOHTAddress.detail,
-            MaLoaiDiaChi: "0003"
+            MaLoaiDiaChi: "3"
         })
         console.group()
         console.log("UpdateQQ: ", resQQ);
@@ -333,21 +341,21 @@ export const updatePartyMember = async (dispatch, payload, open) => {
             wardValue: resQQ.data.MaXa,
             detail: resQQ.data.DiaChiCuThe
         }
-        addressFull.QueQuan = `${resQQ.data.DiaChiCuThe}, ${resQQP.data.name}, ${resQQD.data.name}, ${resQQW.data.name}`
+        addressFull.QueQuan = `${resQQ.data.DiaChiCuThe}, ${resQQW.data.name}, ${resQQD.data.name}, ${resQQP.data.name}`
         addressArr.DiaChiThuongTru = {
             provinceValue: resDCTT.data.MaTinh,
             districtValue: resDCTT.data.MaHuyen,
             wardValue: resDCTT.data.MaXa,
             detail: resDCTT.data.DiaChiCuThe
         }
-        addressFull.DiaChiThuongTru = `${resDCTT.data.DiaChiCuThe}, ${resDCTTP.data.name}, ${resDCTTD.data.name}, ${resDCTTW.data.name}`
+        addressFull.DiaChiThuongTru = `${resDCTT.data.DiaChiCuThe}, ${resDCTTW.data.name}, ${resDCTTD.data.name}, ${resDCTTP.data.name}`
         addressArr.NoiOHienTai = {
             provinceValue: resNOHT.data.MaTinh,
             districtValue: resNOHT.data.MaHuyen,
             wardValue: resNOHT.data.MaXa,
             detail: resNOHT.data.DiaChiCuThe
         }
-        addressFull.NoiOHienTai = `${resNOHT.data.DiaChiCuThe}, ${resNOHTP.data.name}, ${resNOHTD.data.name}, ${resNOHTW.data.name}`
+        addressFull.NoiOHienTai = `${resNOHT.data.DiaChiCuThe}, ${resNOHTW.data.name}, ${resNOHTD.data.name}, ${resNOHTP.data.name}`
 
         const res = await axios.put('/api/partymember/' + newPayload.MaSoDangVien, newPayload);
         console.log("Add: ", res);
@@ -392,40 +400,14 @@ export const updatePartyMember = async (dispatch, payload, open) => {
 
 export const removePartyMember = async (dispatch, payload, open) => {
     try {
-        dispatch({ type: partyMemberConstant.REMOVE_PARTYMEMBER_REQUEST })
-        console.log(payload.id);
-        const removeFl = await axios.delete('/api/flpm/' + payload.id);
-        console.log("Remove fl: ", removeFl);
-        if (removeFl.status == 200) {
-            const removeAd = await axios.delete('/api/address/' + payload.id)
-            console.log("Remove Ad: ", removeAd);
-            if (removeAd.status == 200) {
-                const res = await axios.delete('/api/partymember/' + payload.id);
-                console.log(res);
-                if (res.status == 200) {
-                    dispatch({
-                        type: partyMemberConstant.REMOVE_PARTYMEMBER_SUCCESS,
-                        payload: {
-                            data: payload.id
-                        }
-                    })
-                    open({
-                        type: 'SET_OPEN',
-                        payload: {
-                            msg: "Đã cập nhật!",
-                            type: "success"
-                        }
-                    })
-                }
-            }
-        }
+        console(payload)
     } catch (error) {
         console.log(error);
     }
 }
 
 export const filterPartyMember = async (payload) => {
-
+    console.log(payload);
     Object.keys(payload).map(el => {
         if (el != "age") {
             if (payload[el] == "" || payload[el] == "0")
@@ -461,7 +443,7 @@ export const filterPartyMember = async (payload) => {
                     const resPro = await axios.get(`https://provinces.open-api.vn/api/p/${el.MaTinh}?depth=1`);
                     const resDis = await axios.get(`https://provinces.open-api.vn/api/d/${el.MaHuyen}?depth=1`);
                     const resWard = await axios.get(`https://provinces.open-api.vn/api/w/${el.MaXa}?depth=1`);
-                    if (el.MaLoaiDiaChi == "0001") {
+                    if (el.MaLoaiDiaChi == "1") {
                         addressArr.QueQuan = {
                             provinceValue: el.MaTinh,
                             districtValue: el.MaHuyen,
@@ -470,7 +452,7 @@ export const filterPartyMember = async (payload) => {
                         }
                         addressFull.QueQuan = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
                     }
-                    if (el.MaLoaiDiaChi == "0002") {
+                    if (el.MaLoaiDiaChi == "2") {
                         addressArr.DiaChiThuongTru = {
                             provinceValue: el.MaTinh,
                             districtValue: el.MaHuyen,
@@ -479,7 +461,7 @@ export const filterPartyMember = async (payload) => {
                         }
                         addressFull.DiaChiThuongTru = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
                     }
-                    if (el.MaLoaiDiaChi == "0003") {
+                    if (el.MaLoaiDiaChi == "3") {
                         addressArr.NoiOHienTai = {
                             provinceValue: el.MaTinh,
                             districtValue: el.MaHuyen,
@@ -491,7 +473,7 @@ export const filterPartyMember = async (payload) => {
 
                 }))
                 result[index].NgoaiNgu = lArr;
-                result[index].NgoaiNguTrinhDo = lpArr.join(", ")
+                result[index].NgoaiNguTrinhDo = lpArr.join(", ");
                 result[index].DiaChi = addressArr;
                 result[index].QueQuan = addressFull.QueQuan;
                 result[index].DiaChiThuongTru = addressFull.DiaChiThuongTru;

@@ -11,6 +11,9 @@ import { CategoryContext } from '../contextAPI/CategoryContext';
 import { downloadExcel, getKeyField } from '../utils/utils';
 import CategoryForm from '../component/CategoryForm';
 import AddGradeForm from '../component/AddGradeForm';
+import MyButton from '../component/UI/MyButton';
+import { CSVLink } from 'react-csv'
+import SaveAltIcon from '@mui/icons-material/SaveAlt';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -165,7 +168,7 @@ const Category = () => {
                         <MenuItem value="ethnic">Dân tộc</MenuItem>
                         <MenuItem value="religion">Tôn giáo</MenuItem>
                         <MenuItem value="position">Chức vụ</MenuItem>
-                        <MenuItem value="term">Nhiệm kỳ</MenuItem>
+                        {/* <MenuItem value="term">Nhiệm kỳ</MenuItem> */}
                         <MenuItem value="flanguage">Ngoại ngữ</MenuItem>
                         <MenuItem value="flanguagelevel">Trình độ ngoại ngữ</MenuItem>
                         <MenuItem value="it">Trình độ tin học</MenuItem>
@@ -187,6 +190,11 @@ const Category = () => {
                         />
                     )
                 }
+                {/* <CSVLink data={rows} filename={"export.csv"}>
+                    <MyButton style={{ marginLeft: 8 }} success>
+                        <SaveAltIcon style={{ marginRight: 4 }} />Excel
+                    </MyButton>
+                </CSVLink> */}
 
                 <TableContainer style={{ maxWidth: "1170px", }} >
                     <MaterialTable
@@ -201,16 +209,17 @@ const Category = () => {
                         columns={columns}
                         data={rows}
                         options={{
-                            padding: 'dense'
+                            padding: 'dense',
+                            exportAllData: true
                         }}
-                        actions={[
-                            {
-                                icon: () => <DownloadIcon />,
-                                tooltip: "Export to excel",
-                                onClick: () => downloadExcel(),
-                                isFreeAction: true
-                            }
-                        ]}
+                        // actions={[
+                        //     {
+                        //         icon: () => <DownloadIcon />,
+                        //         tooltip: "Export to excel",
+                        //         // onClick: () => downloadExcel(rows),
+                        //         isFreeAction: true
+                        //     }
+                        // ]}
                         isLoading={category.loading}
                     />
                 </TableContainer>

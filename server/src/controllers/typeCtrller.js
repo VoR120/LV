@@ -5,7 +5,7 @@ exports.getAllType = getAll(Type);
 
 exports.findByIdType = findById(Type);
 
-exports.createType = create(Type);
+exports.createType = create(Type, "Tên hình thức");
 
 exports.updateByIdType = updateById(Type);
 

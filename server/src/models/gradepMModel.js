@@ -3,7 +3,7 @@ const sql = require('../configs/db');
 
 const gradepM = {
     getAll: (callback) => {
-        sql.query(`SELECT loaidangvien.MaSoDangVien, loai.TenLoai, loai.Nam ,dangvien.HoTen, chibo.TenChiBo  
+        sql.query(`SELECT loaidangvien.MaSoDangVien,dangvien.HoTen, chibo.TenChiBo , loai.TenLoai, loai.Nam  
         FROM loaidangvien, loai, dangvien, chibo 
         WHERE loaidangvien.MaLoai = loai.MaLoai
         AND dangvien.MaChiBo = chibo.MaChiBo
@@ -27,7 +27,7 @@ const gradepM = {
                     return;
                 } else {
                     sql.query(
-                        `SELECT loaidangvien.MaSoDangVien, loai.MaLoai ,loai.TenLoai, loai.Nam ,dangvien.HoTen, chibo.TenChiBo  
+                        `SELECT loaidangvien.MaSoDangVien,dangvien.HoTen, chibo.TenChiBo , loai.TenLoai, loai.Nam  
                             FROM loaidangvien, loai, dangvien, chibo 
                             WHERE loaidangvien.MaLoai = loai.MaLoai 
                             AND dangvien.MaChiBo = chibo.MaChiBo
@@ -46,7 +46,7 @@ const gradepM = {
             })
     },
     findByYear: (year, callback) => {
-        sql.query(`SELECT loaidangvien.MaSoDangVien, loai.TenLoai, loai.Nam ,dangvien.HoTen, chibo.TenChiBo  
+        sql.query(`SELECT loaidangvien.MaSoDangVien,dangvien.HoTen, chibo.TenChiBo , loai.TenLoai, loai.Nam  
             FROM loaidangvien, loai, dangvien, chibo 
             WHERE loaidangvien.MaLoai = loai.MaLoai 
             AND dangvien.MaChiBo = chibo.MaChiBo
