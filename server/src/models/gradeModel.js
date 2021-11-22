@@ -64,7 +64,6 @@ const Grade = {
                     return;
                 }
                 if (res.length) {
-                    console.log(res[0].isDuplicate)
                     callback({ type: "duplicated" }, null)
                     return;
                 }

@@ -91,16 +91,24 @@ const PartyForm = (props) => {
                     >
                         <MenuItem value="0">Không</MenuItem>
                         <MenuItem value="1">Kết nạp mới</MenuItem>
-                        <MenuItem value="0003">Chuyển sinh hoạt tạm thời</MenuItem>
-                        <MenuItem value="0004">Chuyển sinh hoạt chính thức</MenuItem>
+                        <MenuItem value="3">Chuyển sinh hoạt tạm thời</MenuItem>
+                        <MenuItem value="4">Chuyển sinh hoạt chính thức</MenuItem>
                     </MySelect>
                 </Grid>
             </Grid>
             <Divider className={classes.divider} />
             {
-                (addType == "0003" || addType == "0004") && (
+                (addType == "3" || addType == "4") && (
                     <>
                         <Grid container spacing={1}>
+                            <Grid item xs={6}>
+                                <InputGrid
+                                    nameTitle={`Chuyển từ Đảng bộ`}
+                                    name={"ChuyenTuDangBo"}
+                                    control={control}
+                                    errors={errors}
+                                />
+                            </Grid>
                             <Grid item xs={6}>
                                 <InputGrid
                                     nameTitle={`Chuyển từ Chi bộ`}
@@ -111,8 +119,9 @@ const PartyForm = (props) => {
                             </Grid>
                             <Grid item xs={6}>
                                 <InputGrid
-                                    nameTitle={`Chuyển từ Đảng bộ`}
-                                    name={"ChuyenTuDangBo"}
+                                    nameTitle={`Chuyển đến Đảng bộ`}
+                                    name={"ChuyenDenDangBo"}
+                                    defaultValue="DHCT"
                                     control={control}
                                     errors={errors}
                                 />

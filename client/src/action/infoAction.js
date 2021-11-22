@@ -55,9 +55,10 @@ export const login = async (dispatch, payload) => {
             dispatch({ type: userConstant.LOGIN_SUCCESS, payload: { token, info: newInfo } });
             localStorage.setItem('token', JSON.stringify(token));
             localStorage.setItem('info', JSON.stringify(newInfo));
+            // axios.defaults.headers.common['Authorization'] = 'Bearer ' + JSON.stringify(token);
         }
     } catch (error) {
-        // console.log(error);
+        console.log(error);
         dispatch({ type: userConstant.LOGIN_FAILURE, error: error.response.data });
     }
 }

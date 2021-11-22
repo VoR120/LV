@@ -15,7 +15,7 @@ export const routes = [
     {
         path: '/home',
         exact: true,
-        component: lazy(() => import('./Home')),
+        component: lazy(() => import('./RedirectPage')),
         isPrivate: true,
     },
     {
@@ -39,6 +39,24 @@ export const routes = [
         path: '/partycell',
         exact: true,
         component: lazy(() => import('./PartyCell')),
+        isPrivate: true,
+    },
+    {
+        path: '/evaluate',
+        exact: true,
+        component: lazy(() => import('./Evaluate')),
+        isPrivate: true,
+    },
+    {
+        path: '/evaluatesubject',
+        exact: true,
+        component: lazy(() => import('./EvaluateSubject')),
+        isPrivate: true,
+    },
+    {
+        path: '/evaluatedepartment',
+        exact: true,
+        component: lazy(() => import('./EvaluateDepartment')),
         isPrivate: true,
     },
     {

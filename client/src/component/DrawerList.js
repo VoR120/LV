@@ -4,30 +4,29 @@ import HomeIcon from '@mui/icons-material/Home';
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import InfoIcon from '@mui/icons-material/Info';
 import LayersIcon from '@mui/icons-material/Layers';
+import ExpandLess from '@mui/icons-material/ExpandMore';
+import ExpandMore from '@mui/icons-material/ExpandLess';
 import ListIcon from '@mui/icons-material/List';
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
 import SearchIcon from '@mui/icons-material/Search';
 import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import ThumbsUpDownIcon from '@mui/icons-material/ThumbsUpDown';
 import GradeIcon from '@mui/icons-material/Grade';
-import { Divider } from '@mui/material';
+import { Collapse, Divider, ListItemButton, ListItemIcon } from '@mui/material';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import { makeStyles } from '@mui/styles';
 import { NavLink } from "react-router-dom";
 import '../public/css/Drawer.scss';
-import { useContext } from 'react';
-import { InfoContext } from '../contextAPI/InfoContext'
+import React, { useContext, useEffect, useState } from 'react';
+import { InfoContext } from '../contextAPI/InfoContext';
+import { useLocation } from 'react-router';
 
 const useStyles = makeStyles(theme => ({
     toolbarMixins: theme.mixins.toolbar,
     toolbar: {
         backgroundColor: theme.palette.primary.main,
-    },
-    icon: {
-        marginRight: theme.spacing(3),
-        color: theme.palette.grey[500]
     },
     badge: {
         marginRight: '10px'
@@ -38,112 +37,198 @@ const DrawerList = () => {
 
     const classes = useStyles();
     const { info } = useContext(InfoContext);
+    const location = useLocation();
+
+    const [open, setOpen] = useState(false);
+    const path = location.pathname;
+    const pathList = ["/grade", "/evaluate", "/evaluatesubject", "/evaluatedepartment"]
+
+    useEffect(() => {
+        if(pathList.includes(path)) {
+            setOpen(true)
+        } 
+    }, [path])
+
+    const handleClick = () => {
+        setOpen(!open);
+    };
     return (
-        <div className="drawer-list">
+        <div className="drawer-list" style={{ overflow: 'hidden' }}>
             <List className={classes.list}>
-                <NavLink to={"/home"}>
+                {/* <NavLink to={"/home"}>
                     <ListItem button>
-                        <HomeIcon className={classes.icon} />
+                        <HomeIcon />
                         <ListItemText primary="Trang chủ" />
                     </ListItem>
-                </NavLink>
+                </NavLink> */}
                 {
                     info.info.Quyen["1"] == 1 &&
                     <NavLink to={"/myfile"}>
-                        <ListItem button>
-                            <InfoIcon className={classes.icon} />
+                        <ListItemButton>
+                            <ListItemIcon>
+                                <InfoIcon />
+                            </ListItemIcon>
                             <ListItemText primary="Thông tin cá nhân" />
-                        </ListItem>
+                        </ListItemButton>
                     </NavLink>
                 }
                 {
-                    info.info.Quyen["2"] == 1 &&
+                    (
+                        info.info.Quyen["2"] == 1 ||
+                        info.info.Quyen["3"] == 1 ||
+                        info.info.Quyen["4"] == 1 ||
+                        info.info.Quyen["5"] == 1
+                    ) &&
                     <NavLink to={"/file"}>
-                        <ListItem button>
-                            <LayersIcon className={classes.icon} />
+                        <ListItemButton>
+                            <ListItemIcon>
+                                <LayersIcon />
+                            </ListItemIcon>
                             <ListItemText primary="Hồ sơ Đảng viên" />
-                        </ListItem>
+                        </ListItemButton>
                     </NavLink>
                 }
+                <ListItemButton onClick={handleClick}>
+                    <ListItemIcon>
+                        <ThumbsUpDownIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Đánh giá" />
+                    {!open ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+                <Collapse in={open} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding>
+                        {
+                            info.info.Quyen["4"] == 1 &&
+                            <NavLink to={"/grade"}>
+                                <ListItemButton >
+                                    <ListItemIcon>
+                                        <GradeIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Loại Đảng viên" />
+                                </ListItemButton>
+                            </NavLink>
+                        }
+                        {
+                            info.info.Quyen["4"] == 1 &&
+                            <NavLink to={"/evaluate"}>
+                                <ListItemButton >
+                                    <ListItemIcon>
+                                        <GradeIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Cá nhân đánh giá" />
+                                </ListItemButton>
+                            </NavLink>
+                        }
+                        {
+                            info.info.Quyen["4"] == 1 &&
+                            <NavLink to={"/evaluatesubject"}>
+                                <ListItemButton >
+                                    <ListItemIcon>
+                                        <GradeIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Bộ môn đánh giá" />
+                                </ListItemButton>
+                            </NavLink>
+                        }
+                        {
+                            info.info.Quyen["12"] == 1 &&
+                            <NavLink to={"/evaluatedepartment"}>
+                                <ListItemButton >
+                                    <ListItemIcon>
+                                        <GradeIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Khoa đánh giá" />
+                                </ListItemButton>
+                            </NavLink>
+                        }
+                    </List>
+                </Collapse>
                 {
                     info.info.Quyen["3"] == 1 &&
                     <NavLink to={"/move"}>
-                        <ListItem button>
-                            <SyncAltIcon className={classes.icon} />
+                        <ListItemButton >
+                            <ListItemIcon>
+                                <SyncAltIcon />
+                            </ListItemIcon>
                             <ListItemText primary="Chuyển sinh hoạt" />
-                        </ListItem>
-                    </NavLink>
-                }
-                {
-                    info.info.Quyen["4"] == 1 &&
-                    <NavLink to={"/grade"}>
-                        <ListItem button>
-                            <GradeIcon className={classes.icon} />
-                            <ListItemText primary="Loại Đảng viên" />
-                        </ListItem>
+                        </ListItemButton>
                     </NavLink>
                 }
                 {
                     info.info.Quyen["5"] == 1 &&
                     <NavLink to={"/rewarddiscipline"}>
-                        <ListItem button>
-                            <ThumbsUpDownIcon className={classes.icon} />
+                        <ListItemButton >
+                            <ListItemIcon>
+                                <ThumbsUpDownIcon />
+                            </ListItemIcon>
                             <ListItemText primary="Khen thưởng - kỷ luật" />
-                        </ListItem>
+                        </ListItemButton>
                     </NavLink>
                 }
                 {
                     info.info.Quyen["6"] == 1 &&
                     <NavLink to={"/statistic"}>
-                        <ListItem button>
-                            <EqualizerIcon className={classes.icon} />
+                        <ListItemButton >
+                            <ListItemIcon>
+                                <EqualizerIcon />
+                            </ListItemIcon>
                             <ListItemText primary="Báo cáo - Thống kê" />
-                        </ListItem>
+                        </ListItemButton>
                     </NavLink>
                 }
                 {info.info.Quyen["2"] == 1 &&
                     <NavLink to={"/search"}>
-                        <ListItem button>
-                            <SearchIcon className={classes.icon} />
+                        <ListItemButton >
+                            <ListItemIcon>
+                                <SearchIcon />
+                            </ListItemIcon>
                             <ListItemText primary="Tìm kiếm" />
-                        </ListItem>
+                        </ListItemButton>
                     </NavLink>
                 }
                 {
                     info.info.Quyen["7"] == 1 &&
                     <NavLink to={"/partycell"}>
-                        <ListItem button>
-                            <GroupIcon className={classes.icon} />
+                        <ListItemButton >
+                            <ListItemIcon>
+                                <GroupIcon />
+                            </ListItemIcon>
                             <ListItemText primary="Chi bộ" />
-                        </ListItem>
+                        </ListItemButton>
                     </NavLink>
                 }
                 {
                     info.info.Quyen["8"] == 1 &&
                     <NavLink to={"/category"}>
-                        <ListItem button>
-                            <ListIcon className={classes.icon} />
+                        <ListItemButton >
+                            <ListItemIcon>
+                                <ListIcon />
+                            </ListItemIcon>
                             <ListItemText primary="Danh mục" />
-                        </ListItem>
+                        </ListItemButton>
                     </NavLink>
                 }
                 {
                     (info.info.Quyen["9"] == 1 || info.info.Quyen["10"]) == 1 &&
                     <NavLink to={"/voting"}>
-                        <ListItem button>
-                            <HowToVoteIcon className={classes.icon} />
+                        <ListItemButton >
+                            <ListItemIcon>
+                                <HowToVoteIcon />
+                            </ListItemIcon>
                             <ListItemText primary="Biểu quyết" />
-                        </ListItem>
+                        </ListItemButton>
                     </NavLink>
                 }
                 <Divider />
                 {
                     info.info.Quyen["11"] == 1 &&
                     <NavLink to={"/decentralization"}>
-                        <ListItem button>
-                            <PlaylistAddCheckIcon className={classes.icon} />
+                        <ListItemButton >
+                            <ListItemIcon>
+                                <PlaylistAddCheckIcon />
+                            </ListItemIcon>
                             <ListItemText primary="Phân quyền" />
-                        </ListItem>
+                        </ListItemButton>
                     </NavLink>
                 }
             </List>

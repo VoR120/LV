@@ -27,6 +27,8 @@ import { useForm } from 'react-hook-form';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import { CSVLink } from 'react-csv'
 import SaveAltIcon from '@mui/icons-material/SaveAlt';
+import { getEvaluated } from '../action/evaluateAction';
+import { InfoContext } from '../contextAPI/InfoContext';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -67,6 +69,7 @@ const Grade = () => {
 
     // ContextAPI
     const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
+    const { info } = useContext(InfoContext);
     const { category, categoryDispatch } = useContext(CategoryContext);
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
 
@@ -104,9 +107,11 @@ const Grade = () => {
     const onSubmit = () => {
         setLoading(true);
         const fetchAPI = async () => {
-            let res = type == "year" ?
-                await getGradeByYear({ year: yearGrade }) :
-                await getGrade({ id: id })
+            let res = await getEvaluated({
+                Nam: yearGrade,
+                MaChiBo: info.info.Quyen['12'] == 1 ? null : info.info.MaChiBo,
+                MaSoDangVien: id
+            })
             console.log(res);
             if (res.error) {
                 setRows([])
@@ -118,7 +123,7 @@ const Grade = () => {
                     }
                 })
             } else
-                setRows(res);
+                setRows(res.data);
             setLoading(false);
         }
         fetchAPI();
@@ -204,14 +209,6 @@ const Grade = () => {
                         options={{
                             padding: 'dense'
                         }}
-                        actions={[
-                            {
-                                icon: () => <DownloadIcon />,
-                                tooltip: "Export to excel",
-                                onClick: () => downloadExcel(),
-                                isFreeAction: true
-                            }
-                        ]}
                         isLoading={loading}
                     />
                 </TableContainer>

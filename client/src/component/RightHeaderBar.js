@@ -79,6 +79,7 @@ const RightHeaderBar = () => {
                     type: "success"
                 }
             })
+            setChangePasswordOpen(false)
         }
     }
 

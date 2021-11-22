@@ -15,6 +15,7 @@ import MoveReturnForm from '../component/MoveReturnForm';
 import { useForm } from 'react-hook-form';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import { CSVLink } from 'react-csv'
+import ActionMoveMenu from '../component/ActionMoveMenu';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -62,8 +63,10 @@ const Move = () => {
         "Chuyển sinh hoạt đi": [
             { title: "Mã số Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
             { title: "Họ tên", field: "HoTen", },
-            { title: "Chuyển từ", field: "ChuyenTu", },
-            { title: "Chuyển đến", field: "ChuyenDen", },
+            { title: "Chuyển từ Đảng bộ", field: "ChuyenTuDangBo", },
+            { title: "Chuyển từ chi bộ", field: "ChuyenTuChiBo", },
+            { title: "Chuyển đến Đảng bộ", field: "ChuyenDenDangBo", },
+            { title: "Chuyển đến Chi bộ", field: "ChuyenDenChiBo", },
             { title: "Ngày chuyển đi", field: "NgayChuyenDi", },
             { title: "Ngày chuyển về", field: "NgayChuyenDen", },
             { title: "Hình thức", field: "TenHinhThuc", },
@@ -91,30 +94,32 @@ const Move = () => {
                         errors={errors}
                     />
                 }
-            }
-            // {
-            //     title: "Chức năng", field: "action", sorting: false,
-            //     render: (params) => {
-            //         console.log(params);
-            //         return <ActionMenu data={params} />
-            //     }
-            // },
+            },
+            {
+                title: "Chức năng", field: "action", sorting: false,
+                render: (params) => {
+                    console.log(params);
+                    return <ActionMoveMenu type={typeChoose} data={params} />
+                }
+            },
         ],
         "Chuyển sinh hoạt đến": [
             { title: "Mã số Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
             { title: "Họ tên", field: "HoTen", },
-            { title: "Chuyển từ", field: "ChuyenTu", },
-            { title: "Chuyển đến", field: "ChuyenDen", },
+            { title: "Chuyển từ Đảng bộ", field: "ChuyenTuDangBo", },
+            { title: "Chuyển từ chi bộ", field: "ChuyenTuChiBo", },
+            { title: "Chuyển đến Đảng bộ", field: "ChuyenDenDangBo", },
+            { title: "Chuyển đến Chi bộ", field: "ChuyenDenChiBo", },
             { title: "Ngày chuyển đến", field: "NgayChuyenDen", },
             { title: "Hình thức", field: "TenHinhThuc", },
             { title: "Ghi chú", field: "GhiChu", sorting: false },
-            // {
-            //     title: "Chức năng", field: "action", sorting: false,
-            //     render: (params) => {
-            //         console.log(params);
-            //         return <ActionMenu disabled={typeChoose != "1"} data={params} />
-            //     }
-            // },
+            {
+                title: "Chức năng", field: "action", sorting: false,
+                render: (params) => {
+                    console.log(params);
+                    return <ActionMoveMenu type={typeChoose} data={params} />
+                }
+            },
         ]
     }
 
@@ -216,14 +221,6 @@ const Move = () => {
                         options={{
                             padding: 'dense'
                         }}
-                        actions={[
-                            {
-                                icon: () => <DownloadIcon />,
-                                tooltip: "Export to excel",
-                                onClick: () => downloadExcel(),
-                                isFreeAction: true
-                            }
-                        ]}
                         isLoading={loading}
                     />
                 </TableContainer>

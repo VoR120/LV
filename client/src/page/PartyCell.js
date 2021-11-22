@@ -119,14 +119,6 @@ const PartyCell = () => {
                         options={{
                             padding: 'dense'
                         }}
-                        actions={[
-                            {
-                                icon: () => <DownloadIcon />,
-                                tooltip: "Export to excel",
-                                onClick: () => downloadExcel(),
-                                isFreeAction: true
-                            }
-                        ]}
                         isLoading={category.loading}
 
                     />

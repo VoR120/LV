@@ -33,7 +33,7 @@ export const getAllPartyMember = async (dispatch, partycell) => {
         dispatch({ type: partyMemberConstant.GET_ALL_PARTYMEMBER_REQUEST })
         let res;
         if (partycell) {
-            res = await axios.get(`/api/partymember?MaChucVu=${partycell}`);
+            res = await axios.get(`/api/partymember?MaChiBo=${partycell}`);
         } else
             res = await axios.get('/api/partymember');
         if (res.status == 200) {
@@ -104,7 +104,7 @@ export const addPartyMember = async (dispatch, payload, open) => {
         SoDienThoai, Email, NgheNghiep, TrinhDoHocVan, NgayVaoDoan, NoiVaoDoan,
         MaChiBo, MaChinhTri, MaChucVu, MaDanToc, MaTinHoc, MaTonGiao,
         NgayVaoDang, NoiVaoDangLanDau, NgayChinhThuc, NoiVaoDangChinhThuc, NguoiGioiThieu,
-        ChuyenDenChiBo, ChuyenTuChiBo, ChuyenTuDangBo, NgayChuyenDen, GhiChu,
+        ChuyenDenDangBo, ChuyenDenChiBo, ChuyenTuChiBo, ChuyenTuDangBo, NgayChuyenDen, GhiChu,
         NgoaiNgu, HinhThucThem, QQAddress, DCTTAddress, NOHTAddress, ImageUpload, MaNhiemKy
     } = payload
     try {
@@ -114,7 +114,6 @@ export const addPartyMember = async (dispatch, payload, open) => {
             SoDienThoai, Email, NgheNghiep, TrinhDoHocVan, NgayVaoDoan, NoiVaoDoan,
             NgayVaoDang, NoiVaoDangLanDau, NgayChinhThuc, NoiVaoDangChinhThuc, NguoiGioiThieu,
             MaChiBo, MaChinhTri, MaDanToc, MaTinHoc, MaTonGiao, MaChucVu,
-            TrangThai: 1
         }
 
         let formData = new FormData();
@@ -123,6 +122,11 @@ export const addPartyMember = async (dispatch, payload, open) => {
         console.log(resUpload.data.file[0]);
 
         newPayload.HinhAnh = resUpload.data.file[0].url;
+
+        if (HinhThucThem == "1") {
+            newPayload.KetNapMoi = 1;
+        }
+
         const res = await axios.post('/api/partymember/create', newPayload)
         let result = [...res.data.data];
 
@@ -130,8 +134,11 @@ export const addPartyMember = async (dispatch, payload, open) => {
             const res = await axios.post('/api/move/create', {
                 MaSoDangVien,
                 MaHinhThuc: HinhThucThem,
-                ChuyenTu: "Đảng bộ " + ChuyenTuDangBo + ", Chi bộ " + ChuyenTuChiBo,
-                ChuyenDen: ChuyenDenChiBo, NgayChuyenDen, GhiChu
+                ChuyenTuDangBo,
+                ChuyenTuChiBo,
+                ChuyenDenDangBo,
+                ChuyenDenChiBo,
+                NgayChuyenDen, GhiChu
             })
             console.log(res);
         }
@@ -400,7 +407,21 @@ export const updatePartyMember = async (dispatch, payload, open, setOpen) => {
 
 export const removePartyMember = async (dispatch, payload, open) => {
     try {
-        console(payload)
+        dispatch({ type: partyMemberConstant.REMOVE_PARTYMEMBER_REQUEST })
+        const res = await axios.delete('/api/partymember/' + payload.id);
+        if (res.status == 200) {
+            dispatch({
+                type: partyMemberConstant.REMOVE_PARTYMEMBER_SUCCESS,
+                payload: { data: payload.id }
+            })
+            open({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Đã cập nhật!",
+                    type: "success"
+                }
+            })
+        }
     } catch (error) {
         console.log(error);
     }

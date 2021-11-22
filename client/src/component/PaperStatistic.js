@@ -5,14 +5,15 @@ const useStyles = makeStyles(theme => ({
     paperStatistic: {
         padding: '8px',
         margin: '0 8px 16px',
+        padding: '8px'
     },
-    label: {
-        // paddingRight: '20px',
-        textAlign: 'right',
-    },
-    content: {
-        float: 'right'
-    },
+    // label: {
+    //     // paddingRight: '20px',
+    //     textAlign: 'right',
+    // },
+    // content: {
+    //     float: 'right'
+    // },
     gridContainer: {
         minWidth: '150px'
     }
@@ -26,11 +27,11 @@ const PaperStatistic = (props) => {
             <Typography align="center" style={{ marginBottom: '8px' }} variant="h5">{title}</Typography>
             {data.map((el, index) =>
                 <Grid className={classes.gridContainer} container key={index}>
-                    <Grid className={classes.label} xs={6} item >
-                        {el.label}:
+                    <Grid flex={1} item >
+                        {el.label}
                     </Grid>
-                    <Grid item xs={1} />
-                    <Grid className={classes.content} xs={5} item >
+                    <Grid item xs={1}>:</Grid>
+                    <Grid className={classes.content} xs={2} item >
                         {el.quantity}
                     </Grid>
                 </Grid>

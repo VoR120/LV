@@ -12,7 +12,8 @@ exports.getAll = (table, id, name, columnName) => {
         sql.query(`SELECT ${table}.${id}, ${table}.${name}, count(dangvien.${id}) AS SoDangVien 
                     FROM ${table} 
                     LEFT JOIN dangvien 
-                    ON ${table}.${id}=dangvien.${id} 
+                    ON ${table}.${id}=dangvien.${id}
+                    AND dangvien.DaXoa = 0
                     GROUP BY ${table}.${id}`, (err, res) => {
             if (err) {
                 console.log("error: ", err);
@@ -81,7 +82,7 @@ exports.updateById = (table, key) => {
                 return;
             }
             console.log("Updated: ", { [key]: id, ...newValue });
-            callback(null, { [key]: id, ...newValue });
+            callback(null, { [key]: id, ...newValue, SoDangVien: 0 });
         }))
     }
 }

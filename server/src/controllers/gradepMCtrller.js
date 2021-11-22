@@ -7,7 +7,7 @@ exports.findByIdGradepM = (req, res) => {
     gradepM.findById(req.params.id, (err, data) => {
         if (err) {
             if (err.type == "not_found") {
-                res.status(400).json({ msg: "Not Found!" })
+                res.status(400).json({ msg: "Không tìm thấy Đảng viên!" })
             } else
                 res.status(500).send({
                     message:
@@ -22,7 +22,7 @@ exports.findByYearGradepM = (req, res) => {
     gradepM.findByYear(req.params.year, (err, data) => {
         if (err) {
             if (err.type == "not_found") {
-                res.status(400).json({ msg: "Not Found!" })
+                res.status(400).json({ msg: "Year Not Found!" })
             } else
                 res.status(500).send({
                     message:

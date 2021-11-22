@@ -10,7 +10,8 @@ const Reward = {
             SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "Khen thưởng"
             )
             AND kt.MaHinhThuc = ht.MaHinhThuc
-            AND kt.MaSoDangVien = dv.MaSoDangVien`;
+            AND kt.MaSoDangVien = dv.MaSoDangVien
+            AND dv.DaXoa = 0`;
         sql.query(sqlQuery, (err, res) => {
             if (err) {
                 console.log("error: ", err);
@@ -33,6 +34,7 @@ const Reward = {
             WHERE khenthuong.MaHinhThuc = "${id}"
             AND khenthuong.MaHinhThuc = hinhthuc.MaHinhThuc
             AND khenthuong.MaSoDangVien = dangvien.MaSoDangVien
+            AND dangvien.DaXoa = 0
         `;
         sql.query(sqlQuery, (err, res) => {
             if (err) {

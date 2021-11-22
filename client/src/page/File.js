@@ -66,7 +66,7 @@ const File = () => {
         getAllCategoryPM(categoryDispatch);
         info.info.Quyen["12"] == 1
             ? getAllPartyMember(partyMemberDispatch)
-            : getAllPartyMember(partyMemberDispatch, info.info.MaChucVu)
+            : getAllPartyMember(partyMemberDispatch, info.info.MaChiBo)
     }, [])
 
     useEffect(() => {

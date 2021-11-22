@@ -7,7 +7,6 @@ const isEmpty = (obj) => {
 }
 
 exports.getAllPartyMember = (req, res) => {
-    console.log("Query: ", req.query);
     isEmpty(req.query)
         ? PartyMember.getAll((err, data) => {
             if (err)

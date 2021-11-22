@@ -103,12 +103,12 @@ const CategoryReducer = (state, action) => {
                 loading: true,
             }
         case categoryConstant.UPDATE_CATEGORY_SUCCESS:
-            const keyArray = Object.keys(action.payload.data.newValue);
+            const keyArray = Object.keys(action.payload.data);
             result = newCategory[`${action.payload.key}`].map(obj => {
                 let newObj = { ...obj }
-                if (newObj[`${keyArray[0]}`] == action.payload.data.newValue[`${keyArray[0]}`]) {
+                if (newObj[`${keyArray[0]}`] == action.payload.data[`${keyArray[0]}`]) {
                     keyArray.forEach(k => {
-                        newObj[k] = action.payload.data.newValue[k]
+                        newObj[k] = action.payload.data[k]
                     })
                 }
                 return newObj

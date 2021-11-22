@@ -196,7 +196,7 @@ const Category = () => {
                     </MyButton>
                 </CSVLink> */}
 
-                <TableContainer style={{ maxWidth: "1170px", }} >
+                <TableContainer className="category-table" style={{ maxWidth: "1170px", }} >
                     <MaterialTable
                         components={{
                             Container: (props) => <Paper
@@ -212,14 +212,6 @@ const Category = () => {
                             padding: 'dense',
                             exportAllData: true
                         }}
-                        // actions={[
-                        //     {
-                        //         icon: () => <DownloadIcon />,
-                        //         tooltip: "Export to excel",
-                        //         // onClick: () => downloadExcel(rows),
-                        //         isFreeAction: true
-                        //     }
-                        // ]}
                         isLoading={category.loading}
                     />
                 </TableContainer>

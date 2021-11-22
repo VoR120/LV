@@ -9,7 +9,8 @@ const Discipline = {
             SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "Kỷ luật"
             )
             AND kyluat.MaHinhThuc = hinhthuc.MaHinhThuc
-            AND kyluat.MaSoDangVien = dangvien.MaSoDangVien`;
+            AND kyluat.MaSoDangVien = dangvien.MaSoDangVien
+            AND dangvien.DaXoa = 0`;
         sql.query(sqlQuery, (err, res) => {
             if (err) {
                 console.log("error: ", err);
@@ -32,6 +33,7 @@ const Discipline = {
             WHERE kyluat.MaHinhThuc = "${id}"
             AND kyluat.MaHinhThuc = hinhthuc.MaHinhThuc
             AND kyluat.MaSoDangVien = dangvien.MaSoDangVien
+            AND dangvien.DaXoa = 0
         `;
         sql.query(sqlQuery, (err, res) => {
             if (err) {

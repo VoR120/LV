@@ -61,7 +61,7 @@ const MoveForm = (props) => {
         setOpen(true)
     }
     const handleChangeSelect = (e) => {
-        if(e.target.value != "") {
+        if (e.target.value != "") {
             clearErrors(e.target.name)
         }
         setValue(e.target.name, e.target.value)
@@ -110,6 +110,15 @@ const MoveForm = (props) => {
                         </Grid>
                         <Divider className={classes.divider} />
                         <Grid container spacing={1}>
+                            <Grid item xs={6}>
+                                <InputGrid
+                                    nameTitle={`Chuyển từ Đảng bộ`}
+                                    name={"ChuyenTuDangBo"}
+                                    defaultValue={"DHCT"}
+                                    control={control}
+                                    errors={errors}
+                                />
+                            </Grid>
                             <Grid item xs={6}>
                                 <InputGrid
                                     nameTitle={`Chuyển từ chi bộ`}

@@ -25,6 +25,7 @@ import { InfoContext } from '../contextAPI/InfoContext';
 import { CSVLink } from 'react-csv'
 import SaveAltIcon from '@mui/icons-material/SaveAlt';
 import axios from '../helper/axios';
+import { getStatistic } from '../action/statisticAction';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -69,7 +70,7 @@ const Statistic = () => {
     const { info } = useContext(InfoContext);
 
     // State
-    const [field, setField] = useState("partycell");
+    const [field, setField] = useState(info.info.Quyen["12"] == 1 ? "partycell" : "position");
     const [fieldKey, setFieldKey] = useState("partycell");
     const [fieldArr, setFieldArr] = useState([]);
     const [fieldValue, setFieldValue] = useState("");
@@ -118,9 +119,9 @@ const Statistic = () => {
     const handleSubmit = async () => {
         let filterObj = { [field]: fieldValue };
         if (info.info.Quyen["12"] != 1)
-            filterObj.partycell = info.info.ChucVu
+            filterObj.partycell = info.info.MaChiBo
         setLoadingTable(true)
-        const res = await filterPartyMember({ [field]: fieldValue });
+        const res = await filterPartyMember(filterObj);
         setRows(res);
         setLoadingTable(false)
     }
@@ -134,37 +135,41 @@ const Statistic = () => {
         return obj[gender];
     }
 
+    const getCondition = () => {
+        return info.info.Quyen["12"] == 1 ? "all" : info.info.MaChiBo
+    }
+
     // UseEffect
     useEffect(() => {
-        const getStatistic = async () => {
-            const res = await axios.get('/api/statistic/gender');
-            const newres = res.data.data.map(el => ({ label: getGender(el.GioiTinh), quantity: el.SoLuong }))
+        const fetchAPI = async () => {
+            const res = await getStatistic({ name: "gender", condition: getCondition() })
+            const newres = res.map(el => ({ label: getGender(el.GioiTinh), quantity: el.SoLuong }))
             setGenderS(newres);
-            const res1 = await axios.get('/api/statistic/partycell');
-            const newres1 = res1.data.data.map(el => ({ label: el.TenChiBo, quantity: el.SoLuong }))
+            const res1 = await getStatistic({ name: "partycell", condition: getCondition() })
+            const newres1 = res1.map(el => ({ label: el.TenChiBo, quantity: el.SoLuong }))
             setPartyCellS(newres1);
-            const res2 = await axios.get('/api/statistic/position');
-            const newres2 = res2.data.data.map(el => ({ label: el.TenChucVu, quantity: el.SoLuong }))
+            const res2 = await getStatistic({ name: "position", condition: getCondition() })
+            const newres2 = res2.map(el => ({ label: el.TenChucVu, quantity: el.SoLuong }))
             setPositionS(newres2);
-            const res3 = await axios.get('/api/statistic/ethnic');
-            const newres3 = res3.data.data.map(el => ({ label: el.TenDanToc, quantity: el.SoLuong }))
+            const res3 = await getStatistic({ name: "ethnic", condition: getCondition() })
+            const newres3 = res3.map(el => ({ label: el.TenDanToc, quantity: el.SoLuong }))
             setEthnicS(newres3);
-            const res4 = await axios.get('/api/statistic/religion');
-            const newres4 = res4.data.data.map(el => ({ label: el.TenTonGiao, quantity: el.SoLuong }))
+            const res4 = await getStatistic({ name: "religion", condition: getCondition() })
+            const newres4 = res4.map(el => ({ label: el.TenTonGiao, quantity: el.SoLuong }))
             setReligionS(newres4);
-            const res5 = await axios.get('/api/statistic/age');
-            const newres5 = Object.keys(res5.data.data[0]).map((el, ìndex) => {
-                return ({ label: el, quantity: res5.data.data[0][el] })
+            const res5 = await getStatistic({ name: "age", condition: getCondition() })
+            const newres5 = Object.keys(res5[0]).map((el, ìndex) => {
+                return ({ label: el, quantity: res5[0][el] })
             })
             setAgeS(newres5);
-            const res6 = await axios.get('/api/statistic/it');
-            const newres6 = res6.data.data.map(el => ({ label: el.TenTinHoc, quantity: el.SoLuong }))
+            const res6 = await getStatistic({ name: "it", condition: getCondition() })
+            const newres6 = res6.map(el => ({ label: el.TenTinHoc, quantity: el.SoLuong }))
             setItS(newres6);
-            const res7 = await axios.get('/api/statistic/politics');
-            const newres7 = res7.data.data.map(el => ({ label: el.TenChinhTri, quantity: el.SoLuong }))
+            const res7 = await getStatistic({ name: "politics", condition: getCondition() })
+            const newres7 = res7.map(el => ({ label: el.TenChinhTri, quantity: el.SoLuong }))
             setPoliticsS(newres7);
         }
-        getStatistic();
+        fetchAPI();
         // getAllPartyMember(partyMemberDispatch);
     }, [])
 
@@ -315,7 +320,7 @@ const Statistic = () => {
                         </MyButton>
                     </CSVLink>
                 }
-                <TableContainer style={{ maxWidth: "1170px", }} >
+                <TableContainer className="statistic-table" style={{ maxWidth: "1170px", }} >
                     <MaterialTable
                         components={{
                             Container: (props) =>
@@ -331,14 +336,6 @@ const Statistic = () => {
                         options={{
                             padding: 'dense'
                         }}
-                        actions={[
-                            {
-                                icon: () => <DownloadIcon />,
-                                tooltip: "Export to excel",
-                                onClick: () => downloadExcel(),
-                                isFreeAction: true
-                            }
-                        ]}
                         isLoading={loadingTable}
                     />
                 </TableContainer>

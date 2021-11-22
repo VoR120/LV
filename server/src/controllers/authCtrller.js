@@ -22,7 +22,7 @@ const query = {
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        sql.query(`SELECT * FROM dangvien WHERE Email = "${email}"`,
+        sql.query(`SELECT * FROM dangvien WHERE Email = "${email}" AND DaXoa = 0`,
             async (err, result) => {
                 if (err) {
                     res.status(500).json({ err })
@@ -72,7 +72,7 @@ exports.logout = async (req, res) => {
 exports.changePassword = async (req, res) => {
     try {
         const { password, newPassword, MaSoDangVien } = req.body
-        sql.query(`SELECT * FROM dangvien WHERE MaSoDangVien = "${MaSoDangVien}"`,
+        sql.query(`SELECT * FROM dangvien WHERE MaSoDangVien = "${MaSoDangVien} AND DaXoa = 0"`,
             async (err, result) => {
                 if (err) {
                     res.status(500).json({ err })

@@ -3,11 +3,12 @@ const sql = require('../configs/db');
 
 const gradepM = {
     getAll: (callback) => {
-        sql.query(`SELECT loaidangvien.MaSoDangVien,dangvien.HoTen, chibo.TenChiBo , loai.TenLoai, loai.Nam  
+        sql.query(`SELECT loaidangvien.MaSoDangVien,dangvien.HoTen, chibo.TenChiBo , loai.TenLoai, loai.Nam, loai.MaLoai
         FROM loaidangvien, loai, dangvien, chibo 
         WHERE loaidangvien.MaLoai = loai.MaLoai
         AND dangvien.MaChiBo = chibo.MaChiBo
-        AND dangvien.MaSoDangVien = loaidangvien.MaSoDangVien`,
+        AND dangvien.MaSoDangVien = loaidangvien.MaSoDangVien
+        `,
             (err, res) => {
                 if (err) {
                     console.log("error: ", err);
@@ -19,7 +20,7 @@ const gradepM = {
             })
     },
     findById: (id, callback) => {
-        sql.query(`SELECT HoTen FROM dangvien WHERE MaSoDangVien = "${id}"`,
+        sql.query(`SELECT HoTen FROM dangvien WHERE MaSoDangVien = "${id}" AND DaXoa = 0`,
             (err, res) => {
                 if (!res.length) {
                     console.log("Error: MaSoDangVien not found");
@@ -27,7 +28,7 @@ const gradepM = {
                     return;
                 } else {
                     sql.query(
-                        `SELECT loaidangvien.MaSoDangVien,dangvien.HoTen, chibo.TenChiBo , loai.TenLoai, loai.Nam  
+                        `SELECT loaidangvien.MaSoDangVien,dangvien.HoTen, chibo.TenChiBo , loai.TenLoai, loai.Nam, loai.MaLoai
                             FROM loaidangvien, loai, dangvien, chibo 
                             WHERE loaidangvien.MaLoai = loai.MaLoai 
                             AND dangvien.MaChiBo = chibo.MaChiBo
@@ -46,7 +47,7 @@ const gradepM = {
             })
     },
     findByYear: (year, callback) => {
-        sql.query(`SELECT loaidangvien.MaSoDangVien,dangvien.HoTen, chibo.TenChiBo , loai.TenLoai, loai.Nam  
+        sql.query(`SELECT loaidangvien.MaSoDangVien,dangvien.HoTen, chibo.TenChiBo , loai.TenLoai, loai.Nam, loai.MaLoai 
             FROM loaidangvien, loai, dangvien, chibo 
             WHERE loaidangvien.MaLoai = loai.MaLoai 
             AND dangvien.MaChiBo = chibo.MaChiBo

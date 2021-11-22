@@ -8,7 +8,7 @@ import MyButton from '../component/UI/MyButton';
 import MaterialTable from '@material-table/core';
 import DownloadIcon from '@mui/icons-material/Download';
 import xlsx from 'xlsx'
-import { allInfoColumn, downloadExcel } from '../utils/utils';
+import { allInfoColumn, downloadExcel, getExportData } from '../utils/utils';
 import InputGrid from '../component/InputGrid';
 import { useForm } from 'react-hook-form';
 import { filterPartyMember } from '../action/partyMemberAction';
@@ -16,6 +16,8 @@ import { CategoryContext } from '../contextAPI/CategoryContext';
 import axios from '../helper/axios';
 import { InfoContext } from '../contextAPI/InfoContext';
 import { getAllCategory } from '../action/categoryAction';
+import { CSVLink } from 'react-csv'
+import SaveAltIcon from '@mui/icons-material/SaveAlt';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -48,6 +50,9 @@ const Search = () => {
 
     const [rows, setRows] = useState([])
     const [columns] = useState(allInfoColumn.slice(0, -1))
+
+    const data = getExportData(rows, columns)
+
     const classes = useStyles({ rows: rows });
     const [gender, setGender] = useState('2');
     const [loadingTable, setLoadingTable] = useState(false);
@@ -217,6 +222,13 @@ const Search = () => {
                         </Grid>
                     </Grid>
                 </Paper>
+                {data.length > 0 &&
+                    <CSVLink data={data} filename={"export.csv"}>
+                        <MyButton style={{ marginLeft: 8 }} success>
+                            <SaveAltIcon style={{ marginRight: 4 }} />Excel
+                        </MyButton>
+                    </CSVLink>
+                }
                 <MyButton primary onClick={handleSubmit(onSubmit)} >Xem</MyButton>
                 <TableContainer className="search-table" style={{ maxWidth: "1170px", }} >
                     <MaterialTable
@@ -234,14 +246,6 @@ const Search = () => {
                         options={{
                             padding: 'dense',
                         }}
-                        actions={[
-                            {
-                                icon: () => <DownloadIcon />,
-                                tooltip: "Export to excel",
-                                onClick: () => downloadExcel(),
-                                isFreeAction: true
-                            }
-                        ]}
                         isLoading={loadingTable}
                     />
                 </TableContainer>

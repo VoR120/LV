@@ -133,7 +133,7 @@ const Login = () => {
                     type: "success"
                 }
             })
-            history.push('/home')
+            history.push('/myfile')
         }
     }, [info])
 
@@ -229,9 +229,9 @@ const Login = () => {
                         </Button>
                         <Grid container>
                             <Grid item xs>
-                                <Link href="#" variant="body2">
+                                {/* <Link href="#" variant="body2">
                                     Quên mật khẩu?
-                                </Link>
+                                </Link> */}
                             </Grid>
                         </Grid>
                     </form>

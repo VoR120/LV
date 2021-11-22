@@ -74,7 +74,7 @@ exports.remove = (Model) => {
                             err.message || "ERROR!"
                     });
                 }
-            else res.status(200).json({ msg: "Deleted!" });
+            else res.status(200).json({ msg: "Đã xóa!" });
         })
     }
 }
@@ -92,7 +92,7 @@ exports.removeAll = (Model) => {
                     });
                 }
             }
-            else res.status(200).json({ msg: "Delete All!" });
+            else res.status(200).json({ msg: "Đã xóa!" });
         })
     }
 }

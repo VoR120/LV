@@ -5,6 +5,7 @@ import React, { useContext, useState } from 'react';
 import { InfoContext } from '../contextAPI/InfoContext';
 import AddForm from './AddForm';
 import DeleteForm from './DeleteForm';
+import EditMoveForm from './EditMoveForm';
 import GradeForm from './GradeForm';
 import MoveForm from './MoveForm';
 import RewardDisciplineForm from './RewardDisciplineForm';
@@ -26,11 +27,11 @@ const useStyles = makeStyles(theme => ({
     },
 }))
 
-const ActionMenu = (props) => {
+const ActionMoveMenu = (props) => {
     const classes = useStyles();
     const [open, setOpen] = useState(null);
     const { info } = useContext(InfoContext)
-    const { data } = props
+    const { data, type } = props
     const handleClose = () => {
         setOpen(null)
     }
@@ -61,30 +62,12 @@ const ActionMenu = (props) => {
                 }}
                 MenuListProps={{ className: classes.menuList }}
             >
-                {info.info.Quyen["2"] == 1 &&
-                    <MenuItem onClick={handleClose}><AddForm edit data={data} /></MenuItem>
-                }
-                {info.info.Quyen["2"] == 1 &&
-                    <MenuItem onClick={handleClose}><DeleteForm name={data.HoTen} id={data.MaSoDangVien} /></MenuItem>
-                }
-                {info.info.Quyen["3"] == 1 &&
-                    <MenuItem onClick={handleClose}><MoveForm id={data.MaSoDangVien} partycell={data.TenChiBo} /></MenuItem>
-                }
-                {/* {info.info.Quyen["4"] == 1 &&
-                    <MenuItem onClick={handleClose}><GradeForm id={data.MaSoDangVien} name={data.HoTen} partycell={data.TenChiBo} /></MenuItem>
-                } */}
-                {info.info.Quyen["5"] == 1 &&
-                    <MenuItem onClick={handleClose}><RewardDisciplineForm name={data.HoTen} id={data.MaSoDangVien} reward /></MenuItem>
-                }
-                {info.info.Quyen["5"] == 1 &&
-                    <MenuItem onClick={handleClose}><RewardDisciplineForm name={data.HoTen} id={data.MaSoDangVien} /></MenuItem>
-                }
-                {/* {info.info.Quyen["11"] == 1 &&
-                    <MenuItem onClick={handleClose}><DecentralizationForm data={d} />                </MenuItem>
-                } */}
+                {/* {info.info.Quyen["2"] == 1 && */}
+                <MenuItem onClick={handleClose}><EditMoveForm type={type} data={data} /></MenuItem>
+                {/* } */}
             </Menu>
         </div>
     );
 };
 
-export default ActionMenu;
+export default ActionMoveMenu;

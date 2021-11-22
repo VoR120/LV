@@ -54,6 +54,7 @@ const MoveReturnForm = (props) => {
 
     const handleSubmitReturn = (data) => {
         data.MaChuyenSinhHoat = moveId
+        data.MaSoDangVien = id
         setOpen(false);
         onSubmit(data);
     }

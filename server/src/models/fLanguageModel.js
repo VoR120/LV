@@ -9,6 +9,7 @@ const FLanguage = {
         INNER JOIN dangvien
         ON dangvien.MaSoDangVien = ngoaingudangvien.MaSoDangVien
         ON ngoaingudangvien.MaNgoaiNgu=ngoaingu.MaNgoaiNgu
+        AND dangvien.DaXoa = 0
         GROUP BY ngoaingu.MaNgoaiNgu`,
             (err, res) => {
                 if (err) {

@@ -4,7 +4,7 @@ import { Redirect, useHistory } from 'react-router';
 const RedirectPage = () => {
     const history = useHistory();
     useEffect(() => {
-        history.push('/home');
+        history.push('/myfile');
     }, [])
     return (
         <>Đang chuyển hướng ...</>

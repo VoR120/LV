@@ -12,7 +12,9 @@ const query = {
         INNER JOIN dantoc ON dangvien.MaDanToc = dantoc.MaDanToc
         INNER JOIN tongiao ON dangvien.MaTonGiao = tongiao.MaTonGiao
         INNER JOIN tinhoc ON dangvien.MaTinHoc = tinhoc.MaTinHoc
-        INNER JOIN chinhtri ON dangvien.MaChinhTri = chinhtri.MaChinhTri WHERE MaSoDangVien = "${id}"`,
+        INNER JOIN chinhtri ON dangvien.MaChinhTri = chinhtri.MaChinhTri 
+        WHERE MaSoDangVien = "${id}"
+        AND DaXoa = 0`,
     getFLanguageWithName: (id) => `SELECT ngoaingudangvien.*, ngoaingu.TenNgoaiNgu, trinhdongoaingu.TenTrinhDo
         FROM ngoaingudangvien, ngoaingu, trinhdongoaingu
         WHERE ngoaingudangvien.MaNgoaiNgu = ngoaingu.MaNgoaiNgu
@@ -29,7 +31,8 @@ const PartyMember = {
             INNER JOIN dantoc ON dangvien.MaDanToc = dantoc.MaDanToc
             INNER JOIN tongiao ON dangvien.MaTonGiao = tongiao.MaTonGiao
             INNER JOIN tinhoc ON dangvien.MaTinHoc = tinhoc.MaTinHoc
-            INNER JOIN chinhtri ON dangvien.MaChinhTri = chinhtri.MaChinhTri`,
+            INNER JOIN chinhtri ON dangvien.MaChinhTri = chinhtri.MaChinhTri
+            AND DaXoa = 0`,
             (err, res) => {
                 if (err) {
                     console.log("error: ", err);
@@ -127,7 +130,7 @@ const PartyMember = {
             const mailOptions = {
                 from: 'vob1706895@student.ctu.edu.vn',
                 to: `${newValue.Email}`,
-                subject: 'Cấp tài khoản bởi admin',
+                subject: `Cấp tài khoản truy cập vào website ${process.env.URL}`,
                 text: `Mật khẩu đăng nhập: ${newPassword}`
             }
 
@@ -211,10 +214,24 @@ const PartyMember = {
             )
         }))
     },
-    remove: remove("dangvien", "MaSoDangVien"),
+    remove: (id, callback) => {
+        sql.query(`UPDATE dangvien SET DaXoa = 1 WHERE MaSoDangVien = "${id}"`, ((err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                callback(err, null);
+                return;
+            }
+            if (res.affectedRows == 0) {
+                callback({ type: "not_found" }, null);
+                return;
+            }
+            callback(null, res)
+        }))
+    },
     removeAll: removeAll("dangvien"),
 
     filter: (data, callback) => {
+        console.log(data)
         let dataStr = "";
         Object.keys(data).map(el => {
             if (el == "QQTinh") {
@@ -227,9 +244,9 @@ const PartyMember = {
                 dataStr = dataStr + `INNER JOIN loaidangvien ON dangvien.MaSoDangVien = loaidangvien.MaSoDangVien
                  AND loaidangvien.${el} = ${data[el]}`
             } else if (el == "Tuoigt") {
-                dataStr = dataStr + ` AND year(current_date()) - year(dangvien.NgaySinh) > ${data[el]}`
+                dataStr = dataStr + ` AND year(current_date()) - year(dangvien.NgaySinh) >= ${data[el]}`
             } else if (el == "Tuoilt") {
-                dataStr = dataStr + ` AND year(current_date()) - year(dangvien.NgaySinh) < ${data[el]}`
+                dataStr = dataStr + ` AND year(current_date()) - year(dangvien.NgaySinh) <= ${data[el]}`
             } else if (el == "HoTen") {
                 dataStr = dataStr + ` AND HoTen LIKE "%${data[el]}%"`
             } else {
@@ -244,7 +261,9 @@ const PartyMember = {
                 INNER JOIN tongiao ON dangvien.MaTonGiao = tongiao.MaTonGiao
                 INNER JOIN tinhoc ON dangvien.MaTinHoc = tinhoc.MaTinHoc
                 INNER JOIN chinhtri ON dangvien.MaChinhTri = chinhtri.MaChinhTri
-                ${dataStr}`
+                AND DaXoa = 0
+                ${dataStr}`;
+        console.log(query);
         sql.query(query,
             (err, res) => {
                 if (err) {

@@ -24,6 +24,7 @@ code {
 }
 
 // First child
+.g-table {
 table:first-child {
   & tr {
       &:hover {
@@ -38,8 +39,12 @@ table:first-child {
       }
     }
   }
+}
   
   // First + Second child
+  .file-table,
+  .statistic-table,
+  .search-table {
     table:first-child {
       & tr {
         &:hover {
@@ -61,10 +66,12 @@ table:first-child {
         }
       }
     }
+  }
     
     // Last child
 .file-table,
-.decentralization-table {
+.decentralization-table,
+.move-table {
   table:first-child {
     & tr {
       &:hover {

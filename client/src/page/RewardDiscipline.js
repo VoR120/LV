@@ -171,14 +171,6 @@ const RewardDiscipline = () => {
                         options={{
                             padding: 'dense'
                         }}
-                        actions={[
-                            {
-                                icon: () => <DownloadIcon />,
-                                tooltip: "Export to excel",
-                                onClick: () => downloadExcel(),
-                                isFreeAction: true
-                            }
-                        ]}
                         isLoading={loadingTable}
                     />
                 </TableContainer>

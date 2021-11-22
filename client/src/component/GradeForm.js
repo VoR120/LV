@@ -106,7 +106,6 @@ const DialogGradeForm = ({ open, setOpen, data }) => {
         const getGradeAPI = async () => {
             const resYear = await getYearGrade();
             const res = await getGrade({ id });
-            console.log(res);
             setGradeS(res);
             setYearArr(resYear);
             setYearChoose(new Date().getFullYear())
@@ -120,7 +119,6 @@ const DialogGradeForm = ({ open, setOpen, data }) => {
     }, [])
 
     useEffect(() => {
-        console.log(yearChoose);
         if (yearChoose) {
             const result = category.categories.grade.filter(el => el.Nam == yearChoose);
             setGradeArr(result[0].Data);

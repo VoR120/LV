@@ -22,7 +22,7 @@ export default function CustomizedSnackbars() {
     return (
         <Snackbar
             open={openSnackbar.open}
-            autoHideDuration={6000}
+            autoHideDuration={3000}
             anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
             onClose={handleClose}
         >

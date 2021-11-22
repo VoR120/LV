@@ -137,8 +137,19 @@ export const actionGrade = async (dispatch, payload, open) => {
             }
         })
     } catch (error) {
-        console.log(error.response.data.message);
-        // throw new Error(error)
+        dispatch({
+            type: categoryConstant.ADD_CATEGORY_FAILURE,
+            payload: {
+                error: error.response.data.msg
+            }
+        })
+        open({
+            type: 'SET_OPEN',
+            payload: {
+                msg: error.response.data.msg,
+                type: "error"
+            }
+        })
     }
 }
 

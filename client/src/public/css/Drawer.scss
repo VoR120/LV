@@ -1,4 +1,4 @@
-a.active .MuiListItem-root {
+a.active .MuiListItemButton-root {
     background-color: var(--primary);
     color: white;
     padding-left: 30px;
@@ -13,8 +13,10 @@ a {
     color: #000 !important
 }
 
-.drawer-list .MuiListItem-root {
+.drawer-list .MuiListItemButton-root {
+    max-height: 48px;
     margin-left: 9.6px;
     border-top-left-radius: 24px;
     border-bottom-left-radius: 24px;
+    // border-bottom: 1px solid #f1f1f1;
 }
