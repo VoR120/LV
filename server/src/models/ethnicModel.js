@@ -5,7 +5,7 @@ const Ethnic = {
     findById: findById("dantoc","MaDanToc"),
     create: create("dantoc", "MaDanToc"),
     updateById: updateById("dantoc", "MaDanToc"),
-    remove: remove("dantoc", "MaDanToc"),
+    remove: remove("dantoc", "MaDanToc", "Dân tộc"),
     removeAll: removeAll("dantoc")
 }
 

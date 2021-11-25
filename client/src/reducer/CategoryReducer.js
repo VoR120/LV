@@ -13,6 +13,7 @@ export const initialState = {
         flanguagelevel: [],
         grade: [],
         permission: [],
+        achievement: [],
     },
     categoryNames: {
         partycell: [],
@@ -26,6 +27,7 @@ export const initialState = {
         flanguagelevel: [],
         grade: [],
         permission: [],
+        achievement: [],
     },
     loading: false,
     error: null,
@@ -133,6 +135,12 @@ const CategoryReducer = (state, action) => {
                 ...state,
                 loading: false,
                 categories: newCategory,
+            }
+        case categoryConstant.REMOVE_CATEGORY_FAILURE:
+            return {
+                ...state,
+                loading: false,
+                error: action.payload.error
             }
         default:
             return initialState;

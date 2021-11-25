@@ -1,8 +1,9 @@
 const sql = require('../configs/db');
-const { findById, create, updateById, removeAll, remove, getDate } = require('./utils');
+const { findById, create, updateById, removeAll, remove, getDate, getGender } = require('./utils');
 const generator = require('generate-password');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
+const axios = require('axios');
 
 const query = {
     getDataWithName: (id) => `SELECT dangvien.*, chibo.TenChiBo, dantoc.TenDanToc, tongiao.TenTonGiao, tinhoc.TenTinHoc,  chinhtri.TenChinhTri, chucvu.TenChucVu
@@ -23,70 +24,198 @@ const query = {
 }
 
 const PartyMember = {
-    getAll: (callback) => {
-        sql.query(`SELECT dangvien.*, chibo.TenChiBo, dantoc.TenDanToc, tongiao.TenTonGiao, tinhoc.TenTinHoc,  chinhtri.TenChinhTri, chucvu.TenChucVu
-            FROM dangvien
-            INNER JOIN chibo ON dangvien.MaChiBo = chibo.MaChiBo
-            INNER JOIN chucvu ON dangvien.MaChucVu = chucvu.MaChucVu
-            INNER JOIN dantoc ON dangvien.MaDanToc = dantoc.MaDanToc
-            INNER JOIN tongiao ON dangvien.MaTonGiao = tongiao.MaTonGiao
-            INNER JOIN tinhoc ON dangvien.MaTinHoc = tinhoc.MaTinHoc
-            INNER JOIN chinhtri ON dangvien.MaChinhTri = chinhtri.MaChinhTri
-            AND DaXoa = 0`,
-            (err, res) => {
-                if (err) {
-                    console.log("error: ", err);
-                    callback(err, null);
-                    return;
-                }
-                let result = [...res]
-                if (res.length) {
-                    res.map((el, index) => {
-                        delete result[index].HashPassword;
-                        result[index].NgaySinh = getDate(result[index].NgaySinh);
-                        result[index].NgayVaoDoan = getDate(result[index].NgayVaoDoan);
-                        result[index].NgayVaoDang = getDate(result[index].NgayVaoDang);
-                        result[index].NgayChinhThuc = getDate(result[index].NgayChinhThuc);
-                    })
-                }
-                console.log("All: ", result);
-                callback(null, { data: result });
-            })
+    // getAll: (callback) => {
+    //     sql.query(`SELECT dangvien.*, chibo.TenChiBo, dantoc.TenDanToc, tongiao.TenTonGiao, tinhoc.TenTinHoc,  chinhtri.TenChinhTri, chucvu.TenChucVu
+    //         FROM dangvien
+    //         INNER JOIN chibo ON dangvien.MaChiBo = chibo.MaChiBo
+    //         INNER JOIN chucvu ON dangvien.MaChucVu = chucvu.MaChucVu
+    //         INNER JOIN dantoc ON dangvien.MaDanToc = dantoc.MaDanToc
+    //         INNER JOIN tongiao ON dangvien.MaTonGiao = tongiao.MaTonGiao
+    //         INNER JOIN tinhoc ON dangvien.MaTinHoc = tinhoc.MaTinHoc
+    //         INNER JOIN chinhtri ON dangvien.MaChinhTri = chinhtri.MaChinhTri
+    //         AND DaXoa = 0`,
+    //         (err, res) => {
+    //             if (err) {
+    //                 console.log("error: ", err);
+    //                 callback(err, null);
+    //                 return;
+    //             }
+    //             let result = [...res]
+    //             if (res.length) {
+    //                 res.map((el, index) => {
+    //                     delete result[index].HashPassword;
+    //                     result[index].NgaySinh = getDate(result[index].NgaySinh);
+    //                     result[index].NgayVaoDoan = getDate(result[index].NgayVaoDoan);
+    //                     result[index].NgayVaoDang = getDate(result[index].NgayVaoDang);
+    //                     result[index].NgayChinhThuc = getDate(result[index].NgayChinhThuc);
+    //                 })
+    //             }
+    //             console.log("All: ", result);
+    //             callback(null, { data: result });
+    //         })
+    // },
+    getAll: async (callback) => {
+        try {
+            const sqlPromise = sql.promise();
+            const [res, f] = await sqlPromise.execute(`
+                    SELECT dangvien.*, chibo.TenChiBo, dantoc.TenDanToc, tongiao.TenTonGiao, tinhoc.TenTinHoc,  chinhtri.TenChinhTri, chucvu.TenChucVu
+                    FROM dangvien
+                    INNER JOIN chibo ON dangvien.MaChiBo = chibo.MaChiBo
+                    INNER JOIN chucvu ON dangvien.MaChucVu = chucvu.MaChucVu
+                    INNER JOIN dantoc ON dangvien.MaDanToc = dantoc.MaDanToc
+                    INNER JOIN tongiao ON dangvien.MaTonGiao = tongiao.MaTonGiao
+                    INNER JOIN tinhoc ON dangvien.MaTinHoc = tinhoc.MaTinHoc
+                    INNER JOIN chinhtri ON dangvien.MaChinhTri = chinhtri.MaChinhTri
+                    AND DaXoa = 0`)
+            let result = [...res]
+            if (res.length > 0) {
+                await Promise.all(res.map(async (data, index) => {
+                    let lArr = [];
+                    let lpArr = [];
+                    const [resFlpm, f] = await sqlPromise.execute(`
+                    SELECT ngoaingudangvien.*, ngoaingu.TenNgoaiNgu, trinhdongoaingu.TenTrinhDo
+                    FROM ngoaingudangvien, ngoaingu, trinhdongoaingu
+                    WHERE ngoaingudangvien.MaNgoaiNgu = ngoaingu.MaNgoaiNgu
+                    AND ngoaingudangvien.MaTrinhDo = trinhdongoaingu.MaTrinhDo
+                    AND ngoaingudangvien.MaSoDangVien = "${data.MaSoDangVien}"`);
+                    resFlpm.forEach(el => {
+                        lArr.push({ MaNgoaiNgu: el.MaNgoaiNgu, MaTrinhDo: el.MaTrinhDo })
+                        lpArr.push(`${el.TenNgoaiNgu}-${el.TenTrinhDo}`);
+                    });
+                    let addressArr = {};
+                    let addressFull = {};
+                    const [resAddress, f1] = await sqlPromise.execute(`
+                    SELECT diachi.*, loaidiachi.MaLoaiDiaChi 
+                    FROM diachidangvien, diachi, loaidiachi 
+                    WHERE diachidangvien.MaLoaiDiaChi = loaidiachi.MaLoaiDiaChi
+                    AND diachidangvien.MaDiaChi = diachi.MaDiaChi
+                    AND diachidangvien.MaSoDangVien = "${data.MaSoDangVien}"`)
+                    await Promise.all(resAddress.map(async (el, index) => {
+                        const resPro = await axios.get(`https://provinces.open-api.vn/api/p/${el.MaTinh}?depth=1`);
+                        const resDis = await axios.get(`https://provinces.open-api.vn/api/d/${el.MaHuyen}?depth=1`);
+                        const resWard = await axios.get(`https://provinces.open-api.vn/api/w/${el.MaXa}?depth=1`);
+                        if (el.MaLoaiDiaChi == "1") {
+                            addressArr.QueQuan = {
+                                provinceValue: el.MaTinh,
+                                districtValue: el.MaHuyen,
+                                wardValue: el.MaXa,
+                                detail: el.DiaChiCuThe
+                            }
+                            addressFull.QueQuan = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
+                        }
+                        if (el.MaLoaiDiaChi == "2") {
+                            addressArr.DiaChiThuongTru = {
+                                provinceValue: el.MaTinh,
+                                districtValue: el.MaHuyen,
+                                wardValue: el.MaXa,
+                                detail: el.DiaChiCuThe
+                            }
+                            addressFull.DiaChiThuongTru = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
+                        }
+                        if (el.MaLoaiDiaChi == "3") {
+                            addressArr.NoiOHienTai = {
+                                provinceValue: el.MaTinh,
+                                districtValue: el.MaHuyen,
+                                wardValue: el.MaXa,
+                                detail: el.DiaChiCuThe
+                            }
+                            addressFull.NoiOHienTai = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
+                        }
+                    }))
+                    delete result[index].HashPassword;
+                    result[index].NgaySinh = getDate(res[index].NgaySinh);
+                    result[index].NgayVaoDoan = getDate(res[index].NgayVaoDoan);
+                    result[index].NgayVaoDang = getDate(res[index].NgayVaoDang);
+                    result[index].NgayChinhThuc = getDate(res[index].NgayChinhThuc);
+                    result[index].NgoaiNgu = lArr;
+                    result[index].NgoaiNguTrinhDo = lpArr.join(", ")
+                    result[index].DiaChi = addressArr;
+                    result[index].QueQuan = addressFull.QueQuan;
+                    result[index].DiaChiThuongTru = addressFull.DiaChiThuongTru;
+                    result[index].NoiOHienTai = addressFull.NoiOHienTai;
+                    result[index].TenGioiTinh = getGender(res[index].GioiTinh)
+                }))
+                callback(null, result);
+            }
+        } catch (error) {
+            callback(error, null)
+        }
     },
-    findById: (id, callback) => {
-        sql.query(query.getDataWithName(id),
-            (err, res) => {
-                if (err) {
-                    console.log("error: ", err);
-                    callback(err, null);
-                    return;
-                }
-                if (res.length) {
-                    let result = [...res];
-                    sql.query(query.getFLanguageWithName(id),
-                        (err, res) => {
-                            if (err) {
-                                console.log("error: ", err);
-                                callback(err, null);
-                                return;
-                            }
-                            if (res.length) {
-                                delete result[0].HashPassword;
-                                result[0].NgoaiNgu = res;
-                                result[0].NgaySinh = getDate(result[0].NgaySinh);
-                                result[0].NgayVaoDoan = getDate(result[0].NgayVaoDoan);
-                                result[0].NgayVaoDang = getDate(result[0].NgayVaoDang);
-                                result[0].NgayChinhThuc = getDate(result[0].NgayChinhThuc);
-                                console.log("Found: ", result);
-                                callback(null, result);
-                                return;
-                            }
-                            callback({ type: "not_found" }, null)
-                        })
-                    return;
-                }
-                callback({ type: "not_found" }, null)
-            })
+    findById: async (id, callback) => {
+        try {
+            const sqlPromise = sql.promise();
+            const [res, f] = await sqlPromise.execute(query.getDataWithName(id))
+            let result = [...res]
+            if (res.length > 0) {
+                let lArr = [];
+                let lpArr = [];
+                const [resFlpm, f] = await sqlPromise.execute(`
+                    SELECT ngoaingudangvien.*, ngoaingu.TenNgoaiNgu, trinhdongoaingu.TenTrinhDo
+                    FROM ngoaingudangvien, ngoaingu, trinhdongoaingu
+                    WHERE ngoaingudangvien.MaNgoaiNgu = ngoaingu.MaNgoaiNgu
+                    AND ngoaingudangvien.MaTrinhDo = trinhdongoaingu.MaTrinhDo
+                    AND ngoaingudangvien.MaSoDangVien = "${res[0].MaSoDangVien}"`);
+                resFlpm.forEach(el => {
+                    lArr.push({ MaNgoaiNgu: el.MaNgoaiNgu, MaTrinhDo: el.MaTrinhDo })
+                    lpArr.push(`${el.TenNgoaiNgu}-${el.TenTrinhDo}`);
+                });
+                let addressArr = {};
+                let addressFull = {};
+                const [resAddress, f1] = await sqlPromise.execute(`
+                    SELECT diachi.*, loaidiachi.MaLoaiDiaChi 
+                    FROM diachidangvien, diachi, loaidiachi 
+                    WHERE diachidangvien.MaLoaiDiaChi = loaidiachi.MaLoaiDiaChi
+                    AND diachidangvien.MaDiaChi = diachi.MaDiaChi
+                    AND diachidangvien.MaSoDangVien = "${res[0].MaSoDangVien}"`)
+                await Promise.all(resAddress.map(async (el, index) => {
+                    const resPro = await axios.get(`https://provinces.open-api.vn/api/p/${el.MaTinh}?depth=1`);
+                    const resDis = await axios.get(`https://provinces.open-api.vn/api/d/${el.MaHuyen}?depth=1`);
+                    const resWard = await axios.get(`https://provinces.open-api.vn/api/w/${el.MaXa}?depth=1`);
+                    if (el.MaLoaiDiaChi == "1") {
+                        addressArr.QueQuan = {
+                            provinceValue: el.MaTinh,
+                            districtValue: el.MaHuyen,
+                            wardValue: el.MaXa,
+                            detail: el.DiaChiCuThe
+                        }
+                        addressFull.QueQuan = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
+                    }
+                    if (el.MaLoaiDiaChi == "2") {
+                        addressArr.DiaChiThuongTru = {
+                            provinceValue: el.MaTinh,
+                            districtValue: el.MaHuyen,
+                            wardValue: el.MaXa,
+                            detail: el.DiaChiCuThe
+                        }
+                        addressFull.DiaChiThuongTru = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
+                    }
+                    if (el.MaLoaiDiaChi == "3") {
+                        addressArr.NoiOHienTai = {
+                            provinceValue: el.MaTinh,
+                            districtValue: el.MaHuyen,
+                            wardValue: el.MaXa,
+                            detail: el.DiaChiCuThe
+                        }
+                        addressFull.NoiOHienTai = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
+                    }
+                }))
+                delete result[0].HashPassword;
+                result[0].NgaySinh = getDate(res[0].NgaySinh);
+                result[0].NgayVaoDoan = getDate(res[0].NgayVaoDoan);
+                result[0].NgayVaoDang = getDate(res[0].NgayVaoDang);
+                result[0].NgayChinhThuc = getDate(res[0].NgayChinhThuc);
+                result[0].NgoaiNgu = lArr;
+                result[0].NgoaiNguTrinhDo = lpArr.join(", ")
+                result[0].DiaChi = addressArr;
+                result[0].QueQuan = addressFull.QueQuan;
+                result[0].DiaChiThuongTru = addressFull.DiaChiThuongTru;
+                result[0].NoiOHienTai = addressFull.NoiOHienTai;
+                result[0].TenGioiTinh = getGender(result[0].GioiTinh)
+                callback(null, result);
+            }
+        } catch (error) {
+            callback(error, null)
+        }
     },
     create: async (newValue, callback) => {
 
@@ -100,18 +229,18 @@ const PartyMember = {
             if (err) {
                 if (err.errno == 1062) {
                     if (err.message.includes("CMND")) {
-                        callback({ type: "duplicated", value: "CMND" })
+                        callback({ type: "duplicated", value: "CMND", field: "CMND" })
                         return;
                     }
                     if (err.message.includes("Email")) {
-                        callback({ type: "duplicated", value: "Email" })
+                        callback({ type: "duplicated", value: "Email", field: "Email" })
                         return;
                     }
                     if (err.message.includes("SoDienThoai")) {
-                        callback({ type: "duplicated", value: "Số điện thoại" })
+                        callback({ type: "duplicated", value: "Số điện thoại", field: "SoDienThoai" })
                         return;
                     }
-                    callback({ type: "duplicated", value: "CMND" }, null)
+                    callback(err, null)
                     return;
                 }
                 console.log("error: ", err);
@@ -165,54 +294,102 @@ const PartyMember = {
             )
         })
     },
-    updateById: (id, newValue, callback) => {
-        sql.query(`UPDATE dangvien SET ? WHERE MaSoDangVien = "${id}"`, newValue, ((err, res) => {
-            if (err) {
-                console.log("error: ", err);
-                callback(err, null);
-                return;
-            }
-
-            if (res.affectedRows == 0) {
-                callback({ type: "not_found" }, null);
-                return;
-            }
-
-            sql.query(query.getDataWithName(id),
-                (err, res) => {
-                    if (err) {
-                        console.log("error: ", err);
-                        callback(err, null);
-                        return;
-                    }
-                    if (res.length) {
-                        let result = [...res];
-                        sql.query(query.getFLanguageWithName(id),
-                            (err, res) => {
-                                if (err) {
-                                    console.log("error: ", err);
-                                    callback(err, null);
-                                    return;
-                                }
-                                if (res.length) {
-                                    delete result[0].HashPassword
-                                    result[0].NgoaiNgu = res;
-                                    result[0].NgaySinh = getDate(result[0].NgaySinh);
-                                    result[0].NgayVaoDoan = getDate(result[0].NgayVaoDoan);
-                                    result[0].NgayVaoDang = getDate(result[0].NgayVaoDang);
-                                    result[0].NgayChinhThuc = getDate(result[0].NgayChinhThuc);
-                                    console.log("Update: ", result);
-                                    callback(null, result);
-                                    return;
-                                }
-                                callback({ type: "not_found" }, null)
-                            })
-                        return;
-                    }
-                    callback({ type: "not_found" }, null)
+    updateById: async (id, newValue, callback) => {
+        try {
+            const sqlPromise = sql.promise()
+            sql.query(`UPDATE dangvien SET ? WHERE MaSoDangVien = "${id}"`, newValue, (async (err, resUp) => {
+                if (err) {
+                    console.log("error: ", err);
+                    callback(err, null);
+                    return;
                 }
-            )
-        }))
+
+                if (resUp.affectedRows == 0) {
+                    callback({ type: "not_found" }, null);
+                    return;
+                }
+
+                const [res, f] = await sqlPromise.execute(query.getDataWithName(id))
+                if (err) {
+                    console.log("error: ", err);
+                    callback(err, null);
+                    return;
+                }
+                const result = [...res]
+                if (res.length > 0) {
+                    let lArr = [];
+                    let lpArr = [];
+                    const [resFlpm, f] = await sqlPromise.execute(`
+                        SELECT ngoaingudangvien.*, ngoaingu.TenNgoaiNgu, trinhdongoaingu.TenTrinhDo
+                        FROM ngoaingudangvien, ngoaingu, trinhdongoaingu
+                        WHERE ngoaingudangvien.MaNgoaiNgu = ngoaingu.MaNgoaiNgu
+                        AND ngoaingudangvien.MaTrinhDo = trinhdongoaingu.MaTrinhDo
+                        AND ngoaingudangvien.MaSoDangVien = "${res[0].MaSoDangVien}"`);
+                    resFlpm.forEach(el => {
+                        lArr.push({ MaNgoaiNgu: el.MaNgoaiNgu, MaTrinhDo: el.MaTrinhDo })
+                        lpArr.push(`${el.TenNgoaiNgu}-${el.TenTrinhDo}`);
+                    });
+                    let addressArr = {};
+                    let addressFull = {};
+                    const [resAddress, f1] = await sqlPromise.execute(`
+                    SELECT diachi.*, loaidiachi.MaLoaiDiaChi 
+                    FROM diachidangvien, diachi, loaidiachi 
+                    WHERE diachidangvien.MaLoaiDiaChi = loaidiachi.MaLoaiDiaChi
+                    AND diachidangvien.MaDiaChi = diachi.MaDiaChi
+                    AND diachidangvien.MaSoDangVien = "${res[0].MaSoDangVien}"`)
+                    await Promise.all(resAddress.map(async (el, index) => {
+                        const resPro = await axios.get(`https://provinces.open-api.vn/api/p/${el.MaTinh}?depth=1`);
+                        const resDis = await axios.get(`https://provinces.open-api.vn/api/d/${el.MaHuyen}?depth=1`);
+                        const resWard = await axios.get(`https://provinces.open-api.vn/api/w/${el.MaXa}?depth=1`);
+                        if (el.MaLoaiDiaChi == "1") {
+                            addressArr.QueQuan = {
+                                provinceValue: el.MaTinh,
+                                districtValue: el.MaHuyen,
+                                wardValue: el.MaXa,
+                                detail: el.DiaChiCuThe
+                            }
+                            addressFull.QueQuan = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
+                        }
+                        if (el.MaLoaiDiaChi == "2") {
+                            addressArr.DiaChiThuongTru = {
+                                provinceValue: el.MaTinh,
+                                districtValue: el.MaHuyen,
+                                wardValue: el.MaXa,
+                                detail: el.DiaChiCuThe
+                            }
+                            addressFull.DiaChiThuongTru = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
+                        }
+                        if (el.MaLoaiDiaChi == "3") {
+                            addressArr.NoiOHienTai = {
+                                provinceValue: el.MaTinh,
+                                districtValue: el.MaHuyen,
+                                wardValue: el.MaXa,
+                                detail: el.DiaChiCuThe
+                            }
+                            addressFull.NoiOHienTai = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
+                        }
+                    }))
+                    delete result[0].HashPassword;
+                    result[0].NgaySinh = getDate(result[0].NgaySinh);
+                    result[0].NgayVaoDoan = getDate(result[0].NgayVaoDoan);
+                    result[0].NgayVaoDang = getDate(result[0].NgayVaoDang);
+                    result[0].NgayChinhThuc = getDate(result[0].NgayChinhThuc);
+                    result[0].NgoaiNgu = lArr;
+                    result[0].NgoaiNguTrinhDo = lpArr.join(", ")
+                    result[0].DiaChi = addressArr;
+                    result[0].QueQuan = addressFull.QueQuan;
+                    result[0].DiaChiThuongTru = addressFull.DiaChiThuongTru;
+                    result[0].NoiOHienTai = addressFull.NoiOHienTai;
+                    result[0].TenGioiTinh = getGender(result[0].GioiTinh)
+                    callback(null, result);
+                    return;
+                }
+                callback({ type: "not_found" }, null)
+            }))
+        } catch (error) {
+            callback(err, null);
+        }
+
     },
     remove: (id, callback) => {
         sql.query(`UPDATE dangvien SET DaXoa = 1 WHERE MaSoDangVien = "${id}"`, ((err, res) => {
@@ -230,30 +407,39 @@ const PartyMember = {
     },
     removeAll: removeAll("dangvien"),
 
-    filter: (data, callback) => {
-        console.log(data)
-        let dataStr = "";
-        Object.keys(data).map(el => {
-            if (el == "QQTinh") {
-                dataStr = dataStr + ` INNER JOIN diachidangvien 
+    filter: async (data, callback) => {
+        try {
+            console.log(data)
+            let dataStr = "";
+            Object.keys(data).map(el => {
+                if (el == "QQTinh") {
+                    dataStr = dataStr + ` INNER JOIN diachidangvien 
                     INNER JOIN diachi ON diachidangvien.MaDiaChi = diachi.MaDiaChi
                     AND diachidangvien.MaLoaiDiaChi = "0001"
                     AND diachi.MaTinh = "${data[el]}"
                     ON dangvien.MaSoDangVien = diachidangvien.MaSoDangVien`
-            } else if (el == "MaLoai") {
-                dataStr = dataStr + `INNER JOIN loaidangvien ON dangvien.MaSoDangVien = loaidangvien.MaSoDangVien
-                 AND loaidangvien.${el} = ${data[el]}`
-            } else if (el == "Tuoigt") {
-                dataStr = dataStr + ` AND year(current_date()) - year(dangvien.NgaySinh) >= ${data[el]}`
-            } else if (el == "Tuoilt") {
-                dataStr = dataStr + ` AND year(current_date()) - year(dangvien.NgaySinh) <= ${data[el]}`
-            } else if (el == "HoTen") {
-                dataStr = dataStr + ` AND HoTen LIKE "%${data[el]}%"`
-            } else {
-                dataStr = dataStr + ` AND dangvien.${el} = "${data[el]}"`
-            }
-        })
-        const query = `SELECT dangvien.*, chibo.TenChiBo, dantoc.TenDanToc, tongiao.TenTonGiao, tinhoc.TenTinHoc,  chinhtri.TenChinhTri, chucvu.TenChucVu
+                } else if (el == "MaLoai") {
+                    dataStr = dataStr + ` INNER JOIN danhgiadangvien 
+                    ON danhgiadangvien.MaSoDangVien = dangvien.MaSoDangVien
+                    AND danhgiadangvien.${el} = ${data[el]}
+                    AND danhgiadangvien.MaDVDG = 3
+                    GROUP BY MaSoDangVien`
+                } else if (el == "KhongDuBi") {
+                    dataStr = dataStr + ` AND dangvien.MaChucVu != 4`
+                } else if (el == "Tuoigt") {
+                    dataStr = dataStr + ` AND year(current_date()) - year(dangvien.NgaySinh) >= ${data[el]}`
+                } else if (el == "Tuoilt") {
+                    dataStr = dataStr + ` AND year(current_date()) - year(dangvien.NgaySinh) <= ${data[el]}`
+                } else if (el == "HoTen") {
+                    dataStr = dataStr + ` AND HoTen LIKE "%${data[el]}%"`
+                } else if (el == "MaThanhTich") {
+                    dataStr = dataStr + ` INNER JOIN thanhtichdangvien ON dangvien.MaSoDangVien = thanhtichdangvien.MaSoDangVien
+                    AND thanhtichdangvien.${el} = ${data[el]}`
+                } else {
+                    dataStr = dataStr + ` AND dangvien.${el} = "${data[el]}"`
+                }
+            })
+            const query = `SELECT dangvien.*, chibo.TenChiBo, dantoc.TenDanToc, tongiao.TenTonGiao, tinhoc.TenTinHoc,  chinhtri.TenChinhTri, chucvu.TenChucVu
                 FROM dangvien
                 INNER JOIN chibo ON dangvien.MaChiBo = chibo.MaChiBo
                 INNER JOIN chucvu ON dangvien.MaChucVu = chucvu.MaChucVu
@@ -261,30 +447,83 @@ const PartyMember = {
                 INNER JOIN tongiao ON dangvien.MaTonGiao = tongiao.MaTonGiao
                 INNER JOIN tinhoc ON dangvien.MaTinHoc = tinhoc.MaTinHoc
                 INNER JOIN chinhtri ON dangvien.MaChinhTri = chinhtri.MaChinhTri
-                AND DaXoa = 0
+                AND dangvien.DaXoa = 0
                 ${dataStr}`;
-        console.log(query);
-        sql.query(query,
-            (err, res) => {
-                if (err) {
-                    console.log("error: ", err);
-                    callback(err, null);
-                    return;
-                }
-                let result = [...res]
-                if (res.length) {
-                    res.map((el, index) => {
-                        delete result[index].HashPassword
-                        result[index].NgaySinh = getDate(result[index].NgaySinh);
-                        result[index].NgayVaoDoan = getDate(result[index].NgayVaoDoan);
-                        result[index].NgayVaoDang = getDate(result[index].NgayVaoDang);
-                        result[index].NgayChinhThuc = getDate(result[index].NgayChinhThuc);
-                    })
-                }
-                console.log("All: ", result);
-                callback(null, { data: result });
-                return;
-            })
+            const sqlPromise = sql.promise();
+            const [res, f] = await sqlPromise.execute(query)
+            let result = [...res]
+            if (res.length > 0) {
+                await Promise.all(res.map(async (data, index) => {
+                    let lArr = [];
+                    let lpArr = [];
+                    const [resFlpm, f] = await sqlPromise.execute(`
+                    SELECT ngoaingudangvien.*, ngoaingu.TenNgoaiNgu, trinhdongoaingu.TenTrinhDo
+                    FROM ngoaingudangvien, ngoaingu, trinhdongoaingu
+                    WHERE ngoaingudangvien.MaNgoaiNgu = ngoaingu.MaNgoaiNgu
+                    AND ngoaingudangvien.MaTrinhDo = trinhdongoaingu.MaTrinhDo
+                    AND ngoaingudangvien.MaSoDangVien = "${data.MaSoDangVien}"`);
+                    resFlpm.forEach(el => {
+                        lArr.push({ MaNgoaiNgu: el.MaNgoaiNgu, MaTrinhDo: el.MaTrinhDo })
+                        lpArr.push(`${el.TenNgoaiNgu}-${el.TenTrinhDo}`);
+                    });
+                    let addressArr = {};
+                    let addressFull = {};
+                    const [resAddress, f1] = await sqlPromise.execute(`
+                    SELECT diachi.*, loaidiachi.MaLoaiDiaChi 
+                    FROM diachidangvien, diachi, loaidiachi 
+                    WHERE diachidangvien.MaLoaiDiaChi = loaidiachi.MaLoaiDiaChi
+                    AND diachidangvien.MaDiaChi = diachi.MaDiaChi
+                    AND diachidangvien.MaSoDangVien = "${data.MaSoDangVien}"`)
+                    await Promise.all(resAddress.map(async (el, index) => {
+                        const resPro = await axios.get(`https://provinces.open-api.vn/api/p/${el.MaTinh}?depth=1`);
+                        const resDis = await axios.get(`https://provinces.open-api.vn/api/d/${el.MaHuyen}?depth=1`);
+                        const resWard = await axios.get(`https://provinces.open-api.vn/api/w/${el.MaXa}?depth=1`);
+                        if (el.MaLoaiDiaChi == "1") {
+                            addressArr.QueQuan = {
+                                provinceValue: el.MaTinh,
+                                districtValue: el.MaHuyen,
+                                wardValue: el.MaXa,
+                                detail: el.DiaChiCuThe
+                            }
+                            addressFull.QueQuan = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
+                        }
+                        if (el.MaLoaiDiaChi == "2") {
+                            addressArr.DiaChiThuongTru = {
+                                provinceValue: el.MaTinh,
+                                districtValue: el.MaHuyen,
+                                wardValue: el.MaXa,
+                                detail: el.DiaChiCuThe
+                            }
+                            addressFull.DiaChiThuongTru = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
+                        }
+                        if (el.MaLoaiDiaChi == "3") {
+                            addressArr.NoiOHienTai = {
+                                provinceValue: el.MaTinh,
+                                districtValue: el.MaHuyen,
+                                wardValue: el.MaXa,
+                                detail: el.DiaChiCuThe
+                            }
+                            addressFull.NoiOHienTai = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
+                        }
+                    }))
+                    delete result[index].HashPassword;
+                    result[index].NgaySinh = getDate(res[index].NgaySinh);
+                    result[index].NgayVaoDoan = getDate(res[index].NgayVaoDoan);
+                    result[index].NgayVaoDang = getDate(res[index].NgayVaoDang);
+                    result[index].NgayChinhThuc = getDate(res[index].NgayChinhThuc);
+                    result[index].NgoaiNgu = lArr;
+                    result[index].NgoaiNguTrinhDo = lpArr.join(", ")
+                    result[index].DiaChi = addressArr;
+                    result[index].QueQuan = addressFull.QueQuan;
+                    result[index].DiaChiThuongTru = addressFull.DiaChiThuongTru;
+                    result[index].NoiOHienTai = addressFull.NoiOHienTai;
+                    result[index].TenGioiTinh = getGender(res[index].GioiTinh)
+                }))
+            }
+            callback(null, result);
+        } catch (error) {
+            callback(error, null);
+        }
     },
 };
 

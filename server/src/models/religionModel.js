@@ -5,7 +5,7 @@ const Religion = {
     findById: findById("tongiao", "MaTonGiao"),
     create: create("tongiao", "MaTonGiao"),
     updateById: updateById("tongiao", "MaTonGiao"),
-    remove: remove("tongiao", "MaTonGiao"),
+    remove: remove("tongiao", "MaTonGiao", "Tôn giáo"),
     removeAll: removeAll("tongiao")
 }
 

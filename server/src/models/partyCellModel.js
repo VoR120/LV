@@ -5,7 +5,7 @@ const PartyCell = {
     findById: findById("chibo","MaChiBo"),
     create: create("chibo", "MaChiBo"),
     updateById: updateById("chibo", "MaChiBo"),
-    remove: remove("chibo", "MaChiBo"),
+    remove: remove("chibo", "MaChiBo", "Chi bộ"),
     removeAll: removeAll("chibo")
 }
 

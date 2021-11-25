@@ -5,8 +5,7 @@ const IT = {
     findById: findById("tinhoc","MaTinHoc"),
     create: create("tinhoc", "MaTinHoc"),
     updateById: updateById("tinhoc", "MaTinHoc"),
-    remove: remove("tinhoc", "MaTinHoc"),
-    removeAll: removeAll("tinhoc")
+    remove: remove("tinhoc", "MaTinHoc", "Trình độ"),
 }
 
 module.exports = IT;

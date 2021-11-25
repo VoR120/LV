@@ -30,9 +30,9 @@ exports.create = (Model, name) => {
             if (err) {
                 if (err.type == "duplicated") {
                     if (err.value)
-                        res.status(400).json({ msg: `${err.value} đã tồn tại!` })
+                        res.status(400).json({ msg: `${err.value} đã tồn tại!`, type: err.field })
                     else
-                        res.status(400).json({ msg: `${name} đã tồn tại!` })
+                        res.status(400).json({ msg: `${name} đã tồn tại!`, type: err.field })
                 } else
                     res.status(500).send({
                         message:
@@ -66,8 +66,10 @@ exports.remove = (Model) => {
     return (req, res) => {
         Model.remove(req.params.id, (err, data) => {
             if (err)
-                if (err.type == "not_found") {
-                    res.status(400).json({ msg: "Not found!" })
+                if (err.type == "foreign") {
+                    res.status(400).json({ msg: err.message })
+                } else if (err.type == "not_found") {
+                    res.status(400).json({ msg: "Không tìm thấy!" })
                 } else {
                     res.status(500).json({
                         message:
@@ -83,8 +85,10 @@ exports.removeAll = (Model) => {
     return (req, res) => {
         Model.removeAll((err, data) => {
             if (err) {
-                if (err.type == "not_found") {
-                    res.status(400).json({ msg: "Not found!" })
+                if (err.type == "foreign") {
+                    res.status(400).json({ msg: err.message })
+                } else if (err.type == "not_found") {
+                    res.status(400).json({ msg: "Không tìm thấy!" })
                 } else {
                     res.status(500).json({
                         message:
@@ -102,7 +106,7 @@ exports.getIdFromName = (Model) => {
         Model.getIdFromName(req.body.name, (err, data) => {
             if (err) {
                 if (err.type == "not_found") {
-                    res.status(400).json({ msg: "Not found!" })
+                    res.status(400).json({ msg: "Không tìm thấy!" })
                 } else {
                     res.status(500).json({
                         message:

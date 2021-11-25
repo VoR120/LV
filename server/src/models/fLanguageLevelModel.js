@@ -48,7 +48,35 @@ const FLanguageLevel = {
         )
     },
     updateById: updateById("trinhdongoaingu", "MaTrinhDo"),
-    remove: remove("trinhdongoaingu", "MaTrinhDo"),
+    remove: (id, callback) => {
+        sql.query(`SELECT MaSoDangVien FROM ngoaingudangvien WHERE MaTrinhDo = ${id}`, (err, result) => {
+            if (err) {
+                console.log("error: ", err);
+                callback(err, null);
+                return;
+            }
+            if (result.length > 0) {
+                callback({ type: 'foreign', message: `Trình độ này đang được sử dụng, không thể xóa!` }, null)
+                return
+            }
+            sql.query(`DELETE FROM TrinhDoNgoaiNgu WHERE MaTrinhDo = ${id}`, (
+                (err, res) => {
+                    if (err) {
+                        console.log("error: ", err);
+                        callback(err, null);
+                        return;
+                    }
+
+                    if (res.affectedRows == 0) {
+                        callback({ type: "not_found" }, null);
+                        return;
+                    }
+
+                    console.log("Deleted: ", id);
+                    callback(null, res);
+                }))
+        })
+    },
     removeAll: removeAll("trinhdongoaingu"),
 }
 

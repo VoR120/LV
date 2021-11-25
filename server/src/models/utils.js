@@ -87,26 +87,37 @@ exports.updateById = (table, key) => {
     }
 }
 
-exports.remove = (table, key) => {
+exports.remove = (table, key, name) => {
     return (id, callback) => {
-        const sqlQuery = typeof (id) === "number" ?
-            `DELETE FROM ${table} WHERE ${key} = ${id}` :
-            `DELETE FROM ${table} WHERE ${key} = "${id}"`;
-        sql.query(sqlQuery, id, ((err, res) => {
+        sql.query(`SELECT MaSoDangVien FROM dangvien WHERE ${key} = ${id}`, (err, result) => {
             if (err) {
                 console.log("error: ", err);
                 callback(err, null);
                 return;
             }
-
-            if (res.affectedRows == 0) {
-                callback({ type: "not_found" }, null);
-                return;
+            if (result.length > 0) {
+                callback({ type: 'foreign', message: `${name} này đang được sử dụng, không thể xóa!` }, null)
+                return
             }
+            const sqlQuery = typeof (id) === "number" ?
+                `DELETE FROM ${table} WHERE ${key} = ${id}` :
+                `DELETE FROM ${table} WHERE ${key} = "${id}"`;
+            sql.query(sqlQuery, id, ((err, res) => {
+                if (err) {
+                    console.log("error: ", err);
+                    callback(err, null);
+                    return;
+                }
 
-            console.log("Deleted: ", id);
-            callback(null, res);
-        }))
+                if (res.affectedRows == 0) {
+                    callback({ type: "not_found" }, null);
+                    return;
+                }
+
+                console.log("Deleted: ", id);
+                callback(null, res);
+            }))
+        })
     }
 }
 
@@ -135,4 +146,13 @@ exports.getDate = (date) => {
     let newDate = new Date(date.getTime() - (offset * 60 * 1000))
     console.log(newDate.toISOString().split('T')[0]);
     return newDate.toISOString().split('T')[0]
+}
+
+exports.getGender = (gender) => {
+    const genderObj = {
+        "m": "Nam",
+        "f": "Nữ",
+        "u": "Khác",
+    }
+    return genderObj[gender];
 }

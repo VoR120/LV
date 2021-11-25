@@ -1,5 +1,6 @@
 const e = require('express');
 const sql = require('../configs/db');
+const { getDate } = require('../models/utils');
 
 exports.getByPartyMember = (req, res) => {
     try {
@@ -164,7 +165,6 @@ exports.getEvaluated = (req, res) => {
 
 exports.createEvaluate = (req, res) => {
     try {
-        console.log()
         const { Nam, MaSoDangVien, MaDVDG, MaLoai } = req.body
         sql.query(`SELECT *
         FROM danhgiadangvien
@@ -194,6 +194,78 @@ exports.createEvaluate = (req, res) => {
                 } else {
                     console.log(req.body);
                     sql.query(`INSERT INTO danhgiadangvien SET ?`, req.body,
+                        (err, result2) => {
+                            if (err) {
+                                console.log(err);
+                                res.status(500).json({ msg: err.message })
+                                return;
+                            }
+                            console.log("Created!")
+                            res.status(201).json(req.body)
+                            return;
+                        }
+                    )
+                }
+            })
+    } catch (error) {
+        res.status(500).json({ msg: error.message });
+    }
+}
+
+exports.getTimeEvaluate = (req, res) => {
+    try {
+        const { Nam } = req.query;
+        sql.query(`SELECT * FROM thoigiandanhgia WHERE Nam = ${Nam}`,
+            (err, result) => {
+                if (err) {
+                    res.status(500).json({ msg: err.message })
+                    return;
+                }
+                const result1 = [...result];
+                if (result.length > 0)
+                    result.map((el, index) => {
+                        result1[index].ThoiGianBatDau = getDate(result[index].ThoiGianBatDau)
+                        result1[index].ThoiGianKetThuc = getDate(result[index].ThoiGianKetThuc)
+                    })
+                res.status(200).json(result1);
+                return;
+            }
+        )
+    } catch (error) {
+        res.status(500).json({ msg: error.message });
+    }
+}
+
+exports.setTimeEvaluate = (req, res) => {
+    try {
+        const { Nam, MaDVDG, ThoiGianBatDau, ThoiGianKetThuc } = req.body
+        sql.query(`SELECT *
+        FROM thoigiandanhgia
+        WHERE Nam = ${Nam}
+        AND MaDVDG = ${MaDVDG}`,
+            (err, result) => {
+                if (err) {
+                    res.status(500).json({ msg: err.message })
+                    return;
+                }
+                if (result.length) {
+                    sql.query(`UPDATE thoigiandanhgia SET ThoiGianBatDau = "${ThoiGianBatDau}",
+                    ThoiGianKetThuc = "${ThoiGianKetThuc}"
+                    WHERE Nam = ${Nam}
+                    AND MaDVDG = ${MaDVDG}
+                    `,
+                        (err, result1) => {
+                            if (err) {
+                                res.status(500).json({ msg: err.message })
+                                return;
+                            }
+                            console.log("Updated!")
+                            res.status(201).json(req.body)
+                            return;
+                        })
+                } else {
+                    console.log(req.body);
+                    sql.query(`INSERT INTO thoigiandanhgia SET ?`, req.body,
                         (err, result2) => {
                             if (err) {
                                 console.log(err);

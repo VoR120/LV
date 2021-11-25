@@ -19,6 +19,7 @@ const route = (app) => {
     app.use('/api', require('./moveRoute'));
     app.use('/api', require('./rewardRoute'));
     app.use('/api', require('./disciplineRoute'));
+    app.use('/api', require('./achievementRoute'));
     app.use('/api', require('./typeRoute'));
     app.use('/api', require('./addressRoute'));
     app.use('/api', require('./evaluateRoute'));

@@ -32,6 +32,8 @@ export const getKeyField = (key) => {
             return ["MaChiBo", "TenChiBo", "SoDangVien"]
         case 'grade':
             return ["Nam", "Loai1", "Loai2", "Loai3", "Loai4", "Loai5", "Loai6", "Loai7"]
+        case 'achievement':
+            return ["MaThanhTich", "TenThanhTich", "SoDangVien"]
         default:
             break;
     }
@@ -91,3 +93,14 @@ export const getExportData = (rows, columns) => {
     })
     return newRows
 }
+
+export const getDate = (date) => {
+    const offset = date.getTimezoneOffset()
+    let newDate = new Date(date.getTime() - (offset * 60 * 1000))
+    console.log(newDate.toISOString().split('T')[0]);
+    return newDate.toISOString().split('T')[0]
+}
+
+export const getTimeWithStartHour = (date) => new Date(date).setHours(0, 0, 0, 0);
+
+export const getTimeWithEndHour = (date) => new Date(date).setHours(23, 59, 0, 0);

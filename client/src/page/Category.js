@@ -168,12 +168,12 @@ const Category = () => {
                         <MenuItem value="ethnic">Dân tộc</MenuItem>
                         <MenuItem value="religion">Tôn giáo</MenuItem>
                         <MenuItem value="position">Chức vụ</MenuItem>
-                        {/* <MenuItem value="term">Nhiệm kỳ</MenuItem> */}
                         <MenuItem value="flanguage">Ngoại ngữ</MenuItem>
                         <MenuItem value="flanguagelevel">Trình độ ngoại ngữ</MenuItem>
                         <MenuItem value="it">Trình độ tin học</MenuItem>
                         <MenuItem value="politics">Trình độ chính trị</MenuItem>
                         <MenuItem value="grade">Loại Đảng viên</MenuItem>
+                        <MenuItem value="achievement">Thành tích Đảng viên</MenuItem>
                     </MySelect>
                 </Paper>
 

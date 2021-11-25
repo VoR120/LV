@@ -87,7 +87,7 @@ const CategoryForm = (props) => {
                     <MyButton onClick={handleOpen} success={true} ><AddIcon />Thêm</MyButton>
                 )
             }
-            <Dialog PaperProps={{ style: { minWidth: '300px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+            <Dialog PaperProps={{ style: { minWidth: categoryField == "achievement" ? '700px' : '300px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">{`Cập nhật ${categoryName}`}</DialogTitle>
                 <DialogContent>
                     {edit &&

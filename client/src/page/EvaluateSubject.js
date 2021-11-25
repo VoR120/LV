@@ -1,5 +1,6 @@
 import {
     Button,
+    Grid,
     MenuItem,
     Paper,
     TableContainer, Typography
@@ -13,7 +14,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { getAllCategory } from '../action/categoryAction';
-import { evaluate } from '../action/evaluateAction';
+import { evaluate, getTimeEvaluate } from '../action/evaluateAction';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
 import MySelect from '../component/UI/MySelect';
@@ -23,9 +24,10 @@ import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import MaterialTable from '@material-table/core';
 import axios from '../helper/axios';
-import { getExportData } from '../utils/utils';
+import { getExportData, getTimeWithEndHour, getTimeWithStartHour } from '../utils/utils';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
+import Loading from '../component/CustomLoadingOverlay';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -86,16 +88,18 @@ const EvaluateSubject = () => {
         {
             title: "Bộ môn đánh giá", field: "action",
             render: (params) => {
-                return (<MySelect
-                    value={params.DanhGiaBoMon || "0"}
-                    onChange={(e) => handleChange(e, params.MaSoDangVien)}
-                >
-                    <MenuItem value="0">Chọn loại</MenuItem>
-                    {
-                        gradeArr.length > 0 &&
-                        gradeArr.map(el => <MenuItem key={el.MaLoai} value={el.MaLoai}>{el.TenLoai}</MenuItem>)
-                    }
-                </MySelect>
+                return (
+                    <MySelect
+                        key={params.MaSoDangVien}
+                        value={params.DanhGiaBoMon || "0"}
+                        onChange={(e) => handleChange(e, params.MaSoDangVien)}
+                    >
+                        <MenuItem value="0">Chọn loại</MenuItem>
+                        {
+                            gradeArr.length > 0 &&
+                            gradeArr.map(el => <MenuItem key={el.MaLoai} value={el.MaLoai}>{el.TenLoai}</MenuItem>)
+                        }
+                    </MySelect>
                 )
             }
         }
@@ -103,11 +107,13 @@ const EvaluateSubject = () => {
 
     const [rows, setRows] = useState([])
 
-    const [year, setYear] = useState("2021");
+    const [year, setYear] = useState((new Date).getFullYear());
     const [grade, setGrade] = useState("0");
     const [gradeArr, setGradeArr] = useState([]);
     const [isEvaluate, setIsEvaluate] = useState(false);
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(false);
+    const [loading2, setLoading2] = useState(true);
+    const [isTime, setIsTime] = useState({ isTime: false, NgayBatDau: "", NgayKetThuc: "" });
 
     // Handle Function
     const handleChange = async (e, id) => {
@@ -121,14 +127,14 @@ const EvaluateSubject = () => {
             })
             if (res.status == 201) {
                 fetchAPI();
+                openSnackbarDispatch({
+                    type: 'SET_OPEN',
+                    payload: {
+                        msg: "Đã đánh giá!",
+                        type: "success"
+                    }
+                })
             }
-            openSnackbarDispatch({
-                type: 'SET_OPEN',
-                payload: {
-                    msg: "Đã đánh giá!",
-                    type: "success"
-                }
-            })
             setLoading(false)
         } catch (error) {
             openSnackbarDispatch({
@@ -148,13 +154,36 @@ const EvaluateSubject = () => {
             if (res.status == 200) {
                 if (res.data.length > 0) {
                     // setGrade(res.data[0].DanhGiaCaNhan)
+                    const newRes = [...res.data];
+                    res.data.map((el, index) => ({ ...el, id: index }));
                     setRows(res.data);
                     // setIsEvaluate(true)
                 }
             }
+            setLoading2(false);
             setLoading(false);
         } catch (error) {
             console.log(error.message)
+        }
+    }
+
+    const checkTime = async () => {
+        const res = await getTimeEvaluate({ Nam: year });
+        if (res.length > 0) {
+            let NgayBatDau;
+            let NgayKetThuc;
+            res.map(el => {
+                if (el.MaDVDG == 2) {
+                    NgayBatDau = el.ThoiGianBatDau;
+                    NgayKetThuc = el.ThoiGianKetThuc;
+                }
+            })
+            let NgayKetThucCheck = getTimeWithEndHour(NgayKetThuc)
+            let NgayBatDauCheck = getTimeWithStartHour(NgayBatDau)
+
+            if (new Date() >= NgayBatDauCheck && new Date() <= NgayKetThucCheck) {
+                setIsTime({ isTime: true, NgayBatDau, NgayKetThuc });
+            }
         }
     }
     // UseEffect
@@ -162,6 +191,7 @@ const EvaluateSubject = () => {
         setLoading(true)
         getAllCategory(categoryDispatch, "grade");
         fetchAPI();
+        checkTime();
     }, [])
 
     useEffect(() => {
@@ -180,27 +210,45 @@ const EvaluateSubject = () => {
                         Bộ môn đánh giá
                     </Typography>
                 </div>
-                <Paper variant="outlined" className={classes.paper}>
-                    <Typography style={{ textTransform: 'uppercase' }}>Đánh giá Đảng viên cuối năm</Typography>
-                </Paper>
-                <TableContainer className="decentralization-table" style={{ maxWidth: "1170px", }} >
-                    <MaterialTable
-                        components={{
-                            Container: (props) => <Paper
-                                {...props}
-                                className={classes.table}
-                                variant="outlined"
-                            />
-                        }}
-                        options={{
-                            padding: 'dense'
-                        }}
-                        title={"Bộ môn đánh giá"}
-                        columns={columns}
-                        data={rows}
-                        isLoading={loading}
-                    />
-                </TableContainer>
+                {
+                    isTime.isTime ?
+                        <>
+                            <Paper variant="outlined" className={classes.paper}>
+                                <Typography style={{ textTransform: 'uppercase' }}>Đánh giá Đảng viên cuối năm</Typography>
+                                <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
+                                <Typography variant="body1">
+                                    Thời gian: Từ ngày <b>{isTime.NgayBatDau}</b> đến ngày <b>{isTime.NgayKetThuc}</b>
+                                </Typography>
+                            </Paper>
+                            <TableContainer className="decentralization-table" style={{ maxWidth: "1170px", }} >
+                                <MaterialTable
+                                    components={{
+                                        Container: (props) => <Paper
+                                            {...props}
+                                            className={classes.table}
+                                            variant="outlined"
+                                        />
+                                    }}
+                                    options={{
+                                        padding: 'dense'
+                                    }}
+                                    title={"Bộ môn đánh giá"}
+                                    columns={columns}
+                                    data={rows}
+                                    isLoading={loading}
+                                />
+                            </TableContainer>
+                        </>
+                        :
+                        <Paper variant="outlined" className={classes.paper}>
+                            <Grid marginBottom={2}>
+                                <Typography style={{ textTransform: 'uppercase' }}>Đánh giá Đảng viên cuối năm</Typography>
+                                <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
+                                <Typography variant="body1">Chưa đến thời gian đánh giá</Typography>
+                            </Grid>
+                        </Paper>
+                }
+                <Loading loading={loading2} />
             </Layout>
         </>
     );

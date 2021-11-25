@@ -1,5 +1,6 @@
 import {
     Button,
+    Grid,
     MenuItem,
     Paper,
     TableContainer, Typography
@@ -21,9 +22,11 @@ import { InfoContext } from '../contextAPI/InfoContext';
 import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import axios from '../helper/axios';
-import { getExportData } from '../utils/utils';
+import { getExportData, getTimeWithEndHour, getTimeWithStartHour } from '../utils/utils';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
+import { getTimeEvaluate } from '../action/evaluateAction';
+import Loading from '../component/CustomLoadingOverlay';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -80,17 +83,20 @@ const Evaluate = () => {
     // State
 
 
-    const [year, setYear] = useState("2021");
+    const [year, setYear] = useState((new Date).getFullYear());
+    const [loading, setLoading] = useState(true);
+    console.log(year);
     const [grade, setGrade] = useState("0");
     const [gradeArr, setGradeArr] = useState([]);
     const [isEvaluate, setIsEvaluate] = useState(false);
+    const [isTime, setIsTime] = useState({ isTime: false, NgayBatDau: "", NgayKetThuc: "" });
 
     // Handle Function
     const handleChange = (e) => {
         setGrade(e.target.value)
     }
 
-    const fetchAPI = async () => {
+    const fetchGetEvaluate = async () => {
         try {
             const res = await axios.get(`/api/evaluate/getbypm?MaSoDangVien=${info.info.MaSoDangVien}&Nam=${year}`)
             console.log(res.data);
@@ -98,8 +104,10 @@ const Evaluate = () => {
                 if (res.data.length > 0) {
                     setGrade(res.data[0].MaLoai)
                     setIsEvaluate(true)
+                    setLoading(false);
                 }
-            }
+            } else
+                setLoading(false);
         } catch (error) {
             console.log(error.message)
         }
@@ -114,7 +122,7 @@ const Evaluate = () => {
                 MaDVDG: 1
             })
             if (res.status == 201) {
-                fetchAPI();
+                fetchGetEvaluate();
             }
             openSnackbarDispatch({
                 type: 'SET_OPEN',
@@ -136,8 +144,29 @@ const Evaluate = () => {
     // UseEffect
     useEffect(() => {
         getAllCategory(categoryDispatch, "grade");
-        fetchAPI();
+        fetchGetEvaluate();
+        checkTime();
     }, [])
+
+    const checkTime = async () => {
+        const res = await getTimeEvaluate({ Nam: year });
+        if (res.length > 0) {
+            let NgayBatDau;
+            let NgayKetThuc;
+            res.map(el => {
+                if (el.MaDVDG == 1) {
+                    NgayBatDau = el.ThoiGianBatDau;
+                    NgayKetThuc = el.ThoiGianKetThuc;
+                }
+            });
+            let NgayKetThucCheck = getTimeWithEndHour(NgayKetThuc)
+            let NgayBatDauCheck = getTimeWithStartHour(NgayBatDau)
+
+            if (new Date() >= NgayBatDauCheck && new Date() <= NgayKetThucCheck) {
+                setIsTime({ isTime: true, NgayBatDau, NgayKetThuc });
+            }
+        }
+    }
 
     useEffect(() => {
         if (category.categories.grade.length > 0) {
@@ -155,37 +184,48 @@ const Evaluate = () => {
                         Cá nhân đánh giá
                     </Typography>
                 </div>
-                <Paper variant="outlined" className={classes.paper}>
-                    <Typography style={{ textTransform: 'uppercase' }}>Đánh giá Đảng viên cuối năm</Typography>
-                    <div className={classes.flexContainer}>
-                        <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
-                        <Typography style={{ marginRight: 20 }} variant="body1">Loại:</Typography>
-                        <MySelect
-                            value={grade}
-                            onChange={handleChange}
-                        >
-                            <MenuItem value="0">Chọn loại</MenuItem>
-                            {
-                                gradeArr.length > 0 &&
-                                gradeArr.map(el => <MenuItem key={el.MaLoai} value={el.MaLoai}>{el.TenLoai}</MenuItem>)
-                            }
-                        </MySelect>
-                        <MyButton disabled={grade == 0} onClick={handleSubmit} style={{ marginLeft: 20 }} info>Đánh giá</MyButton>
-                    </div>
-                    {isEvaluate ?
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <CheckIcon color="success" fontSize="large" />
-                            <Typography alignItems="center" style={{ textTransform: "uppercase" }} variant="h5" color="green">Đã đánh giá</Typography>
-                        </div>
-                        :
-                        <>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <ClearIcon color="error" fontSize="large" />
-                                <Typography alignItems="center" style={{ textTransform: "uppercase" }} variant="h5" color="red">Chưa đánh giá</Typography>
+                {
+                    isTime.isTime ?
+                        <Paper variant="outlined" className={classes.paper}>
+                            <Typography style={{ textTransform: 'uppercase', marginBottom: 16 }}>Đánh giá Đảng viên cuối năm</Typography>
+                            <Typography variant="body1">Thời gian: Từ ngày <b>{isTime.NgayBatDau}</b> đến ngày <b>{isTime.NgayKetThuc}</b></Typography>
+                            <div className={classes.flexContainer}>
+                                <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
+                                <Typography style={{ marginRight: 20 }} variant="body1">Loại:</Typography>
+                                <MySelect
+                                    value={grade}
+                                    onChange={handleChange}
+                                >
+                                    <MenuItem value="0">Chọn loại</MenuItem>
+                                    {
+                                        gradeArr.length > 0 &&
+                                        gradeArr.map(el => <MenuItem key={el.MaLoai} value={el.MaLoai}>{el.TenLoai}</MenuItem>)
+                                    }
+                                </MySelect>
+                                <MyButton disabled={grade == 0} onClick={handleSubmit} style={{ marginLeft: 20 }} info>Đánh giá</MyButton>
                             </div>
-                        </>
-                    }
-                </Paper>
+                            {isEvaluate ?
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <CheckIcon color="success" fontSize="large" />
+                                    <Typography alignItems="center" style={{ textTransform: "uppercase" }} variant="h5" color="green">Đã đánh giá</Typography>
+                                </div>
+                                :
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <ClearIcon color="error" fontSize="large" />
+                                    <Typography alignItems="center" style={{ textTransform: "uppercase" }} variant="h5" color="red">Chưa đánh giá</Typography>
+                                </div>
+                            }
+                        </Paper>
+                        :
+                        <Paper variant="outlined" className={classes.paper}>
+                            <Grid marginBottom={2}>
+                                <Typography style={{ textTransform: 'uppercase' }}>Đánh giá Đảng viên cuối năm</Typography>
+                                <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
+                                <Typography variant="body1">Chưa đến thời gian đánh giá</Typography>
+                            </Grid>
+                        </Paper>
+                }
+
                 {/* <TableContainer variant="outlined" component={Paper}>
                     <Table aria-label="simple table">
                         <TableHead>
@@ -226,6 +266,7 @@ const Evaluate = () => {
                         </TableBody>
                     </Table>
                 </TableContainer> */}
+                <Loading loading={loading} />
             </Layout>
         </>
     );

@@ -40,17 +40,26 @@ const DrawerList = () => {
     const location = useLocation();
 
     const [open, setOpen] = useState(false);
+    const [open1, setOpen1] = useState(false);
     const path = location.pathname;
-    const pathList = ["/grade", "/evaluate", "/evaluatesubject", "/evaluatedepartment"]
+    const pathList = ["/grade", "/evaluate", "/evaluatesubject", "/evaluatedepartment", "/openevaluate"]
+    const pathList2 = ["/createvoting", "/voting"]
 
     useEffect(() => {
-        if(pathList.includes(path)) {
+        if (pathList.includes(path)) {
             setOpen(true)
-        } 
+        }
+        if (pathList2.includes(path)) {
+            setOpen1(true)
+        }
     }, [path])
 
     const handleClick = () => {
         setOpen(!open);
+    };
+
+    const handleClick1 = () => {
+        setOpen1(!open1);
     };
     return (
         <div className="drawer-list" style={{ overflow: 'hidden' }}>
@@ -75,9 +84,7 @@ const DrawerList = () => {
                 {
                     (
                         info.info.Quyen["2"] == 1 ||
-                        info.info.Quyen["3"] == 1 ||
-                        info.info.Quyen["4"] == 1 ||
-                        info.info.Quyen["5"] == 1
+                        info.info.Quyen["3"] == 1
                     ) &&
                     <NavLink to={"/file"}>
                         <ListItemButton>
@@ -98,7 +105,7 @@ const DrawerList = () => {
                 <Collapse in={open} timeout="auto" unmountOnExit>
                     <List component="div" disablePadding>
                         {
-                            info.info.Quyen["4"] == 1 &&
+                            info.info.Quyen["15"] == 1 &&
                             <NavLink to={"/grade"}>
                                 <ListItemButton >
                                     <ListItemIcon>
@@ -109,18 +116,26 @@ const DrawerList = () => {
                             </NavLink>
                         }
                         {
-                            info.info.Quyen["4"] == 1 &&
-                            <NavLink to={"/evaluate"}>
+                            info.info.Quyen["14"] == 1 &&
+                            <NavLink to={"/openevaluate"}>
                                 <ListItemButton >
                                     <ListItemIcon>
                                         <GradeIcon />
                                     </ListItemIcon>
-                                    <ListItemText primary="Cá nhân đánh giá" />
+                                    <ListItemText primary="Mở đánh giá" />
                                 </ListItemButton>
                             </NavLink>
                         }
+                        <NavLink to={"/evaluate"}>
+                            <ListItemButton >
+                                <ListItemIcon>
+                                    <GradeIcon />
+                                </ListItemIcon>
+                                <ListItemText primary="Cá nhân đánh giá" />
+                            </ListItemButton>
+                        </NavLink>
                         {
-                            info.info.Quyen["4"] == 1 &&
+                            info.info.Quyen["14"] == 1 &&
                             <NavLink to={"/evaluatesubject"}>
                                 <ListItemButton >
                                     <ListItemIcon>
@@ -131,7 +146,7 @@ const DrawerList = () => {
                             </NavLink>
                         }
                         {
-                            info.info.Quyen["12"] == 1 &&
+                            info.info.Quyen["15"] == 1 &&
                             <NavLink to={"/evaluatedepartment"}>
                                 <ListItemButton >
                                     <ListItemIcon>
@@ -208,17 +223,39 @@ const DrawerList = () => {
                         </ListItemButton>
                     </NavLink>
                 }
-                {
-                    (info.info.Quyen["9"] == 1 || info.info.Quyen["10"]) == 1 &&
-                    <NavLink to={"/voting"}>
-                        <ListItemButton >
-                            <ListItemIcon>
-                                <HowToVoteIcon />
-                            </ListItemIcon>
-                            <ListItemText primary="Biểu quyết" />
-                        </ListItemButton>
-                    </NavLink>
-                }
+                <ListItemButton onClick={handleClick1}>
+                    <ListItemIcon>
+                        <ThumbsUpDownIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Biểu quyết" />
+                    {!open1 ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+                <Collapse in={open1} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding>
+                        {
+                            info.info.Quyen["9"] == 1 &&
+                            <NavLink to={"/createvoting"}>
+                                <ListItemButton >
+                                    <ListItemIcon>
+                                        <GradeIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Tạo biểu quyết" />
+                                </ListItemButton>
+                            </NavLink>
+                        }
+                        {
+                            info.info.Quyen["10"] == 1 &&
+                            <NavLink to={"/voting"}>
+                                <ListItemButton >
+                                    <ListItemIcon>
+                                        <GradeIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Biểu quyết" />
+                                </ListItemButton>
+                            </NavLink>
+                        }
+                    </List>
+                </Collapse>
                 <Divider />
                 {
                     info.info.Quyen["11"] == 1 &&

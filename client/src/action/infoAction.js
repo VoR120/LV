@@ -6,52 +6,11 @@ export const login = async (dispatch, payload) => {
         dispatch({ type: userConstant.LOGIN_REQUEST });
         const res = await axios.post('/auth/login', payload);
         console.log("Data: ", res.data); // msg, user, token
-        if (res.status === 200) {
-            const { token, info } = res.data
-            const newInfo = { ...info };
-            let addressArr = {};
-            let addressFull = {};
-            const resAddress = await axios.get('/api/address/' + info.MaSoDangVien);
-            console.log(resAddress);
-            await Promise.all(resAddress.data.data.map(async (el, index) => {
-                const resPro = await axios.get(`https://provinces.open-api.vn/api/p/${el.MaTinh}?depth=1`);
-                const resDis = await axios.get(`https://provinces.open-api.vn/api/d/${el.MaHuyen}?depth=1`);
-                const resWard = await axios.get(`https://provinces.open-api.vn/api/w/${el.MaXa}?depth=1`);
-                if (el.MaLoaiDiaChi == "1") {
-                    addressArr.QueQuan = {
-                        provinceValue: el.MaTinh,
-                        districtValue: el.MaHuyen,
-                        wardValue: el.MaXa,
-                        detail: el.DiaChiCuThe
-                    }
-                    addressFull.QueQuan = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
-                }
-                if (el.MaLoaiDiaChi == "0002") {
-                    addressArr.DiaChiThuongTru = {
-                        provinceValue: el.MaTinh,
-                        districtValue: el.MaHuyen,
-                        wardValue: el.MaXa,
-                        detail: el.DiaChiCuThe
-                    }
-                    addressFull.DiaChiThuongTru = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
-                }
-                if (el.MaLoaiDiaChi == "0003") {
-                    addressArr.NoiOHienTai = {
-                        provinceValue: el.MaTinh,
-                        districtValue: el.MaHuyen,
-                        wardValue: el.MaXa,
-                        detail: el.DiaChiCuThe
-                    }
-                    addressFull.NoiOHienTai = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
-                }
-
-
-            }))
+        if (res.status === 200) {;
+            const { info, token } = res.data
+            let newInfo = { ...info }
             const resPer = await axios.get('/api/permissionps/' + info.MaChucVu);
-            console.log(resPer.data.data);
             newInfo.Quyen = resPer.data.data
-            newInfo.DiaChi = addressArr;
-            console.log(newInfo);
             dispatch({ type: userConstant.LOGIN_SUCCESS, payload: { token, info: newInfo } });
             localStorage.setItem('token', JSON.stringify(token));
             localStorage.setItem('info', JSON.stringify(newInfo));

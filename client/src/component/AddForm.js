@@ -101,7 +101,7 @@ const AddForm = (props) => {
     const [loading, setLoading] = useState(false);
     const [step, setStep] = useState(0);
     const { category, categoryDispatch } = useContext(CategoryContext);
-    const { partyMemberDispatch } = useContext(PartyMemberContext);
+    const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
     const { openSnackbarDispatch } = useContext(SnackbarContext)
     const [flArray, setFlArray] = useState([{ MaNgoaiNgu: "0", MaTrinhDo: "0" }]);
     const [levelArray, setLevelArray] = useState([]);
@@ -117,6 +117,7 @@ const AddForm = (props) => {
         handleSubmit,
         control,
         setValue,
+        setError,
         clearErrors,
         getValues,
         formState: { errors }
@@ -162,7 +163,7 @@ const AddForm = (props) => {
 
     const onSubmit = (data) => {
         // setLoading(true)
-        setOpen(false)
+        // setOpen(false)
         data.QQAddress = { ...qqValue, detail: getValues("QQChiTiet") };
         data.DCTTAddress = { ...dcttValue, detail: getValues("DCTTChiTiet") };
         data.NOHTAddress = { ...nohtValue, detail: getValues("NOHTChiTiet") };
@@ -174,6 +175,11 @@ const AddForm = (props) => {
             addPartyMember(partyMemberDispatch, data, openSnackbarDispatch);
         // }
     }
+
+    useEffect(() => {
+        if (partyMember.error)
+            setError(partyMember.error.type, partyMember.error.msg)
+    }, [partyMember.error])
 
     useEffect(() => {
         if (edit) {

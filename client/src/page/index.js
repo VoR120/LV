@@ -42,6 +42,12 @@ export const routes = [
         isPrivate: true,
     },
     {
+        path: '/openevaluate',
+        exact: true,
+        component: lazy(() => import('./OpenEvaluate')),
+        isPrivate: true,
+    },
+    {
         path: '/evaluate',
         exact: true,
         component: lazy(() => import('./Evaluate')),
@@ -81,6 +87,12 @@ export const routes = [
         path: '/decentralization',
         exact: true,
         component: lazy(() => import('./Decentralization')),
+        isPrivate: true,
+    },
+    {
+        path: '/createvoting',
+        exact: true,
+        component: lazy(() => import('./CreateVoting')),
         isPrivate: true,
     },
     {

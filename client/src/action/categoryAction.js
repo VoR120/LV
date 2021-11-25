@@ -256,6 +256,18 @@ export const removeCategory = async (dispatch, payload, open) => {
             })
         }
     } catch (error) {
-        throw new Error(error)
+        dispatch({
+            type: categoryConstant.REMOVE_CATEGORY_FAILURE,
+            payload: {
+                error: error.response.data.msg
+            }
+        })
+        open({
+            type: 'SET_OPEN',
+            payload: {
+                msg: error.response.data.msg,
+                type: "error"
+            }
+        })
     }
 }

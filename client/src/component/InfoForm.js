@@ -142,8 +142,10 @@ const InfoForm = (props) => {
     }
     const handleChangePosition = (e) => {
         const { name, value } = e.target;
+        if (name != "0") {
+            clearErrors(name)
+        }
         setValue(name, value);
-        setPosition(value)
     }
 
     const handleChangeProvince = (e, type) => {
@@ -284,13 +286,13 @@ const InfoForm = (props) => {
         }
     })
 
-    useEffect(() => {
-        return () => {
-            if (!getValues("HinhAnh")) {
-                imageUpload && URL.revokeObjectURL(imageUpload.preview)
-            }
-        }
-    }, [imageUpload])
+    // useEffect(() => {
+    //     return () => {
+    //         if (!getValues("HinhAnh")) {
+    //             imageUpload && URL.revokeObjectURL(imageUpload.preview)
+    //         }
+    //     }
+    // }, [imageUpload])
 
     return (
         <FormControl margin="dense" fullWidth>
@@ -333,6 +335,7 @@ const InfoForm = (props) => {
                         />
                         <InputGrid
                             nameTitle={`Quốc tịch`}
+                            defaultValue={"Việt Nam"}
                             name={"QuocTich"}
                             control={control}
                             errors={errors}
@@ -477,7 +480,7 @@ const InfoForm = (props) => {
                     </Grid>
                 </Grid>
             </Grid>
-            <Grid container spacing={1}>
+            {/* <Grid container spacing={1}>
                 <Grid container item xs={9}>
                     <Grid item style={{ width: '150px' }}>
                         <Typography>Quê quán</Typography>
@@ -709,7 +712,7 @@ const InfoForm = (props) => {
                         </Grid>
                     </Grid>
                 </Grid>
-            </Grid>
+            </Grid> */}
         </FormControl >
     );
 };

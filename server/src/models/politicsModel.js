@@ -5,8 +5,7 @@ const Politics = {
     findById: findById("chinhtri","MaChinhTri"),
     create: create("chinhtri", "MaChinhTri"),
     updateById: updateById("chinhtri", "MaChinhTri"),
-    remove: remove("chinhtri", "MaChinhTri"),
-    removeAll: removeAll("chinhtri")
+    remove: remove("chinhtri", "MaChinhTri", "Trình độ"),
 }
 
 module.exports = Politics;

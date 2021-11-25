@@ -71,7 +71,7 @@ const File = () => {
 
     useEffect(() => {
         setRows(partyMember.partyMembers)
-    }, [partyMember])
+    }, [partyMember.partyMembers])
 
     return (
         <>
