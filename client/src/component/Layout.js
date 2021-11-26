@@ -1,6 +1,7 @@
 import makeStyles from '@mui/styles/makeStyles';
 import React from 'react';
 import CustomizedSnackbars from './CustomizedSnackbars';
+import Loading from './CustomLoadingOverlay';
 import DrawerBar from './DrawerBar';
 
 const useStyles = makeStyles(theme => ({
@@ -26,6 +27,7 @@ const Layout = (props) => {
                 )
             }
             <CustomizedSnackbars />
+            <Loading />
         </>
     );
 };

@@ -23,6 +23,7 @@ const route = (app) => {
     app.use('/api', require('./typeRoute'));
     app.use('/api', require('./addressRoute'));
     app.use('/api', require('./evaluateRoute'));
+    app.use('/api', require('./voting'));
     app.use('/upload', require('./uploadRoute'));
     app.use('/auth/', require('./authRoute'));
     app.use('/api/', require('./statisticRoute'));

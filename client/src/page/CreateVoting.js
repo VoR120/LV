@@ -1,33 +1,21 @@
 import {
-    Button,
-    Chip,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    FormControlLabel,
-    Grid,
+    Chip, Grid,
     MenuItem,
-    Paper,
-    Radio,
-    RadioGroup,
-    TextField,
-    Typography
+    Paper, Typography
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useEffect, useState, useContext, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { getAllCategory } from '../action/categoryAction';
+import { createPoll } from '../action/votingAction';
 import AddCandidateForm from '../component/AddCandidateForm';
 import AddVoterForm from '../component/AddVoterForm';
-import AddVotingForm from '../component/AddVotingForm';
 import InputGrid from '../component/InputGrid';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
-import MySelect from '../component/UI/MySelect';
 import { CategoryContext } from '../contextAPI/CategoryContext';
 import { InfoContext } from '../contextAPI/InfoContext';
-import { getTimeWithStartHour } from '../utils/utils';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -62,6 +50,7 @@ const CreateVoting = () => {
 
     const { category, categoryDispatch } = useContext(CategoryContext);
     const { info } = useContext(InfoContext);
+    const { openSnackbarDispatch } = useContext(SnackbarContext);
     const [candidate, setCandidate] = useState([]);
     const [voter, setVoter] = useState([]);
 
@@ -72,6 +61,7 @@ const CreateVoting = () => {
         setError,
         clearErrors,
         getValues,
+        reset,
         watch,
         formState: { errors }
     } = useForm();
@@ -83,8 +73,46 @@ const CreateVoting = () => {
         setValue(e.target.name, e.target.value)
     }
 
-    const onSubmit = (data) => {
-        console.log(data);
+    const onSubmit = async (data) => {
+        if (candidate.length == 0)
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Bạn chưa chọn ứng cử viên",
+                    type: "error"
+                }
+            })
+        else if (voter.length == 0)
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Bạn chưa chọn đơn vị tham gia",
+                    type: "error"
+                }
+            })
+        else {
+            data.UngCuVien = candidate.map(el => el.MaSoDangVien);
+            data.NguoiThamGia = voter.map(el => el.MaSoDangVien);
+            const res = await createPoll(data);
+            if (res) {
+                openSnackbarDispatch({
+                    type: 'SET_OPEN',
+                    payload: {
+                        msg: "Đã tạo cuộc biểu quyết",
+                        type: "success"
+                    }
+                })
+                reset({
+                    TenBieuQuyet: 0,
+                    ThoiGianBatDau: "",
+                    ThoiGianKetThuc: "",
+                    SoPhieuToiDa: 1,
+                    NoiDung: "",
+                });
+                setCandidate([]);
+                setVoter([]);
+            }
+        }
     }
 
     useEffect(() => {
@@ -110,11 +138,20 @@ const CreateVoting = () => {
                         </Grid>
                         <Grid item xs={8}>
                             <InputGrid
+                                noTitle
+                                name="TenBieuQuyet"
+                                control={control}
+                                errors={errors}
+                                rules={{
+                                    required: "Vui lòng nhập trường này!",
+                                }}
+                            />
+
+                            {/* <InputGrid
                                 select
                                 noTitle
                                 defaultValue="0"
                                 name="TenBieuQuyet"
-                                rules={require}
                                 control={control}
                                 errors={errors}
                                 rules={{ required: "Vui lòng nhập trường này!" }}
@@ -123,10 +160,10 @@ const CreateVoting = () => {
                                 <MenuItem value="0">Chọn</MenuItem>
                                 {
                                     category.categories.achievement.map(el =>
-                                        <MenuItem key={el.MaThanhTich} value={el.MaThanhTich}>Biểu quyết {el.TenThanhTich}</MenuItem>
+                                        <MenuItem key={el.MaThanhTich} value={"Biểu quyết " + el.TenThanhTich}>Biểu quyết {el.TenThanhTich}</MenuItem>
                                     )
                                 }
-                            </InputGrid>
+                            </InputGrid> */}
                         </Grid>
                     </Grid>
                     <Grid container className={classes.inputItem} alignItems="center">
@@ -138,7 +175,6 @@ const CreateVoting = () => {
                                 noTitle
                                 type="datetime-local"
                                 name="ThoiGianBatDau"
-                                rules={require}
                                 control={control}
                                 errors={errors}
                                 rules={{
@@ -156,7 +192,6 @@ const CreateVoting = () => {
                                 noTitle
                                 type="datetime-local"
                                 name="ThoiGianKetThuc"
-                                rules={require}
                                 control={control}
                                 errors={errors}
                                 rules={{
@@ -167,20 +202,38 @@ const CreateVoting = () => {
                             />
                         </Grid>
                     </Grid>
-                    <Grid container style={{ marginTop: '16px' }} >
+                    <Grid container className={classes.inputItem} alignItems="center" >
                         <Grid item xs={4}>
                             <Typography>Số phiếu tối đa</Typography>
                         </Grid>
                         <Grid item xs={8}>
-                            <TextField defaultValue="1" InputProps={{ inputProps: { min: 1} }} fullWidth type="number" size="small" variant="outlined" />
+                            <InputGrid
+                                noTitle
+                                type="number"
+                                defaultValue="1"
+                                name="SoPhieuToiDa"
+                                control={control}
+                                errors={errors}
+                                InputProps={{ inputProps: { min: 1 } }}
+                            />
                         </Grid>
                     </Grid>
-                    <Grid container style={{ marginTop: '16px' }} >
+                    <Grid container className={classes.inputItem} alignItems="center" >
                         <Grid item xs={4}>
                             <Typography>Nội dung biểu quyết</Typography>
                         </Grid>
                         <Grid item xs={8}>
-                            <TextField fullWidth multiline minRows="3" size="small" variant="outlined" />
+                            <InputGrid
+                                noTitle
+                                multiline
+                                minRows={3}
+                                name="NoiDung"
+                                control={control}
+                                errors={errors}
+                                rules={{
+                                    required: "Vui lòng nhập trường này!",
+                                }}
+                            />
                         </Grid>
                     </Grid>
                     <Grid container style={{ marginTop: '16px' }} >

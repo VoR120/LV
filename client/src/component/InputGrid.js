@@ -18,7 +18,10 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const InputGrid = (props) => {
-    const { nameTitle, noTitle, select, children, center,  onChange, errors, name, id, register, disabled, type, placeholder, ...other } = props;
+    const { nameTitle, noTitle, select, children, center,
+        onChange, errors, name, id, register, disabled,
+        type, placeholder, InputProps, multiline, minRows, ...other
+    } = props;
     const classes = useStyles();
     return (
         <div className={classes.input}>
@@ -71,6 +74,9 @@ const InputGrid = (props) => {
                                                 variant="outlined"
                                                 error={!!errors[name]}
                                                 helperText={errors[name]?.message}
+                                                InputProps={InputProps}
+                                                multiline={multiline}
+                                                minRows={minRows || 1}
                                             />
                                             :
                                             <TextField
@@ -84,6 +90,9 @@ const InputGrid = (props) => {
                                                 variant="outlined"
                                                 error={!!errors[name]}
                                                 helperText={errors[name]?.message}
+                                                InputProps={InputProps}
+                                                multiline={multiline}
+                                                minRows={minRows || 1}
                                             />
 
                                     }

@@ -13,7 +13,6 @@ import {
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import AddVotingForm from '../component/AddVotingForm';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
 import InputGrid from './InputGrid';

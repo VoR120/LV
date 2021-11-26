@@ -14,11 +14,13 @@ import {
     Typography
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import AddVotingForm from '../component/AddVotingForm';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import { getAllPoll } from '../action/votingAction'
+import { LoadingContext } from '../contextAPI/LoadingContext';
 
 
 const useStyles = makeStyles(theme => ({
@@ -47,11 +49,77 @@ const useStyles = makeStyles(theme => ({
 
 const Voting = () => {
     const classes = useStyles();
+    const { loadingDispatch } = useContext(LoadingContext)
+    const [pollArr, setPollArr] = useState([]);
+
+    useEffect(() => {
+        const fetchAllPoll = async () => {
+            const res = await getAllPoll();
+            if (res) {
+                setPollArr(res);
+                loadingDispatch({ type: 'CLOSE_LOADING' })
+            }
+        }
+        loadingDispatch({ type: 'OPEN_LOADING' })
+        fetchAllPoll();
+    }, [])
+
+    return (
+        <>
+            <Layout sidebar>
+                <div className={classes.header} >
+                    <Typography className={classes.headerContent} variant="h5">
+                        Biểu quyết
+                    </Typography>
+                </div>
+                <Grid style={{ width: '100%' }} container spacing={2}>
+                    {pollArr.length > 0 ?
+                        pollArr.map(el =>
+                            <Grid item xs={6} key={el.MaBieuQuyet}>
+                                <Paper className={classes.paper} variant="outlined">
+                                    <Grid container justifyContent="space-between" marginBottom="40px">
+                                        <Typography variant="button">
+                                            {new Date(el.ThoiGianBatDau).toLocaleString()} - {new Date(el.ThoiGianKetThuc).toLocaleString()}
+                                        </Typography>
+                                        <Typography color="gray" variant="button">Chưa bắt đầu</Typography>
+                                    </Grid>
+                                    <Typography textAlign="center" className={classes.title} variant="h5">
+                                        {el.TenBieuQuyet}
+                                    </Typography>
+                                    <Typography textAlign="center" className={classes.title}>
+                                        {el.NoiDung}
+                                    </Typography>
+                                    <Typography textAlign="center" className={classes.title}>
+                                        Số phiếu tối đa: <b>{el.SoPhieuToiDa}</b>
+                                    </Typography>
+                                    <Grid container justifyContent="center">
+
+                                        <VotingForm data={el} />
+                                    </Grid>
+                                </Paper>
+                            </Grid>
+                        )
+                        :
+                        <Typography>Không có cuộc biểu quyết nào đang diễn ra</Typography>
+                    }
+                </Grid>
+            </Layout>
+        </>
+    );
+};
+
+const VotingForm = ({ data }) => {
+    const classes = useStyles();
     const [open, setOpen] = useState(false)
 
-    const [choose, setChoose] = useState([]);
+    const [checkedValues, setCheckedValues] = useState([]);
+    const { openSnackbarDispatch } = useContext(SnackbarContext)
 
-
+    const [candidate, setCandidate] = useState([
+        { MaSoDangVien: "B1706895", HoTen: "Nguyễn Văn Vỏ" },
+        { MaSoDangVien: "B1706001", HoTen: "Nguyễn Văn Dỏ" },
+        { MaSoDangVien: "B1706002", HoTen: "Nguyễn Văn Giỏ" },
+    ]);
 
     const handleOpen = () => {
         setOpen(true);
@@ -61,42 +129,55 @@ const Voting = () => {
         setOpen(false)
     }
 
-    const ConfirmSelect = () => {
+    const { control, getValues, setValue, register } = useForm();
 
-        const [checkedValues, setCheckedValues] = useState([]);
-        const [candidate, setCandidate] = useState([
-            { MaSoDangVien: "B1706895", HoTen: "Nguyễn Văn Vỏ" },
-            { MaSoDangVien: "B1706001", HoTen: "Nguyễn Văn Dỏ" },
-            { MaSoDangVien: "B1706002", HoTen: "Nguyễn Văn Giỏ" },
-        ]);
+    function handleSelect(e, checkedName) {
+        const newNames = checkedValues?.includes(checkedName)
+            ? checkedValues?.filter(name => name !== checkedName)
+            : [...(checkedValues ?? []), checkedName];
+        setCheckedValues(newNames);
 
-        const { control, getValues, setValue, register } = useForm();
+        return newNames;
+    }
 
-        function handleSelect(e, checkedName) {
-            const newNames = checkedValues?.includes(checkedName)
-                ? checkedValues?.filter(name => name !== checkedName)
-                : [...(checkedValues ?? []), checkedName];
-            setCheckedValues(newNames);
-
-            return newNames;
+    const handleSubmit = () => {
+        if (checkedValues.length > 2) {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Được chọn nhiều nhất 2 ứng cử viên",
+                    type: "error"
+                }
+            })
         }
-
-        const handleSubmit = () => {
-            console.log(checkedValues)
+        if (checkedValues.length == 0) {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Phải chọn ít nhất 1 ứng cử viên",
+                    type: "error"
+                }
+            })
         }
+        console.log(checkedValues)
+    }
 
-        return (
+    return (
+        <>
+            <MyButton onClick={handleOpen} primary>Biểu quyết</MyButton>
             <Dialog PaperProps={{ style: { minWidth: "700px" } }} fullWidth open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">Biểu quyết</DialogTitle>
                 <DialogContent className={classes.dialogContent}>
                     <Typography className={classes.title} alignItems="center" variant="h5">
-                        Biểu quyết khen thưởng Đảng viên hoàn thành xuất sắc nhiệm vụ 5 năm
+                        {data.TenBieuQuyet}
                     </Typography>
-                    <Typography>Nội dung: Biểu quyết khen thưởng Đảng viên hoàn thành xuất sắc nhiệm vụ 5 năm</Typography>
-                    <Typography>Thời gian: 00:00 25/12/2021 - 23:59 27/12/2021</Typography>
-                    <Typography>Số phiếu tối đa: 2</Typography>
+                    <Typography marginBottom="8px">Nội dung: {data.NoiDung}</Typography>
+                    <Typography marginBottom="8px">
+                        Thời gian: <b>{new Date(data.ThoiGianBatDau).toLocaleString()} - {new Date(data.ThoiGianKetThuc).toLocaleString()}                        </b>
+                    </Typography>
+                    <Typography marginBottom="8px">Số phiếu tối đa: <b>2</b></Typography>
                     <FormGroup>
-                        {candidate.map(el =>
+                        {data.UngCuVien.map(el =>
                             <FormControlLabel
                                 control={
                                     <Controller
@@ -104,16 +185,16 @@ const Voting = () => {
                                         render={({ props }) => {
                                             return (
                                                 <Checkbox
-                                                    checked={checkedValues.includes(el.MaSoDangVien)}
-                                                    onChange={(e) => handleSelect(e, el.MaSoDangVien)}
+                                                    checked={checkedValues.includes(el.MaUngCuVien)}
+                                                    onChange={(e) => handleSelect(e, el.MaUngCuVien)}
                                                 />
                                             );
                                         }}
                                         control={control}
                                     />
                                 }
-                                key={el.MaSoDangVien}
-                                label={el.HoTen}
+                                key={el.MaUngCuVien}
+                                label={el.HoTen + " - " + el.MaSoDangVien}
                             />
                         )}
                     </FormGroup>
@@ -127,49 +208,8 @@ const Voting = () => {
                     </MyButton>
                 </DialogActions>
             </Dialog>
-        )
-    }
-
-    return (
-        <>
-            <Layout sidebar>
-                <div className={classes.header} >
-                    <Typography className={classes.headerContent} variant="h5">
-                        Biểu quyết
-                    </Typography>
-                </div>
-                <Grid style={{ width: '100%' }} container spacing={2}>
-                    <Grid item xs={6}>
-                        <Paper className={classes.paper} variant="outlined">
-                            <Grid container justifyContent="space-between" marginBottom="40px">
-                                <Typography variant="button">00:00 25/12/2021 - 23:59 27/12/2021</Typography>
-                                <Typography color="green" variant="button">Đang diễn ra</Typography>
-                            </Grid>
-                            <Typography textAlign="center" className={classes.title} variant="h5">
-                                Biểu quyết khen thưởng Đảng viên hoàn thành xuất sắc nhiệm vụ 5 năm
-                            </Typography>
-                            <Grid container justifyContent="center">
-                                <MyButton onClick={handleOpen} primary>Biểu quyết</MyButton>
-                            </Grid>
-                            <ConfirmSelect />
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Paper className={classes.paper} variant="outlined">
-                            <div className={classes.flex}>
-                                <Typography variant="button">00:00 25/12/2021 - 23:59 27/12/2021</Typography>
-                                <Typography color="red" variant="button">Đã kết thúc</Typography>
-                            </div>
-                            <Typography textAlign="center" className={classes.title} variant="h5">
-                                Biểu quyết khen thưởng Đảng viên hoàn thành xuất sắc nhiệm vụ 5 năm
-                            </Typography>
-                            <ConfirmSelect />
-                        </Paper>
-                    </Grid>
-                </Grid>
-            </Layout>
         </>
-    );
-};
+    )
+}
 
 export default Voting;

@@ -43,7 +43,7 @@ const DrawerList = () => {
     const [open1, setOpen1] = useState(false);
     const path = location.pathname;
     const pathList = ["/grade", "/evaluate", "/evaluatesubject", "/evaluatedepartment", "/openevaluate"]
-    const pathList2 = ["/createvoting", "/voting"]
+    const pathList2 = ["/createvoting", "/voting", "/votingmanage"]
 
     useEffect(() => {
         if (pathList.includes(path)) {
@@ -240,6 +240,17 @@ const DrawerList = () => {
                                         <GradeIcon />
                                     </ListItemIcon>
                                     <ListItemText primary="Tạo biểu quyết" />
+                                </ListItemButton>
+                            </NavLink>
+                        }
+                        {
+                            info.info.Quyen["9"] == 1 &&
+                            <NavLink to={"/votingmanage"}>
+                                <ListItemButton >
+                                    <ListItemIcon>
+                                        <GradeIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Quản lý biểu quyết" />
                                 </ListItemButton>
                             </NavLink>
                         }

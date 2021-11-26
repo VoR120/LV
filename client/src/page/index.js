@@ -102,6 +102,12 @@ export const routes = [
         isPrivate: true,
     },
     {
+        path: '/votingmanage',
+        exact: true,
+        component: lazy(() => import('./VotingManage')),
+        isPrivate: true,
+    },
+    {
         path: '/myfile',
         exact: true,
         component: lazy(() => import('./MyFile')),
