@@ -1,4 +1,4 @@
-import { Button, Typography, Paper, TableContainer, MenuItem } from '@mui/material';
+import { Button, Typography, Paper, TableContainer, MenuItem, TextField } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
 import AddForm from '../component/AddForm';
@@ -9,7 +9,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import SaveAltIcon from '@mui/icons-material/SaveAlt';
 import { downloadExcel, getExportData } from '../utils/utils';
 import MySelect from '../component/UI/MySelect';
-import { getMoveByType, updateMove } from '../action/moveAction';
+import { getMoveByPMId, getMoveByType, updateMove } from '../action/moveAction';
 import MyButton from '../component/UI/MyButton';
 import MoveReturnForm from '../component/MoveReturnForm';
 import { useForm } from 'react-hook-form';
@@ -37,12 +37,18 @@ const useStyles = makeStyles(theme => ({
         padding: '16px',
         marginBottom: '16px',
     },
+    inputSelect: {
+        marginRight: '20px',
+        marginLeft: '16px',
+    },
 }))
 
 const Move = () => {
     const classes = useStyles();
     const [typeChoose, setTypeChoose] = useState('Chuyển sinh hoạt đi');
     const [type, setType] = useState("all");
+    const [typeFirst, setTypeFirst] = useState("type")
+    const [id, setId] = useState("")
     const [loading, setLoading] = useState(false);
 
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext);
@@ -58,17 +64,16 @@ const Move = () => {
         formState: { errors }
     } = useForm();
 
-
     const columnArr = {
         "Chuyển sinh hoạt đi": [
             { title: "Mã số Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
             { title: "Họ tên", field: "HoTen", },
             { title: "Chuyển từ Đảng bộ", field: "ChuyenTuDangBo", },
-            { title: "Chuyển từ chi bộ", field: "ChuyenTuChiBo", },
+            { title: "Chuyển từ chi bộ", field: "TenChiBoTu", },
             { title: "Chuyển đến Đảng bộ", field: "ChuyenDenDangBo", },
-            { title: "Chuyển đến Chi bộ", field: "ChuyenDenChiBo", },
-            { title: "Ngày chuyển đi", field: "NgayChuyenDi", },
-            { title: "Ngày chuyển về", field: "NgayChuyenDen", },
+            { title: "Chuyển đến Chi bộ", field: "TenChiBoDen", },
+            { title: "Ngày chuyển đi", field: "NgayChuyenDi", type: "date" },
+            { title: "Ngày chuyển về", field: "NgayChuyenDen", type: "date" },
             { title: "Hình thức", field: "TenHinhThuc", },
             { title: "Ghi chú", field: "GhiChu", sorting: false },
             {
@@ -107,10 +112,10 @@ const Move = () => {
             { title: "Mã số Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
             { title: "Họ tên", field: "HoTen", },
             { title: "Chuyển từ Đảng bộ", field: "ChuyenTuDangBo", },
-            { title: "Chuyển từ chi bộ", field: "ChuyenTuChiBo", },
+            { title: "Chuyển từ chi bộ", field: "TenChiBoTu", },
             { title: "Chuyển đến Đảng bộ", field: "ChuyenDenDangBo", },
-            { title: "Chuyển đến Chi bộ", field: "ChuyenDenChiBo", },
-            { title: "Ngày chuyển đến", field: "NgayChuyenDen", },
+            { title: "Chuyển đến Chi bộ", field: "TenChiBoDen", },
+            { title: "Ngày chuyển đến", field: "NgayChuyenDen", type: "date" },
             { title: "Hình thức", field: "TenHinhThuc", },
             { title: "Ghi chú", field: "GhiChu", sorting: false },
             {
@@ -120,12 +125,53 @@ const Move = () => {
                     return <ActionMoveMenu type={typeChoose} data={params} />
                 }
             },
-        ]
+        ],
+        "Chuyển sinh hoạt theo Mã": [
+            { title: "Mã số Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
+            { title: "Họ tên", field: "HoTen", },
+            { title: "Chuyển từ Đảng bộ", field: "ChuyenTuDangBo", },
+            { title: "Chuyển từ chi bộ", field: "TenChiBoTu", },
+            { title: "Chuyển đến Đảng bộ", field: "ChuyenDenDangBo", },
+            { title: "Chuyển đến Chi bộ", field: "TenChiBoDen", },
+            { title: "Ngày chuyển đi", field: "NgayChuyenDi", type: "date" },
+            { title: "Ngày chuyển đến/về", field: "NgayChuyenDen", type: "date" },
+            { title: "Hình thức", field: "TenHinhThuc", },
+            { title: "Ghi chú", field: "GhiChu", sorting: false },
+            {
+                title: "Chức năng", field: "action", sorting: false,
+                render: (params) => {
+                    console.log(params);
+                    return <ActionMoveMenu type={typeChoose} data={params} />
+                }
+            },
+        ],
+        "Chuyển sinh hoạt nội bộ": [
+            { title: "Mã số Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
+            { title: "Họ tên", field: "HoTen", },
+            { title: "Chuyển từ Đảng bộ", field: "ChuyenTuDangBo", },
+            { title: "Chuyển từ chi bộ", field: "TenChiBoTu", },
+            { title: "Chuyển đến Đảng bộ", field: "ChuyenDenDangBo", },
+            { title: "Chuyển đến chi bộ", field: "TenChiBoDen", },
+            { title: "Ngày chuyển", field: "NgayChuyenDi", type: "date" },
+            { title: "Hình thức", field: "TenHinhThuc", },
+            { title: "Ghi chú", field: "GhiChu", sorting: false },
+            {
+                title: "Chức năng", field: "action", sorting: false,
+                render: (params) => {
+                    console.log(params);
+                    return <ActionMoveMenu type={typeChoose} data={params} />
+                }
+            },
+        ],
     }
 
     const [columns, setColumns] = useState(columnArr["Chuyển sinh hoạt đi"])
 
     const data = getExportData(rows, columns)
+
+    const handleChangeTypeFirst = (e) => {
+        setTypeFirst(e.target.value);
+    }
 
     const handleChangeType = (e) => {
         setType("all");
@@ -133,9 +179,26 @@ const Move = () => {
     }
 
     const fetchApi = async () => {
-        const res = await getMoveByType({ LoaiHinhThuc: typeChoose, MaHinhThuc: type });
-        setRows(res);
-        setColumns(columnArr[typeChoose])
+        let res;
+        typeFirst == "type"
+            ? res = await getMoveByType({ LoaiHinhThuc: typeChoose, MaHinhThuc: type })
+            : res = await getMoveByPMId({ MaSoDangVien: id })
+        if (res.error) {
+            setRows([])
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: `${res.error}`,
+                    type: "error"
+                }
+            })
+        } else {
+            const newRes = [...res];
+            setRows(res);
+            typeFirst == "type"
+                ? setColumns(columnArr[typeChoose])
+                : setColumns(columnArr["Chuyển sinh hoạt theo Mã"])
+        }
         setLoading(false)
     };
 
@@ -164,9 +227,6 @@ const Move = () => {
     useEffect(() => {
         setLoading(true)
         fetchApi();
-        return () => {
-            console.log("Unmount");
-        }
     }, [])
 
     return (
@@ -179,24 +239,51 @@ const Move = () => {
                 </div>
                 <Paper variant="outlined" className={classes.paper}>
                     <MySelect
-                        onChange={handleChangeType}
-                        nameTitle={"Loại báo cáo"}
-                        value={typeChoose}
+                        onChange={handleChangeTypeFirst}
+                        value={typeFirst}
                         autowidth
                     >
-                        <MenuItem value="Chuyển sinh hoạt đi">Chuyển đi</MenuItem>
-                        <MenuItem value="Chuyển sinh hoạt đến">Chuyển đến</MenuItem>
+                        <MenuItem value="type">Theo loại</MenuItem>
+                        <MenuItem value="name">Theo Mã số Đảng viên</MenuItem>
                     </MySelect>
-                    <MySelect
-                        onChange={(e) => setType(e.target.value)}
-                        value={type}
-                        style={{ marginLeft: 16 }}
-                        autowidth
-                    >
-                        <MenuItem value="all">Tất cả</MenuItem>
-                        <MenuItem value={typeChoose == "Chuyển sinh hoạt đi" ? "1" : "3"}>Chuyển sinh hoạt tạm thời</MenuItem>
-                        <MenuItem value={typeChoose == "Chuyển sinh hoạt đi" ? "2" : "4"}>Chuyển sinh hoạt chính thức</MenuItem>
-                    </MySelect>
+                    {
+                        typeFirst == "type" ?
+                            <>
+                                <Typography className={classes.inputSelect}>Loại</Typography>
+                                <MySelect
+                                    onChange={handleChangeType}
+                                    value={typeChoose}
+                                    style={{ marginLeft: 16 }}
+                                    autowidth
+                                >
+                                    <MenuItem value="Chuyển sinh hoạt đi">Chuyển đi</MenuItem>
+                                    <MenuItem value="Chuyển sinh hoạt đến">Chuyển đến</MenuItem>
+                                    <MenuItem value="Chuyển sinh hoạt nội bộ">Chuyển nội bộ</MenuItem>
+                                </MySelect>
+                                {typeChoose != "Chuyển sinh hoạt nội bộ" &&
+                                    <MySelect
+                                        onChange={(e) => setType(e.target.value)}
+                                        value={type}
+                                        style={{ marginLeft: 16 }}
+                                        autowidth
+                                    >
+                                        <MenuItem value="all">Tất cả</MenuItem>
+                                        <MenuItem value={typeChoose == "Chuyển sinh hoạt đi" ? "1" : "3"}>Chuyển sinh hoạt tạm thời</MenuItem>
+                                        <MenuItem value={typeChoose == "Chuyển sinh hoạt đi" ? "2" : "4"}>Chuyển sinh hoạt chính thức</MenuItem>
+                                    </MySelect>
+                                }
+                            </>
+                            :
+                            <>
+                                <Typography className={classes.inputSelect}>Mã số Đảng viên</Typography>
+                                <TextField
+                                    onChange={(e) => setId(e.target.value)}
+                                    size="small"
+                                    variant="outlined"
+                                />
+                            </>
+                    }
+
                 </Paper>
                 <MyButton onClick={handleView} primary>Xem</MyButton>
                 {data.length > 0 &&

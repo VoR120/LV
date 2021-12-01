@@ -1,4 +1,4 @@
-const { getAll, findById, create, updateById, removeAll, remove, getDate } = require('./utils');
+const { getAll, findById, create, updateById, removeAll, remove } = require('./utils');
 const sql = require('../configs/db');
 
 const Discipline = {
@@ -17,12 +17,8 @@ const Discipline = {
                 callback(err, null);
                 return;
             }
-            let result = [...res]
-            res.map((el, index) => {
-                result[index].NgayKyLuat = result[index].NgayKyLuat && getDate(result[index].NgayKyLuat);
-            })
-            console.log("All: ", result);
-            callback(null, result);
+            console.log("All: ", res);
+            callback(null, res);
             return;
         })
     },
@@ -41,12 +37,8 @@ const Discipline = {
                 callback(err, null);
                 return;
             }
-            let result = [...res]
-            res.map((el, index) => {
-                result[index].NgayKyLuat = result[index].NgayKyLuat && getDate(result[index].NgayKyLuat);
-            })
-            console.log("Found: ", result);
-            callback(null, result);
+            console.log("Found: ", res);
+            callback(null, res);
             return;
         })
     },

@@ -16,7 +16,6 @@ const MySelectReactHookForm = (props) => {
         <Controller
             name={name}
             id={id}
-            r
             {...other}
             render={({ field }) => (
                 value ?

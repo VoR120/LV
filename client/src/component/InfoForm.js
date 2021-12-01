@@ -107,11 +107,11 @@ const InfoForm = (props) => {
         nohtArr, setNohtArr,
         qqValue, setQqValue,
         dcttValue, setDcttValue,
-        nohtValue, setNohtValue, } = props
+        nohtValue, setNohtValue,
+        setImageUpload } = props
     const classes = useStyles();
 
     // State
-    const [imageUpload, setImageUpload] = useState('');
     const [loading, setLoading] = useState(false);
     const [position, setPosition] = useState('');
 
@@ -120,14 +120,15 @@ const InfoForm = (props) => {
 
     // Function
     const handleRemove = () => {
+        setValue("HinhAnh", "");
         setImageUpload('');
-        setValue("ImageUpload", "");
     }
     const handleUpload = (e) => {
         const file = e.target.files[0];
         file.preview = URL.createObjectURL(file)
+        console.log(file);
+        setValue("HinhAnh", file);
         setImageUpload(file);
-        setValue("ImageUpload", file);
     }
     const handleChangeSelect = (e) => {
         setValue(e.target.name, e.target.value)
@@ -271,21 +272,13 @@ const InfoForm = (props) => {
 
     // useEffect
 
-    useEffect(() => {
-        if (getValues("HinhAnh")) {
-            let file = {};
-            file.preview = getValues("HinhAnh");
-            setImageUpload(file);
-        }
-        console.log("Mount");
-    }, [])
-
-    useEffect(() => {
-        return () => {
-            console.log("Unmount");
-        }
-    })
-
+    // useEffect(() => {
+    //     if (getValues("HinhAnh")) {
+    //         let file = {};
+    //         file.preview = getValues("HinhAnh");
+    //         setValue("HinhAnh", file)
+    //     }
+    // }, [])
     // useEffect(() => {
     //     return () => {
     //         if (!getValues("HinhAnh")) {
@@ -300,16 +293,18 @@ const InfoForm = (props) => {
                 <Grid item container xs={9} spacing={1}>
                     <Grid item xs={6}>
                         <InputGrid
+                            key={1}
                             nameTitle={`Họ tên`}
                             name={"HoTen"}
                             defaultValue={""}
                             control={control}
                             errors={errors}
-                        // rules={{ required: "Vui lòng nhập trường này!" }}
+                            rules={{ required: "Vui lòng nhập trường này!" }}
                         />
                         <InputGrid
                             nameTitle={`Mã Đảng viên`}
                             name={"MaSoDangVien"}
+                            defaultValue={""}
                             control={control}
                             errors={errors}
                             disabled={edit}
@@ -330,6 +325,7 @@ const InfoForm = (props) => {
                         <InputGrid
                             nameTitle={`CMND`}
                             name={"CMND"}
+                            defaultValue={""}
                             control={control}
                             errors={errors}
                         />
@@ -440,10 +436,10 @@ const InfoForm = (props) => {
                 <Grid item xs={3}>
                     <div className={classes.imageWrapper} >
                         <>
-                            {imageUpload ?
+                            {getValues("HinhAnh") ?
                                 <>
                                     <img className={classes.fileUpload} style={{ height: '100%' }}
-                                        src={imageUpload.preview}
+                                        src={getValues("HinhAnh").preview}
                                         alt=""
                                     />
                                     <IconButton className={classes.closeBtn} size="small" onClick={handleRemove}>
@@ -480,7 +476,7 @@ const InfoForm = (props) => {
                     </Grid>
                 </Grid>
             </Grid>
-            {/* <Grid container spacing={1}>
+            <Grid container spacing={1}>
                 <Grid container item xs={9}>
                     <Grid item style={{ width: '150px' }}>
                         <Typography>Quê quán</Typography>
@@ -712,8 +708,8 @@ const InfoForm = (props) => {
                         </Grid>
                     </Grid>
                 </Grid>
-            </Grid> */}
-        </FormControl >
+            </Grid>
+        </FormControl>
     );
 };
 

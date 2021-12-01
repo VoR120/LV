@@ -204,7 +204,7 @@ export const updateCategory = async (dispatch, payload, open) => {
         dispatch({ type: categoryConstant.UPDATE_CATEGORY_REQUEST });
         const res = await axios.put('/api/' + payload.categoryField + '/' + payload.id, payload.data);
         let newData = new Object(res.data);
-        console.log(payload);
+        console.log(newData);
         if (payload.categoryField == 'flanguagelevel') {
             newData = await getfLanguageName(res.data)
         }

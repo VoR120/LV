@@ -1,10 +1,77 @@
-const { getAll, findById, create, updateById, removeAll, remove, getDate } = require('./utils');
+const { getAll, findById, create, updateById, removeAll, remove } = require('./utils');
 const sql = require('../configs/db');
+const e = require('express');
 
 const Move = {
-    getAll: getAll("chuyensinhhoat"),
+    getAll: (callback) => {
+        const sqlPromise = sql.promise();
+        const sqlQuery = `SELECT 
+        csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, 
+        csh.ChuyenDenDangBo, csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
+        ht.TenHinhThuc
+        FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht
+        WHERE csh.MaHinhThuc = ht.MaHinhThuc
+        AND csh.MaSoDangVien = dv.MaSoDangVien
+        AND dv.DaXoa = 0
+        `;
+        sql.query(sqlQuery, async (err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                callback(err, null);
+                return;
+            }
+            const result = [...res];
+            await Promise.all(res.map(async (el, index) => {
+                if (el.MaHinhThuc == 1 || el.MaHinhThuc == 2) {
+                    const [result1, f] = await sqlPromise.query(`
+                                        SELECT TenChiBo FROM chibo WHERE MaChiBo = ${el.ChuyenTuChiBo}
+                                    `)
+                    if (err) {
+                        console.log("error: ", err);
+                        callback(err, null);
+                        return;
+                    }
+                    result[index].TenChiBoTu = result1[0].TenChiBo
+                    result[index].TenChiBoDen = result[0].ChuyenDenChiBo
+
+                }
+                if (el.MaHinhThuc == 3 || el.MaHinhThuc == 4) {
+                    const [result2, f] = await sqlPromise.query(`
+                                        SELECT TenChiBo FROM chibo WHERE MaChiBo = ${el.ChuyenDenChiBo}
+                                    `)
+                    if (err) {
+                        console.log("error: ", err);
+                        callback(err, null);
+                        return;
+                    }
+                    result[index].TenChiBoDen = result2[0].TenChiBo
+                    result[index].TenChiBoTu = result[0].ChuyenTuChiBo
+                }
+                if (el.MaHinhThuc == 13) {
+                    const [result2, f] = await sqlPromise.query(`
+                                        SELECT chibo.TenChiBo as TenChiBoDen, chibotu.TenChiBoTu FROM chibo,
+                                        (SELECT TenChiBo as TenChiBoTu FROM chibo
+                                        WHERE MaChiBo = ${el.ChuyenTuChiBo}    
+                                        ) as chibotu
+                                        WHERE MaChiBo = ${el.ChuyenDenChiBo}
+                                    `)
+                    if (err) {
+                        console.log("error: ", err);
+                        callback(err, null);
+                        return;
+                    }
+                    result[index].TenChiBoDen = result2[0].TenChiBoDen
+                    result[index].TenChiBoTu = result2[0].TenChiBoTu
+                }
+            }))
+            console.log("Found: ", result);
+            callback(null, result);
+            return;
+        })
+    },
     findById: findById("chuyensinhhoat", "MaSoDangVien"),
     findByTypeId: (id, callback) => {
+        const sqlPromise = sql.promise();
         const sqlQuery = `SELECT 
         csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, 
         csh.ChuyenDenDangBo, csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
@@ -15,26 +82,139 @@ const Move = {
         AND csh.MaSoDangVien = dv.MaSoDangVien
         AND dv.DaXoa = 0
         `;
-        sql.query(sqlQuery, (err, res) => {
+        sql.query(sqlQuery, async (err, res) => {
             if (err) {
                 console.log("error: ", err);
                 callback(err, null);
                 return;
             }
-            let result = [...res]
-            res.map((el, index) => {
-                result[index].NgayChuyenDi = result[index].NgayChuyenDi && getDate(result[index].NgayChuyenDi);
-                result[index].NgayChuyenDen = result[index].NgayChuyenDen && getDate(result[index].NgayChuyenDen);
-            })
+
+            const result = [...res];
+            await Promise.all(res.map(async (el, index) => {
+                if (el.MaHinhThuc == 1 || el.MaHinhThuc == 2) {
+                    const [result1, f] = await sqlPromise.query(`
+                                        SELECT TenChiBo FROM chibo WHERE MaChiBo = ${el.ChuyenTuChiBo}
+                                    `)
+                    if (err) {
+                        console.log("error: ", err);
+                        callback(err, null);
+                        return;
+                    }
+                    result[index].TenChiBoTu = result1[0].TenChiBo
+
+                }
+                if (el.MaHinhThuc == 3 || el.MaHinhThuc == 4) {
+                    const [result2, f] = await sqlPromise.query(`
+                                        SELECT TenChiBo FROM chibo WHERE MaChiBo = ${el.ChuyenDenChiBo}
+                                    `)
+                    if (err) {
+                        console.log("error: ", err);
+                        callback(err, null);
+                        return;
+                    }
+                    result[index].TenChiBoDen = result2[0].TenChiBo
+                }
+                if (el.MaHinhThuc == 13) {
+                    const [result2, f] = await sqlPromise.query(`
+                                        SELECT chibo.TenChiBo as TenChiBoDen, chibotu.TenChiBoTu FROM chibo,
+                                        (SELECT TenChiBo as TenChiBoTu FROM chibo
+                                        WHERE MaChiBo = ${el.ChuyenTuChiBo}    
+                                        ) as chibotu
+                                        WHERE MaChiBo = ${el.ChuyenDenChiBo}
+                                    `)
+                    if (err) {
+                        console.log("error: ", err);
+                        callback(err, null);
+                        return;
+                    }
+                    result[index].TenChiBoDen = result2[0].TenChiBoDen
+                    result[index].TenChiBoTu = result2[0].TenChiBoTu
+                }
+            }))
             console.log("Found: ", result);
             callback(null, result);
             return;
         })
     },
+    findByPMId: (id, callback) => {
+        const sqlPromise = sql.promise();
+        sql.query(`SELECT HoTen FROM dangvien WHERE MaSoDangVien = "${id}" AND DaXoa = 0`,
+            (err, res) => {
+                if (!res.length) {
+                    console.log("Error: MaSoDangVien not found");
+                    callback({ type: "not_found" }, null);
+                    return;
+                } else {
+                    sql.query(`SELECT 
+                    csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo , 
+                    csh.ChuyenDenDangBo, csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
+                    ht.TenHinhThuc
+                    FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht
+                    WHERE csh.MaHinhThuc = ht.MaHinhThuc
+                    AND csh.MaSoDangVien = dv.MaSoDangVien
+                    AND csh.MaSoDangVien = "${id}"
+                    AND dv.DaXoa = 0`,
+                        async (err, res) => {
+                            if (err) {
+                                console.log("error: ", err);
+                                callback(err, null);
+                                return;
+                            }
+                            const result = [...res];
+                            await Promise.all(res.map(async (el, index) => {
+                                if (el.MaHinhThuc == 1 || el.MaHinhThuc == 2) {
+                                    const [result1, f] = await sqlPromise.query(`
+                                        SELECT TenChiBo FROM chibo WHERE MaChiBo = ${el.ChuyenTuChiBo}
+                                    `)
+                                    if (err) {
+                                        console.log("error: ", err);
+                                        callback(err, null);
+                                        return;
+                                    }
+                                    result[index].TenChiBoTu = result1[0].TenChiBo
+
+                                }
+                                if (el.MaHinhThuc == 3 || el.MaHinhThuc == 4) {
+                                    const [result2, f] = await sqlPromise.query(`
+                                        SELECT TenChiBo FROM chibo WHERE MaChiBo = ${el.ChuyenDenChiBo}
+                                    `)
+                                    if (err) {
+                                        console.log("error: ", err);
+                                        callback(err, null);
+                                        return;
+                                    }
+                                    result[index].TenChiBoDen = result2[0].TenChiBo
+                                }
+                                if (el.MaHinhThuc == 13) {
+                                    const [result2, f] = await sqlPromise.query(`
+                                        SELECT chibo.TenChiBo as TenChiBoDen, chibotu.TenChiBoTu FROM chibo,
+                                        (SELECT TenChiBo as TenChiBoTu FROM chibo
+                                        WHERE MaChiBo = ${el.ChuyenTuChiBo}    
+                                        ) as chibotu
+                                        WHERE MaChiBo = ${el.ChuyenDenChiBo}
+                                    `)
+                                    if (err) {
+                                        console.log("error: ", err);
+                                        callback(err, null);
+                                        return;
+                                    }
+                                    result[index].TenChiBoDen = result2[0].TenChiBoDen
+                                    result[index].TenChiBoTu = result2[0].TenChiBoTu
+                                }
+                            }))
+
+                            console.log("Found By Id: ", result);
+                            callback(null, result);
+                        }
+                    )
+                }
+            }
+        )
+    },
     findByType: (type, callback) => {
-        const sqlQuery = `SELECT 
-            csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo,
-            csh.ChuyenDenDangBo,csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
+        let sqlQuery = `SELECT 
+            csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo AS TenChiBoTu,
+            csh.ChuyenDenDangBo,csh.ChuyenDenChiBo AS TenChiBoDen, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
             ht.TenHinhThuc
             FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht
             WHERE csh.MaHinhThuc IN (
@@ -43,19 +223,67 @@ const Move = {
             AND csh.MaHinhThuc = ht.MaHinhThuc
             AND csh.MaSoDangVien = dv.MaSoDangVien
             AND dv.DaXoa = 0`;
+        if (type == "Chuyển sinh hoạt đi") {
+            sqlQuery = `SELECT 
+            csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, cb.TenChiBo AS TenChiBoTu,
+            csh.ChuyenDenDangBo,csh.ChuyenDenChiBo AS TenChiBoDen, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
+            ht.TenHinhThuc
+            FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht, chibo cb
+            WHERE csh.MaHinhThuc IN (
+            SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "${type}"
+            )
+            AND csh.ChuyenTuChiBo = cb.MaChiBo
+            AND csh.MaHinhThuc = ht.MaHinhThuc
+            AND csh.MaSoDangVien = dv.MaSoDangVien
+            AND dv.DaXoa = 0`;
+        }
+        if (type == "Chuyển sinh hoạt đến") {
+            sqlQuery = `SELECT 
+            csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo AS TenChiBoTu, cb.TenChiBo AS TenChiBoDen,
+            csh.ChuyenDenDangBo,csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
+            ht.TenHinhThuc
+            FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht, chibo cb
+            WHERE csh.MaHinhThuc IN (
+            SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "${type}"
+            )
+            AND csh.ChuyenDenChiBo = cb.MaChiBo
+            AND csh.MaHinhThuc = ht.MaHinhThuc
+            AND csh.MaSoDangVien = dv.MaSoDangVien
+            AND dv.DaXoa = 0`;
+        }
+        if (type == "Chuyển sinh hoạt nội bộ") {
+            sqlQuery = `SELECT 
+            csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, cb.TenChiBo AS TenChiBoTu, chiboden.TenChiBoDen,
+            csh.ChuyenDenDangBo,csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
+            ht.TenHinhThuc
+            FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht, chibo cb,
+            (SELECT 
+                cb.TenChiBo AS TenChiBoDen
+                FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht, chibo cb
+                WHERE csh.MaHinhThuc IN (
+                SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "Chuyển sinh hoạt nội bộ"
+                )
+                AND csh.ChuyenDenChiBo = cb.MaChiBo
+                AND csh.MaHinhThuc = ht.MaHinhThuc
+                AND csh.MaSoDangVien = dv.MaSoDangVien
+                AND dv.DaXoa = 0
+			) AS chiboden
+            WHERE csh.MaHinhThuc IN (
+            SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "Chuyển sinh hoạt nội bộ"
+            )
+            AND csh.ChuyenTuChiBo = cb.MaChiBo
+            AND csh.MaHinhThuc = ht.MaHinhThuc
+            AND csh.MaSoDangVien = dv.MaSoDangVien
+            AND dv.DaXoa = 0`
+        }
         sql.query(sqlQuery, (err, res) => {
             if (err) {
                 console.log("error: ", err);
                 callback(err, null);
                 return;
             }
-            let result = [...res]
-            res.map((el, index) => {
-                result[index].NgayChuyenDi = result[index].NgayChuyenDi && getDate(result[index].NgayChuyenDi);
-                result[index].NgayChuyenDen = result[index].NgayChuyenDen && getDate(result[index].NgayChuyenDen);
-            })
-            console.log("Found: ", result);
-            callback(null, result);
+            console.log("Found: ", res);
+            callback(null, res);
             return;
         })
     },

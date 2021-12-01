@@ -5,7 +5,7 @@ const Position = {
     getAll: getAll("chucvu", "MaChucVu", "TenChucVu", ["Mã Chức vụ", "Tên Chức vụ", "Số Đảng viên"]),
     findById: findById("chucvu", "MaChucVu"),
     create: create("chucvu", "MaChucVu"),
-    updateById: updateById("chucvu", "MaChucVu"),
+    updateById: updateById("chucvu", "MaChucVu", "TenChucVu"),
     remove: (id, callback) => {
         try {
             sql.query(`SELECT MaSoDangVien FROM dangvien WHERE MaChucVu = ${id}`, (err, result) => {

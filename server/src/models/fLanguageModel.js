@@ -23,7 +23,38 @@ const FLanguage = {
     },
     findById: findById("ngoaingu", "MaNgoaiNgu"),
     create: create("ngoaingu", "MaNgoaiNgu"),
-    updateById: updateById("ngoaingu", "MaNgoaiNgu"),
+    updateById: (id, newValue, callback) => {
+        sql.query(`UPDATE ngoaingu SET ? WHERE MaNgoaiNgu = ${id}`, newValue, ((err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                callback(err, null);
+                return;
+            }
+
+            if (res.affectedRows == 0) {
+                callback({ type: "not_found" }, null);
+                return;
+            }
+
+            sql.query(`SELECT ngoaingu.MaNgoaiNgu, ngoaingu.TenNgoaiNgu, count(ngoaingudangvien.MaNgoaiNgu) AS SoDangVien 
+                FROM ngoaingu 
+                LEFT JOIN ngoaingudangvien 
+                INNER JOIN dangvien
+                ON dangvien.MaSoDangVien = ngoaingudangvien.MaSoDangVien
+                ON ngoaingudangvien.MaNgoaiNgu=ngoaingu.MaNgoaiNgu
+                AND dangvien.DaXoa = 0
+                AND ngoaingudangvien.MaNgoaiNgu = ${id}
+                    `, (err, res1) => {
+                if (err) {
+                    console.log("error: ", err);
+                    callback(err, null);
+                    return;
+                }
+                console.log("Updated: ", res1[0]);
+                callback(null, res1[0]);
+            })
+        }))
+    },
     remove: (id, callback) => {
         sql.query(`SELECT MaSoDangVien FROM ngoaingudangvien WHERE MaNgoaiNgu = ${id}`, (err, result) => {
             if (err) {

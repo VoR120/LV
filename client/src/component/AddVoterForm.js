@@ -74,7 +74,7 @@ const AddVoterForm = (props) => {
         } else {
             console.log(right);
             setOpen(false);
-            setVoter(right)
+            setVoter(right.map(el => ({ HoTen: el.HoTen, MaNguoiThamGia: el.MaSoDangVien })))
         }
     }
 
@@ -86,6 +86,7 @@ const AddVoterForm = (props) => {
         // setRight([]);
         data.notreserve = includeReserve
         const res = await filterPartyMember(data);
+        console.log(res);
         setLeft(res)
         // setLoading(false)
     }

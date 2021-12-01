@@ -21,6 +21,9 @@ import MyButton from './UI/MyButton';
 import InputGrid from './InputGrid';
 import { createMove } from '../action/moveAction';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import { CategoryContext } from '../contextAPI/CategoryContext';
+import { getAllCategory } from '../action/categoryAction';
+import { dateArr, getDate } from '../utils/utils'
 
 const useStyles = makeStyles(theme => ({
     icon: {
@@ -43,7 +46,8 @@ const EditMoveForm = (props) => {
     const classes = useStyles();
     const { data, type } = props
     const [open, setOpen] = useState(false);
-    const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
+    const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext);
+    const { category, categoryDispatch } = useContext(CategoryContext);
 
     const {
         register,
@@ -75,7 +79,13 @@ const EditMoveForm = (props) => {
 
     useEffect(() => {
         if (data) {
-            Object.keys(data).map(el => setValue(el, data[el]))
+            console.log(data);
+            getAllCategory(categoryDispatch, "partycell");
+            Object.keys(data).map(el => {
+                (dateArr.includes(el) && data[el])
+                    ? setValue(el, getDate(data[el]))
+                    : setValue(el, data[el])
+            })
         }
     }, [])
 
@@ -88,49 +98,62 @@ const EditMoveForm = (props) => {
                 <DialogTitle id="form-dialog-title">Cập nhật chuyển sinh hoạt</DialogTitle>
                 <DialogContent>
                     <FormControl margin="dense" fullWidth>
-                        {/* <Grid container spacing={1}>
-                            <Grid item xs={6}>
-                                <InputGrid
-                                    select
-                                    onChange={handleChangeSelect}
-                                    nameTitle={"Hình thức chuyển"}
-                                    name={"MaHinhThuc"}
-                                    defaultValue={"0"}
-                                    rules={{
-                                        validate: value =>
-                                            value != "0" || "Vui lòng nhập trường này!"
-                                    }}
-                                    control={control}
-                                    errors={errors}
-                                >
-                                    <MenuItem value="0">Chọn hình thức</MenuItem>
-                                    <MenuItem value="0001">Chuyển sinh hoạt tạm thời</MenuItem>
-                                    <MenuItem value="0002">Chuyển sinh hoạt chính thức</MenuItem>
-                                </InputGrid>
-                            </Grid>
-                        </Grid> */}
-                        {/* <Divider className={classes.divider} /> */}
                         <Grid container spacing={1}>
                             {type == "Chuyển sinh hoạt đi" &&
                                 <>
-                                    <Grid item xs={6}>
-                                        <InputGrid
-                                            nameTitle={`Chuyển từ Đảng bộ`}
-                                            name={"ChuyenTuDangBo"}
-                                            defaultValue={"DHCT"}
-                                            control={control}
-                                            errors={errors}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <InputGrid
-                                            nameTitle={`Chuyển từ chi bộ`}
-                                            name={"ChuyenTuChiBo"}
-                                            defaultValue={""}
-                                            control={control}
-                                            errors={errors}
-                                        />
-                                    </Grid>
+                                    {(data.MaHinhThuc == 1 || data.MaHinhThuc == 2) ?
+                                        <>
+                                            <Grid item xs={6}>
+                                                <InputGrid
+                                                    nameTitle={`Chuyển từ Đảng bộ`}
+                                                    name={"ChuyenTuDangBo"}
+                                                    defaultValue={"DHCT"}
+                                                    disabled={true}
+                                                    control={control}
+                                                    errors={errors}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <InputGrid
+                                                    select
+                                                    onChange={handleChangeSelect}
+                                                    nameTitle={"Chuyển từ chi bộ"}
+                                                    name={`ChuyenTuChiBo`}
+                                                    disabled={true}
+                                                    control={control}
+                                                    errors={errors}
+                                                >
+                                                    <MenuItem value="0">Chọn chi bộ</MenuItem>
+                                                    {category.categories.partycell.length > 0 &&
+                                                        category.categories.partycell.map(el =>
+                                                            <MenuItem key={el.MaChiBo} value={el.MaChiBo}>{el.TenChiBo}</MenuItem>
+                                                        )
+                                                    }
+                                                </InputGrid>
+                                            </Grid>
+                                        </>
+                                        :
+                                        <>
+                                            <Grid item xs={6}>
+                                                <InputGrid
+                                                    nameTitle={`Chuyển từ Đảng bộ`}
+                                                    name={"ChuyenTuDangBo"}
+                                                    defaultValue={""}
+                                                    control={control}
+                                                    errors={errors}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <InputGrid
+                                                    nameTitle={`Chuyển từ chi bộ`}
+                                                    name={"ChuyenTuChiBo"}
+                                                    defaultValue={""}
+                                                    control={control}
+                                                    errors={errors}
+                                                />
+                                            </Grid>
+                                        </>
+                                    }
                                     <Grid item xs={6}>
                                         <InputGrid
                                             nameTitle={`Chuyển đến Đảng bộ`}

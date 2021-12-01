@@ -65,7 +65,7 @@ exports.create = (table, key) => {
     }
 }
 
-exports.updateById = (table, key) => {
+exports.updateById = (table, key, name) => {
     return (id, newValue, callback) => {
         const sqlQuery = typeof (id) === "number" ?
             `UPDATE ${table} SET ? WHERE ${key} = ${id}` :
@@ -81,15 +81,32 @@ exports.updateById = (table, key) => {
                 callback({ type: "not_found" }, null);
                 return;
             }
-            console.log("Updated: ", { [key]: id, ...newValue });
-            callback(null, { [key]: id, ...newValue, SoDangVien: 0 });
+
+            sql.query(`SELECT ${table}.${key}, ${table}.${name}, count(dangvien.${key}) AS SoDangVien 
+                    FROM ${table} 
+                    LEFT JOIN dangvien 
+                    ON ${table}.${key}=dangvien.${key}
+                    AND dangvien.DaXoa = 0
+                    AND ${table}.${key} = ${id}
+                    `, (err, res1) => {
+                if (err) {
+                    console.log("error: ", err);
+                    callback(err, null);
+                    return;
+                }
+                console.log("Updated: ", res1[0]);
+                callback(null, res1[0] );
+            })
         }))
     }
 }
 
 exports.remove = (table, key, name) => {
     return (id, callback) => {
-        sql.query(`SELECT MaSoDangVien FROM dangvien WHERE ${key} = ${id}`, (err, result) => {
+        const sqlQuerySelect = typeof (id) === "number" ?
+            `SELECT MaSoDangVien FROM dangvien WHERE ${key} = ${id}` :
+            `SELECT MaSoDangVien FROM dangvien WHERE ${key} = "${id}"`;
+        sql.query(sqlQuerySelect, (err, result) => {
             if (err) {
                 console.log("error: ", err);
                 callback(err, null);

@@ -68,7 +68,7 @@ const ActionMenu = (props) => {
                     <MenuItem onClick={handleClose}><DeleteForm name={data.HoTen} id={data.MaSoDangVien} /></MenuItem>
                 }
                 {info.info.Quyen["3"] == 1 &&
-                    <MenuItem onClick={handleClose}><MoveForm id={data.MaSoDangVien} partycell={data.TenChiBo} /></MenuItem>
+                    <MenuItem onClick={handleClose}><MoveForm id={data.MaSoDangVien} partycell={data.MaChiBo} /></MenuItem>
                 }
                 {/* {info.info.Quyen["4"] == 1 &&
                     <MenuItem onClick={handleClose}><GradeForm id={data.MaSoDangVien} name={data.HoTen} partycell={data.TenChiBo} /></MenuItem>

@@ -15,6 +15,7 @@ import InputGrid from './InputGrid';
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import { CategoryContext } from '../contextAPI/CategoryContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
 
 const useStyles = makeStyles(theme => ({
     addBtn: {
@@ -103,6 +104,7 @@ const LevelForm = (props) => {
     const { control, errors, setValue, flArray, setFlArray, levelArray, setLevelArray, edit, clearErrors } = props
     const [loading, setLoading] = useState(false);
     const { category, categoryDispatch } = useContext(CategoryContext);
+    const { openSnackbarDispatch } = useContext(SnackbarContext);
 
     const handleRemove = () => {
 
@@ -144,7 +146,13 @@ const LevelForm = (props) => {
 
     const handleRemoveInput = (id, index) => {
         if (flArray.length == 1) {
-            alert("Bạn phải nhập ít nhất 1 trình độ ngoại ngữ")
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Bạn phải nhập ít nhất 1 trình độ ngoại ngữ!",
+                    type: "error"
+                }
+            })
             return;
         }
         let newData = [...flArray];

@@ -55,16 +55,9 @@ const CategoryForm = (props) => {
 
     useEffect(() => {
         if (edit) {
+            console.log(dataArr);
             Object.keys(dataArr).forEach(key => setValue(key, dataArr[key]));
         }
-        const getId = async () => {
-            const res = await getfLanguageId({ name: flanguage })
-            if (res.data.length > 0) {
-                setValue("MaNgoaiNgu", res.data[0].MaNgoaiNgu)
-            }
-        }
-        if (categoryField == "flanguagelevel")
-            getId();
     }, [])
 
     useEffect(() => {

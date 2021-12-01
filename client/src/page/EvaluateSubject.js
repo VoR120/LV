@@ -24,7 +24,7 @@ import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import MaterialTable from '@material-table/core';
 import axios from '../helper/axios';
-import { getExportData, getTimeWithEndHour, getTimeWithStartHour } from '../utils/utils';
+import { getExportData, getLocaleDate, getTimeWithEndHour, getTimeWithStartHour } from '../utils/utils';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import Loading from '../component/CustomLoadingOverlay';
@@ -217,7 +217,7 @@ const EvaluateSubject = () => {
                                 <Typography style={{ textTransform: 'uppercase' }}>Đánh giá Đảng viên cuối năm</Typography>
                                 <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
                                 <Typography variant="body1">
-                                    Thời gian: Từ ngày <b>{isTime.NgayBatDau}</b> đến ngày <b>{isTime.NgayKetThuc}</b>
+                                    Thời gian: Từ ngày <b>{getLocaleDate(isTime.NgayBatDau)}</b> đến ngày <b>{getLocaleDate(isTime.NgayKetThuc)}</b>
                                 </Typography>
                             </Paper>
                             <TableContainer className="decentralization-table" style={{ maxWidth: "1170px", }} >

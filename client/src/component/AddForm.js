@@ -5,15 +5,17 @@ import {
     Dialog, DialogActions, DialogTitle, Tab, Tabs
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { getAllCategory, getFlanguageLevel } from '../action/categoryAction';
 import { addPartyMember, updatePartyMember } from '../action/partyMemberAction';
 import { CategoryContext } from '../contextAPI/CategoryContext';
+import { LoadingContext } from '../contextAPI/LoadingContext';
 import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import axios from '../helper/axios';
 import '../public/css/Form.scss';
+import { dateArr, getDate, getLocaleDate } from '../utils/utils';
 import Loading from './CustomLoadingOverlay';
 import InfoForm from './InfoForm';
 import LevelForm from './LevelForm';
@@ -94,17 +96,18 @@ const useStyles = makeStyles(theme => ({
 }))
 
 
-const AddForm = (props) => {
-    const { edit, data } = props
+const AddForm = ({ edit, data }) => {
     const classes = useStyles();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [step, setStep] = useState(0);
     const { category, categoryDispatch } = useContext(CategoryContext);
     const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
+    const { loadingDispatch } = useContext(LoadingContext);
     const { openSnackbarDispatch } = useContext(SnackbarContext)
     const [flArray, setFlArray] = useState([{ MaNgoaiNgu: "0", MaTrinhDo: "0" }]);
     const [levelArray, setLevelArray] = useState([]);
+    const [imageUpload, setImageUpload] = useState("")
 
     const [qqArr, setQqArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
     const [dcttArr, setDcttArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
@@ -120,6 +123,7 @@ const AddForm = (props) => {
         setError,
         clearErrors,
         getValues,
+        watch,
         formState: { errors }
     } = useForm();
 
@@ -160,25 +164,40 @@ const AddForm = (props) => {
         setStep(newValue);
     };
 
+    const onSubmit = (newValue) => {
 
-    const onSubmit = (data) => {
-        // setLoading(true)
-        // setOpen(false)
-        data.QQAddress = { ...qqValue, detail: getValues("QQChiTiet") };
-        data.DCTTAddress = { ...dcttValue, detail: getValues("DCTTChiTiet") };
-        data.NOHTAddress = { ...nohtValue, detail: getValues("NOHTChiTiet") };
-        // if (step != 2)
-        //     setStep(previewStep => previewStep + 1);
-        // else {
-        edit ?
-            updatePartyMember(partyMemberDispatch, data, openSnackbarDispatch) :
-            addPartyMember(partyMemberDispatch, data, openSnackbarDispatch);
-        // }
+        if (edit) {
+            JSON.stringify(getValues("NgoaiNgu")) === JSON.stringify(data.NgoaiNgu) && delete newValue.NgoaiNgu
+            JSON.stringify(getValues("NgoaiNgu")) === JSON.stringify(data.NgoaiNgu) && delete newValue.NgoaiNgu
+            if (JSON.stringify({ ...qqValue, detail: getValues("QQChiTiet") }) !==
+                JSON.stringify(data.DiaChi.QueQuan))
+                newValue.QQAddress = { ...qqValue, detail: getValues("QQChiTiet") };
+            if (JSON.stringify({ ...dcttValue, detail: getValues("DCTTChiTiet") }) !==
+                JSON.stringify(data.DiaChi.DiaChiThuongTru))
+                newValue.DCTTAddress = { ...dcttValue, detail: getValues("DCTTChiTiet") };
+            if (JSON.stringify({ ...nohtValue, detail: getValues("NOHTChiTiet") }) !==
+                JSON.stringify(data.DiaChi.NoiOHienTai))
+                newValue.NOHTAddress = { ...nohtValue, detail: getValues("NOHTChiTiet") };
+        }
+        if (step != 2)
+            setStep(previewStep => previewStep + 1);
+        else {
+            loadingDispatch({ type: "OPEN_LOADING" })
+            edit ?
+                updatePartyMember(partyMemberDispatch, newValue, openSnackbarDispatch, setOpen, loadingDispatch) :
+                addPartyMember(partyMemberDispatch, newValue, openSnackbarDispatch, setOpen, loadingDispatch);
+        }
     }
 
     useEffect(() => {
-        if (partyMember.error)
-            setError(partyMember.error.type, partyMember.error.msg)
+        if (partyMember.error) {
+            setError(partyMember.error.type,
+                {
+                    type: "manual",
+                    message: partyMember.error.msg,
+                })
+            setStep(0);
+        }
     }, [partyMember.error])
 
     useEffect(() => {
@@ -187,7 +206,12 @@ const AddForm = (props) => {
                 function isEmpty(obj) {
                     return Object.keys(obj).length === 0;
                 }
-                if (key == "NgoaiNgu") {
+                if (dateArr.includes(key)) {
+                    setValue(key, getDate(data[key]))
+                } else if (key == "HinhAnh") {
+                    setValue(key, { preview: data[key] })
+                    setImageUpload({ preview: data[key] })
+                } else if (key == "NgoaiNgu") {
                     let arr = [];
                     data[key].map((el, index) => {
                         setValue(`MaNgoaiNgu${index}`, el.MaNgoaiNgu)
@@ -276,6 +300,11 @@ const AddForm = (props) => {
             setA();
     }, [flArray])
 
+    useEffect(() => {
+        if (imageUpload)
+            setValue("HinhAnh", imageUpload);
+    }, [imageUpload])
+
     return (
         <>
             <>
@@ -304,48 +333,77 @@ const AddForm = (props) => {
                     </Tabs>
                 </Box>
                 <form className="add-form">
-                    <TabPanel value={step} index={0}>
-                        <InfoForm
-                            edit={edit}
-                            control={control}
-                            errors={errors}
-                            setValue={setValue}
-                            clearErrors={clearErrors}
-                            getValues={getValues}
-                            qqArr={qqArr}
-                            setQqArr={setQqArr}
-                            dcttArr={dcttArr}
-                            setDcttArr={setDcttArr}
-                            nohtArr={nohtArr}
-                            setNohtArr={setNohtArr}
-                            qqValue={qqValue}
-                            setQqValue={setQqValue}
-                            dcttValue={dcttValue}
-                            setDcttValue={setDcttValue}
-                            nohtValue={nohtValue}
-                            setNohtValue={setNohtValue}
-                        />
-                    </TabPanel>
-                    <TabPanel value={step} index={1}>
-                        <LevelForm
-                            control={control}
-                            errors={errors}
-                            setValue={setValue}
-                            flArray={flArray}
-                            setFlArray={setFlArray}
-                            levelArray={levelArray}
-                            setLevelArray={setLevelArray}
-                            edit={edit}
-                            clearErrors={clearErrors}
-                        />
-                    </TabPanel>
-                    <TabPanel value={step} index={2}>
-                        <PartyForm
-                            control={control}
-                            errors={errors}
-                            setValue={setValue}
-                        />
-                    </TabPanel>
+                    <div
+                        role="tabpanel"
+                        hidden={step !== 0}
+                        id={`simple-tabpanel-0`}
+                        aria-labelledby={`simple-tab-0`}
+                    >
+                        {step === 0 && (
+                            <Box p={3}>
+                                <InfoForm
+                                    edit={edit}
+                                    control={control}
+                                    errors={errors}
+                                    setValue={setValue}
+                                    clearErrors={clearErrors}
+                                    getValues={getValues}
+                                    qqArr={qqArr}
+                                    setQqArr={setQqArr}
+                                    dcttArr={dcttArr}
+                                    setDcttArr={setDcttArr}
+                                    nohtArr={nohtArr}
+                                    setNohtArr={setNohtArr}
+                                    qqValue={qqValue}
+                                    setQqValue={setQqValue}
+                                    dcttValue={dcttValue}
+                                    setDcttValue={setDcttValue}
+                                    nohtValue={nohtValue}
+                                    setNohtValue={setNohtValue}
+                                    setImageUpload={setImageUpload}
+                                />
+                            </Box>
+                        )}
+                    </div>
+                    <div
+                        role="tabpanel"
+                        hidden={step !== 1}
+                        id={`simple-tabpanel-1`}
+                        aria-labelledby={`simple-tab-1`}
+                    >
+                        {step === 1 && (
+                            <Box p={3}>
+                                <LevelForm
+                                    control={control}
+                                    errors={errors}
+                                    setValue={setValue}
+                                    flArray={flArray}
+                                    setFlArray={setFlArray}
+                                    levelArray={levelArray}
+                                    setLevelArray={setLevelArray}
+                                    edit={edit}
+                                    clearErrors={clearErrors}
+                                />
+                            </Box>
+                        )}
+                    </div>
+                    <div
+                        role="tabpanel"
+                        hidden={step !== 2}
+                        id={`simple-tabpanel-2`}
+                        aria-labelledby={`simple-tab-2`}
+                    >
+                        {step === 2 && (
+                            <Box p={3}>
+                                <PartyForm
+                                    control={control}
+                                    errors={errors}
+                                    setValue={setValue}
+                                    watch={watch}
+                                />
+                            </Box>
+                        )}
+                    </div>
                 </form>
                 {/* {...register("name", {
                             required: true,

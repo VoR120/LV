@@ -15,6 +15,7 @@ const getIdField = (field) => {
         province: "QQTinh",
         achievement: "MaThanhTich",
         notreserve: "KhongDuBi",
+        status: "TrangThai"
     }
     return idField[field]
 }
@@ -50,13 +51,13 @@ export const getAllPartyMember = async (dispatch, partycell) => {
     }
 }
 
-export const addPartyMember = async (dispatch, payload, open) => {
+export const addPartyMember = async (dispatch, payload, open, setOpen, loading) => {
     let { HoTen, MaSoDangVien, GioiTinh, CMND, NgaySinh, NoiSinh, QuocTich,
         SoDienThoai, Email, NgheNghiep, TrinhDoHocVan, NgayVaoDoan, NoiVaoDoan,
         MaChiBo, MaChinhTri, MaChucVu, MaDanToc, MaTinHoc, MaTonGiao,
         NgayVaoDang, NoiVaoDangLanDau, NgayChinhThuc, NoiVaoDangChinhThuc, NguoiGioiThieu,
         ChuyenDenDangBo, ChuyenDenChiBo, ChuyenTuChiBo, ChuyenTuDangBo, NgayChuyenDen, GhiChu,
-        NgoaiNgu, HinhThucThem, QQAddress, DCTTAddress, NOHTAddress, ImageUpload, MaNhiemKy
+        NgoaiNgu, HinhThucThem, QQAddress, DCTTAddress, NOHTAddress, HinhAnh, MaNhiemKy
     } = payload
     try {
         dispatch({ type: partyMemberConstant.ADD_PARTYMEMBER_REQUEST })
@@ -67,8 +68,9 @@ export const addPartyMember = async (dispatch, payload, open) => {
             MaChiBo, MaChinhTri, MaDanToc, MaTinHoc, MaTonGiao, MaChucVu,
         }
 
+        console.log(HinhAnh)
         let formData = new FormData();
-        formData.append('file', ImageUpload);
+        formData.append('file', HinhAnh);
         const resUpload = await axios.post('/upload', formData);
         console.log(resUpload.data.file[0]);
 
@@ -197,6 +199,8 @@ export const addPartyMember = async (dispatch, payload, open) => {
                         type: "success"
                     }
                 })
+                loading({ type: 'CLOSE_LOADING' })
+                setOpen(false);
             }
         }
     } catch (error) {
@@ -206,6 +210,7 @@ export const addPartyMember = async (dispatch, payload, open) => {
                 error: error.response.data
             }
         })
+        loading({ type: 'CLOSE_LOADING' })
         // open({
         //     type: 'SET_OPEN',
         //     payload: {
@@ -216,13 +221,13 @@ export const addPartyMember = async (dispatch, payload, open) => {
     }
 }
 
-export const updatePartyMember = async (dispatch, payload, open, setOpen) => {
+export const updatePartyMember = async (dispatch, payload, open, setOpen, loading) => {
     let { HoTen, MaSoDangVien, GioiTinh, CMND, NgaySinh, NoiSinh, QuocTich,
         SoDienThoai, Email, NgheNghiep, TrinhDoHocVan, NgayVaoDoan, NoiVaoDoan,
         MaChiBo, MaChinhTri, MaChucVu, MaDanToc, MaTinHoc, MaTonGiao,
         NgayVaoDang, NoiVaoDangLanDau, NgayChinhThuc, NoiVaoDangChinhThuc, NguoiGioiThieu,
         ChuyenDenChiBo, ChuyenTuChiBo, ChuyenTuDangBo, NgayChuyenDen, GhiChu,
-        NgoaiNgu, HinhThucThem, QQAddress, DCTTAddress, NOHTAddress, ImageUpload
+        NgoaiNgu, HinhThucThem, QQAddress, DCTTAddress, NOHTAddress, HinhAnh
     } = payload
     try {
         dispatch({ type: partyMemberConstant.UPDATE_PARTYMEMBER_REQUEST });
@@ -235,9 +240,9 @@ export const updatePartyMember = async (dispatch, payload, open, setOpen) => {
             TrangThai: 1
         }
 
-        if (ImageUpload) {
+        if (HinhAnh) {
             let formData = new FormData();
-            formData.append('file', ImageUpload);
+            formData.append('file', HinhAnh);
 
             const resUpload = await axios.post('/upload', formData);
             console.log(resUpload.data.file[0]);
@@ -245,48 +250,58 @@ export const updatePartyMember = async (dispatch, payload, open, setOpen) => {
             newPayload.HinhAnh = resUpload.data.file[0].url;
         }
 
-        const resRemove = await axios.delete('/api/flpm/' + MaSoDangVien);
-        console.log("Remove Fl: ", resRemove);
+        if (NgoaiNgu) {
+            const resRemove = await axios.delete('/api/flpm/' + MaSoDangVien);
+            console.log("Remove Fl: ", resRemove);
 
-        await Promise.all(NgoaiNgu.map(async (data) => {
-            let res = await axios.post('/api/flpm/create', {
-                MaSoDangVien,
-                MaNgoaiNgu: data.MaNgoaiNgu,
-                MaTrinhDo: data.MaTrinhDo,
+            await Promise.all(NgoaiNgu.map(async (data) => {
+                let res = await axios.post('/api/flpm/create', {
+                    MaSoDangVien,
+                    MaNgoaiNgu: data.MaNgoaiNgu,
+                    MaTrinhDo: data.MaTrinhDo,
+                })
+                console.log("Add Fl: ", res.data)
+            }))
+        }
+
+        if (QQAddress) {
+            const resQQ = await axios.put('/api/address/' + newPayload.MaSoDangVien, {
+                MaTinh: QQAddress.provinceValue,
+                MaHuyen: QQAddress.districtValue,
+                MaXa: QQAddress.wardValue,
+                DiaChiCuThe: QQAddress.detail,
+                MaLoaiDiaChi: "1"
             })
-            console.log("Add Fl: ", res.data)
-        }))
-
-        const resQQ = await axios.put('/api/address/' + newPayload.MaSoDangVien, {
-            MaTinh: QQAddress.provinceValue,
-            MaHuyen: QQAddress.districtValue,
-            MaXa: QQAddress.wardValue,
-            DiaChiCuThe: QQAddress.detail,
-            MaLoaiDiaChi: "1"
-        })
-        const resDCTT = await axios.put('/api/address/' + newPayload.MaSoDangVien, {
-            MaTinh: DCTTAddress.provinceValue,
-            MaHuyen: DCTTAddress.districtValue,
-            MaXa: DCTTAddress.wardValue,
-            DiaChiCuThe: DCTTAddress.detail,
-            MaLoaiDiaChi: "2"
-        })
-        const resNOHT = await axios.put('/api/address/' + newPayload.MaSoDangVien, {
-            MaTinh: NOHTAddress.provinceValue,
-            MaHuyen: NOHTAddress.districtValue,
-            MaXa: NOHTAddress.wardValue,
-            DiaChiCuThe: NOHTAddress.detail,
-            MaLoaiDiaChi: "3"
-        })
-        console.group()
-        console.log("UpdateQQ: ", resQQ);
-        console.log("UpdateDCTT: ", resDCTT);
-        console.log("UpdateNOHT: ", resNOHT);
-        console.groupEnd()
+            console.log("UpdateQQ: ", resQQ);
+        }
+        if (DCTTAddress) {
+            const resDCTT = await axios.put('/api/address/' + newPayload.MaSoDangVien, {
+                MaTinh: DCTTAddress.provinceValue,
+                MaHuyen: DCTTAddress.districtValue,
+                MaXa: DCTTAddress.wardValue,
+                DiaChiCuThe: DCTTAddress.detail,
+                MaLoaiDiaChi: "2"
+            })
+            console.log("UpdateDCTT: ", resDCTT);
+        }
+        if (NOHTAddress) {
+            const resNOHT = await axios.put('/api/address/' + newPayload.MaSoDangVien, {
+                MaTinh: NOHTAddress.provinceValue,
+                MaHuyen: NOHTAddress.districtValue,
+                MaXa: NOHTAddress.wardValue,
+                DiaChiCuThe: NOHTAddress.detail,
+                MaLoaiDiaChi: "3"
+            })
+            console.log("UpdateNOHT: ", resNOHT);
+        }
 
         const res = await axios.put('/api/partymember/' + newPayload.MaSoDangVien, newPayload);
         console.log("Add: ", res);
+
         let result = [...res.data];
+        const resPer = await axios.get('/api/permissionps/' + MaChucVu);
+        console.log(resPer.data.data);
+        result[0].Quyen = resPer.data.data
 
         if (res.status == 200) {
             dispatch({
@@ -302,6 +317,7 @@ export const updatePartyMember = async (dispatch, payload, open, setOpen) => {
                     type: "success"
                 }
             })
+            loading({ type: 'CLOSE_LOADING' })
         }
         if (res.status == 400)
             dispatch({
@@ -310,6 +326,7 @@ export const updatePartyMember = async (dispatch, payload, open, setOpen) => {
                     error: res
                 }
             })
+        loading({ type: 'CLOSE_LOADING' })
     } catch (error) {
         console.log(error);
         // throw new Error(error)

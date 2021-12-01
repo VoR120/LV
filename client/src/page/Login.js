@@ -17,6 +17,8 @@ import { InfoContext } from '../contextAPI/InfoContext';
 import { login } from '../action/infoAction'
 import { useHistory } from 'react-router-dom';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import { LoadingContext } from '../contextAPI/LoadingContext';
+import Loading from '../component/CustomLoadingOverlay';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -110,6 +112,7 @@ const Login = () => {
     const classes = useStyles();
     const { info, infoDispatch } = useContext(InfoContext);
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext);
+    const { loadingDispatch } = useContext(LoadingContext);
     const history = useHistory()
 
     const {
@@ -121,6 +124,7 @@ const Login = () => {
     } = useForm();
 
     const onLogin = (data) => {
+        loadingDispatch({ type: 'OPEN_LOADING' })
         login(infoDispatch, data)
     }
 
@@ -134,6 +138,8 @@ const Login = () => {
                 }
             })
             history.push('/myfile')
+        } else {
+            loadingDispatch({ type: 'CLOSE_LOADING' })
         }
     }, [info])
 
@@ -160,84 +166,87 @@ const Login = () => {
     }, [info.loading])
 
     return (
-        <Grid container component="main" className={classes.root}>
-            <CssBaseline />
-            <Grid item xs={false} sm={4} md={7} className={classes.image}>
-                <div className={classes.contentWrapper}>
-                    <div className={classes.logoWrapper}>
-                        <img className={classes.logo} src={logo} alt="party-logo" />
+        <>
+            <Grid container component="main" className={classes.root}>
+                <CssBaseline />
+                <Grid item xs={false} sm={4} md={7} className={classes.image}>
+                    <div className={classes.contentWrapper}>
+                        <div className={classes.logoWrapper}>
+                            <img className={classes.logo} src={logo} alt="party-logo" />
+                        </div>
+                        <Typography className={classes.content} variant="h4">Quản lý hồ sơ Đảng viên</Typography>
                     </div>
-                    <Typography className={classes.content} variant="h4">Quản lý hồ sơ Đảng viên</Typography>
-                </div>
-            </Grid>
-            <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-                <div className={classes.paper}>
-                    <Avatar className={classes.avatar}>
-                        <LockOutlinedIcon />
-                    </Avatar>
-                    <Typography component="h1" variant="h5">
-                        Đăng nhập
-                    </Typography>
-
-                    <form className={classes.form} noValidate>
-                        <CssTextField
-                            {...register("email", {
-                                required: "Vui lòng nhập email",
-                                pattern: {
-                                    value: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-                                    message: 'Email không hợp lệ!'
-                                }
-                            })}
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="email"
-                            label="Email"
-                            name="email"
-                            autoComplete="email"
-                            autoFocus
-                            error={Boolean(errors.email)}
-                            helperText={errors.email?.message}
-                        />
-                        <CssTextField
-                            {...register("password", {
-                                required: "Vui lòng nhập mật khẩu!",
-                            })}
-                            autoComplete="current-password"
-                            error={Boolean(errors.password)}
-                            helperText={errors.password?.message}
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="password"
-                            label="Mật khẩu"
-                            type="password"
-                            id="password"
-                            autoComplete="current-password"
-                        />
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            color="primary"
-                            className={classes.submit}
-                            onClick={handleSubmit(onLogin)}
-                        >
+                </Grid>
+                <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+                    <div className={classes.paper}>
+                        <Avatar className={classes.avatar}>
+                            <LockOutlinedIcon />
+                        </Avatar>
+                        <Typography component="h1" variant="h5">
                             Đăng nhập
-                        </Button>
-                        <Grid container>
-                            <Grid item xs>
-                                {/* <Link href="#" variant="body2">
+                        </Typography>
+
+                        <form className={classes.form} noValidate>
+                            <CssTextField
+                                {...register("email", {
+                                    required: "Vui lòng nhập email",
+                                    pattern: {
+                                        value: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                                        message: 'Email không hợp lệ!'
+                                    }
+                                })}
+                                variant="outlined"
+                                margin="normal"
+                                required
+                                fullWidth
+                                id="email"
+                                label="Email"
+                                name="email"
+                                autoComplete="email"
+                                autoFocus
+                                error={Boolean(errors.email)}
+                                helperText={errors.email?.message}
+                            />
+                            <CssTextField
+                                {...register("password", {
+                                    required: "Vui lòng nhập mật khẩu!",
+                                })}
+                                autoComplete="current-password"
+                                error={Boolean(errors.password)}
+                                helperText={errors.password?.message}
+                                variant="outlined"
+                                margin="normal"
+                                required
+                                fullWidth
+                                name="password"
+                                label="Mật khẩu"
+                                type="password"
+                                id="password"
+                                autoComplete="current-password"
+                            />
+                            <Button
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                color="primary"
+                                className={classes.submit}
+                                onClick={handleSubmit(onLogin)}
+                            >
+                                Đăng nhập
+                            </Button>
+                            <Grid container>
+                                <Grid item xs>
+                                    {/* <Link href="#" variant="body2">
                                     Quên mật khẩu?
                                 </Link> */}
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    </form>
-                </div>
+                        </form>
+                    </div>
+                </Grid>
             </Grid>
-        </Grid>
+            <Loading />
+        </>
     );
 }
 

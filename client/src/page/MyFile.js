@@ -5,7 +5,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { getAllCategory, getAllCategoryPM, getFlanguageLevel } from '../action/categoryAction';
 import { getInfo, updateInfo } from '../action/infoAction';
-import CustomLoadingOverlay from '../component/CustomLoadingOverlay';
 import InputGrid from '../component/InputGrid';
 import Layout from '../component/Layout';
 import MyInfo from '../component/MyInfo';
@@ -14,9 +13,11 @@ import MyParty from '../component/MyParty';
 import MyButton from '../component/UI/MyButton';
 import { CategoryContext } from '../contextAPI/CategoryContext';
 import { InfoContext } from '../contextAPI/InfoContext';
+import { LoadingContext } from '../contextAPI/LoadingContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import axios from '../helper/axios';
 import image from '../public/image/anhthe1.png';
+import { getDate } from '../utils/utils';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -92,7 +93,7 @@ const MyFile = () => {
     const { info, infoDispatch } = useContext(InfoContext);
     const { category, categoryDispatch } = useContext(CategoryContext);
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
-    const [loading, setLoading] = useState(true);
+    const { loading, loadingDispatch } = useContext(LoadingContext)
     const [step, setStep] = useState(0);
     const [disable, setDisable] = useState(true);
     const [flArray, setFlArray] = useState([]);
@@ -105,6 +106,8 @@ const MyFile = () => {
     const [qqValue, setQqValue] = useState({ provinceValue: '', districtValue: '', wardValue: '' })
     const [dcttValue, setDcttValue] = useState({ provinceValue: '', districtValue: '', wardValue: '' })
     const [nohtValue, setNohtValue] = useState({ provinceValue: '', districtValue: '', wardValue: '' })
+
+    const dateArr = ["NgaySinh", "NgayChinhThuc", "NgayVaoDang", "NgayVaoDoan"]
 
     const {
         handleSubmit,
@@ -179,15 +182,22 @@ const MyFile = () => {
         setDisable(true);
     }
 
-    const onSubmit = (data) => {
-        setLoading(true);
-        data.QQAddress = { ...qqValue, detail: getValues("QQChiTiet") };
-        data.DCTTAddress = { ...dcttValue, detail: getValues("DCTTChiTiet") };
-        data.NOHTAddress = { ...nohtValue, detail: getValues("NOHTChiTiet") };
-        setQqValue({ provinceValue: '', districtValue: '', wardValue: '' })
-        setDcttValue({ provinceValue: '', districtValue: '', wardValue: '' })
-        setNohtValue({ provinceValue: '', districtValue: '', wardValue: '' })
-        updateInfo(infoDispatch, data, openSnackbarDispatch)
+    const onSubmit = (newValue) => {
+        loadingDispatch({ type: "OPEN_LOADING" })
+
+        JSON.stringify(getValues("NgoaiNgu")) === JSON.stringify(info.info.NgoaiNgu) && delete newValue.NgoaiNgu
+        JSON.stringify(getValues("NgoaiNgu")) === JSON.stringify(info.info.NgoaiNgu) && delete newValue.NgoaiNgu
+        if (JSON.stringify({ ...qqValue, detail: getValues("QQChiTiet") }) !==
+            JSON.stringify(info.info.DiaChi.QueQuan))
+            newValue.QQAddress = { ...qqValue, detail: getValues("QQChiTiet") };
+        if (JSON.stringify({ ...dcttValue, detail: getValues("DCTTChiTiet") }) !==
+            JSON.stringify(info.info.DiaChi.DiaChiThuongTru))
+            newValue.DCTTAddress = { ...dcttValue, detail: getValues("DCTTChiTiet") };
+        if (JSON.stringify({ ...nohtValue, detail: getValues("NOHTChiTiet") }) !==
+            JSON.stringify(info.info.DiaChi.NoiOHienTai))
+            newValue.NOHTAddress = { ...nohtValue, detail: getValues("NOHTChiTiet") };
+
+        updateInfo(infoDispatch, newValue, openSnackbarDispatch)
         setDisable(true);
     }
 
@@ -198,10 +208,12 @@ const MyFile = () => {
                 function isEmpty(obj) {
                     return Object.keys(obj).length === 0;
                 }
-                let image = {};
-                image.preview = info.info["HinhAnh"]
-                setImageUpload(image)
-                if (key == "NgoaiNgu") {
+                if (dateArr.includes(key)) {
+                    setValue(key, getDate(info.info[key]))
+                    let image = {};
+                    image.preview = info.info["HinhAnh"]
+                    setImageUpload(image)
+                } else if (key == "NgoaiNgu") {
                     let arr = [];
                     info.info[key].map((el, index) => {
                         setValue(`MaNgoaiNgu${index}`, el.MaNgoaiNgu)
@@ -254,7 +266,7 @@ const MyFile = () => {
                         setValue('NOHTHuyen', info.info["DiaChi"].NoiOHienTai.districtValue)
                         setValue('NOHTXa', info.info["DiaChi"].NoiOHienTai.wardValue)
                         setValue('NOHTChiTiet', info.info["DiaChi"].NoiOHienTai.detail)
-                        setLoading(false);
+                        loadingDispatch({ type: "CLOSE_LOADING" })
                     }
                     if (!isEmpty(info.info["DiaChi"]))
                         getProvinceArr();
@@ -285,15 +297,7 @@ const MyFile = () => {
     }, [flArray])
 
     useEffect(() => {
-        // getAllCategory(categoryDispatch, "ethnic")
-        // getAllCategory(categoryDispatch, "religion")
-        // getAllCategory(categoryDispatch, "partycell")
-        // getAllCategory(categoryDispatch, "position")
-        // getAllCategory(categoryDispatch, "flanguage");
-        // getAllCategory(categoryDispatch, "flanguagelevel");
-        // getAllCategory(categoryDispatch, "politics");
-        // getAllCategory(categoryDispatch, "it");
-        // getAllCategory(categoryDispatch, "grade");
+        loadingDispatch({ type: "OPEN_LOADING" })
         getAllCategoryPM(categoryDispatch);
     }, [])
 
@@ -315,7 +319,7 @@ const MyFile = () => {
                     </>
                 )
             }
-            {loading ||
+            {loading.open ||
                 <Grid container spacing={2} className={classes.wrapper}>
                     <Grid item xs={4}>
                         <Paper variant="outlined" className={classes.paper}>
@@ -430,11 +434,11 @@ const MyFile = () => {
                                     <Tab label="Về Đoàn / Đảng" {...a11yProps(2)} />
                                 </Tabs>
                             </Box>
-                            {loading ||
+                            {loading.open ||
                                 <form className="add-form">
                                     <TabPanel value={step} index={0}>
                                         <MyInfo
-                                            loading={loading}
+                                            loading={loading.open}
                                             disable={disable}
                                             control={control}
                                             errors={errors}
@@ -461,7 +465,7 @@ const MyFile = () => {
                                             control={control}
                                             errors={errors}
                                             setValue={setValue}
-                                            loading={loading}
+                                            loading={loading.open}
                                             flArray={flArray}
                                             setFlArray={setFlArray}
                                             levelArray={levelArray}
@@ -474,7 +478,7 @@ const MyFile = () => {
                                             control={control}
                                             errors={errors}
                                             setValue={setValue}
-                                            loading={loading}
+                                            loading={loading.open}
                                         />
                                     </TabPanel>
                                 </form>
@@ -483,7 +487,6 @@ const MyFile = () => {
                     </Grid>
                 </Grid>
             }
-            <CustomLoadingOverlay loading={loading} />
         </Layout>
     );
 };

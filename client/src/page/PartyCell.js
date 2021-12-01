@@ -52,6 +52,8 @@ const PartyCell = () => {
     const [columns] = useState([
         { title: "Mã Chi bộ", field: "MaChiBo", },
         { title: "Tên chi bộ", field: "TenChiBo", },
+        { title: "Bí thư", field: "BiThu", },
+        { title: "Phó bí thư", field: "PhoBiThu", },
         { title: "Số đảng viên", field: "SoDangVien", },
         {
             title: "Chức năng",

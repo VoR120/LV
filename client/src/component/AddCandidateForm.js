@@ -72,7 +72,7 @@ const AddCandidateForm = (props) => {
         } else {
             console.log(right);
             setOpen(false);
-            setCandidate(right)
+            setCandidate(right.map(el => ({ HoTen: el.HoTen, MaUngCuVien: el.MaSoDangVien })))
         }
     }
 

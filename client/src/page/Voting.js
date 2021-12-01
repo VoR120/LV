@@ -19,8 +19,10 @@ import { Controller, useForm } from 'react-hook-form';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
-import { getAllPoll } from '../action/votingAction'
+import { checkIsVoted, getAllPoll, vote } from '../action/votingAction'
 import { LoadingContext } from '../contextAPI/LoadingContext';
+import { getDateStatus, getLocaleDateTime, getStatus } from '../utils/utils';
+import { InfoContext } from '../contextAPI/InfoContext';
 
 
 const useStyles = makeStyles(theme => ({
@@ -44,6 +46,12 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         justifyContent: 'space-between',
         marginBottom: '40px'
+    },
+    votedBtn: {
+        cursor: "default",
+        '&:hover': {
+            backgroundColor: theme.palette.success.main,
+        }
     }
 }))
 
@@ -51,6 +59,18 @@ const Voting = () => {
     const classes = useStyles();
     const { loadingDispatch } = useContext(LoadingContext)
     const [pollArr, setPollArr] = useState([]);
+
+    const getStatus = (startDate, finishDate) => {
+        if (new Date() < new Date(startDate)) {
+            return 0
+        }
+        if (new Date() >= new Date(startDate) && new Date() <= new Date(finishDate)) {
+            return 1
+        }
+        if (new Date() >= new Date(finishDate)) {
+            return 2
+        }
+    }
 
     useEffect(() => {
         const fetchAllPoll = async () => {
@@ -79,9 +99,9 @@ const Voting = () => {
                                 <Paper className={classes.paper} variant="outlined">
                                     <Grid container justifyContent="space-between" marginBottom="40px">
                                         <Typography variant="button">
-                                            {new Date(el.ThoiGianBatDau).toLocaleString()} - {new Date(el.ThoiGianKetThuc).toLocaleString()}
+                                        {getLocaleDateTime(el.ThoiGianBatDau)} - {getLocaleDateTime(el.ThoiGianKetThuc)} 
                                         </Typography>
-                                        <Typography color="gray" variant="button">Chưa bắt đầu</Typography>
+                                        <Typography color="gray" variant="button">{getDateStatus(el.ThoiGianBatDau, el.ThoiGianKetThuc)}</Typography>
                                     </Grid>
                                     <Typography textAlign="center" className={classes.title} variant="h5">
                                         {el.TenBieuQuyet}
@@ -93,7 +113,6 @@ const Voting = () => {
                                         Số phiếu tối đa: <b>{el.SoPhieuToiDa}</b>
                                     </Typography>
                                     <Grid container justifyContent="center">
-
                                         <VotingForm data={el} />
                                     </Grid>
                                 </Paper>
@@ -114,6 +133,8 @@ const VotingForm = ({ data }) => {
 
     const [checkedValues, setCheckedValues] = useState([]);
     const { openSnackbarDispatch } = useContext(SnackbarContext)
+    const { info } = useContext(InfoContext);
+    const [isVoted, setIsVoted] = useState(false);
 
     const [candidate, setCandidate] = useState([
         { MaSoDangVien: "B1706895", HoTen: "Nguyễn Văn Vỏ" },
@@ -140,31 +161,71 @@ const VotingForm = ({ data }) => {
         return newNames;
     }
 
-    const handleSubmit = () => {
-        if (checkedValues.length > 2) {
+    const handleSubmit = async () => {
+        if (checkedValues.length > data.SoPhieuToiDa) {
             openSnackbarDispatch({
                 type: 'SET_OPEN',
                 payload: {
-                    msg: "Được chọn nhiều nhất 2 ứng cử viên",
+                    msg: `Được chọn nhiều nhất ${data.SoPhieuToiDa} ứng cử viên`,
                     type: "error"
                 }
             })
         }
-        if (checkedValues.length == 0) {
+        else if (checkedValues.length == 0) {
             openSnackbarDispatch({
                 type: 'SET_OPEN',
                 payload: {
-                    msg: "Phải chọn ít nhất 1 ứng cử viên",
+                    msg: `Phải chọn ít nhất 1 ứng cử viên`,
                     type: "error"
                 }
             })
+        } else {
+            const votes = {
+                MaBieuQuyet: data.MaBieuQuyet,
+                MaNguoiThamGia: info.info.MaSoDangVien,
+                UngCuVien: checkedValues,
+            }
+            const res = await vote(votes)
+            if (res) {
+                openSnackbarDispatch({
+                    type: 'SET_OPEN',
+                    payload: {
+                        msg: res.msg,
+                        type: "success"
+                    }
+                })
+                fetchCheck();
+            }
+            setOpen(false);
         }
-        console.log(checkedValues)
     }
+
+    const fetchCheck = async () => {
+        const res = await checkIsVoted({
+            MaBieuQuyet: data.MaBieuQuyet,
+            MaNguoiThamGia: info.info.MaSoDangVien,
+        });
+        if (res) {
+            setIsVoted(res.isVoted);
+        }
+    }
+
+    useEffect(() => {
+        fetchCheck();
+    }, [])
 
     return (
         <>
-            <MyButton onClick={handleOpen} primary>Biểu quyết</MyButton>
+            {isVoted ?
+                <Button disableRipple disableElevation className={classes.votedBtn} variant="contained" color="success">Đã biểu quyết</Button>
+                :
+                <MyButton
+                    disabled={getStatus(data.ThoiGianBatDau, data.ThoiGianKetThuc) != 1}
+                    onClick={handleOpen}
+                    primary>
+                    Biểu quyết
+                </MyButton>
+            }
             <Dialog PaperProps={{ style: { minWidth: "700px" } }} fullWidth open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">Biểu quyết</DialogTitle>
                 <DialogContent className={classes.dialogContent}>
@@ -173,9 +234,9 @@ const VotingForm = ({ data }) => {
                     </Typography>
                     <Typography marginBottom="8px">Nội dung: {data.NoiDung}</Typography>
                     <Typography marginBottom="8px">
-                        Thời gian: <b>{new Date(data.ThoiGianBatDau).toLocaleString()} - {new Date(data.ThoiGianKetThuc).toLocaleString()}                        </b>
+                        Thời gian: <b>{getLocaleDateTime(data.ThoiGianBatDau)} - {getLocaleDateTime(data.ThoiGianKetThuc)}</b>
                     </Typography>
-                    <Typography marginBottom="8px">Số phiếu tối đa: <b>2</b></Typography>
+                    <Typography marginBottom="8px">Số phiếu tối đa: <b>{data.SoPhieuToiDa}</b></Typography>
                     <FormGroup>
                         {data.UngCuVien.map(el =>
                             <FormControlLabel
@@ -194,7 +255,7 @@ const VotingForm = ({ data }) => {
                                     />
                                 }
                                 key={el.MaUngCuVien}
-                                label={el.HoTen + " - " + el.MaSoDangVien}
+                                label={el.HoTen + " - " + el.MaUngCuVien}
                             />
                         )}
                     </FormGroup>

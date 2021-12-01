@@ -36,7 +36,7 @@ const InputGrid = (props) => {
                         }
                         <Grid item flex={1}>
                             <MySelectReactHookForm
-                                onChange={props.onChange}
+                                onChange={onChange}
                                 disabled={disabled}
                                 name={name}
                                 id={id}
@@ -77,6 +77,7 @@ const InputGrid = (props) => {
                                                 InputProps={InputProps}
                                                 multiline={multiline}
                                                 minRows={minRows || 1}
+                                                // autoFocus
                                             />
                                             :
                                             <TextField
@@ -93,6 +94,7 @@ const InputGrid = (props) => {
                                                 InputProps={InputProps}
                                                 multiline={multiline}
                                                 minRows={minRows || 1}
+                                                // autoFocus
                                             />
 
                                     }

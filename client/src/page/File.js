@@ -1,6 +1,6 @@
 import MaterialTable from '@material-table/core';
 import DownloadIcon from '@mui/icons-material/Download';
-import { Paper, TableContainer, Typography } from '@mui/material';
+import { Checkbox, FormControlLabel, FormGroup, Grid, Paper, TableContainer, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
 import { getAllCategory, getAllCategoryPM } from '../action/categoryAction';
@@ -46,32 +46,55 @@ const File = () => {
     const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
     const { category, categoryDispatch } = useContext(CategoryContext);
     const { info } = useContext(InfoContext);
+    const [status, setStatus] = useState({ all: false, living: true, moving: false });
+    const [loading, setLoading] = useState(false)
+
     const [rows, setRows] = useState([])
+
+    const handleClick = (e) => {
+        const name = e.target.name
+        console.log(name);
+        const newStatus = { all: false, living: false, moving: false }
+        setStatus({ ...newStatus, [name]: true })
+    }
 
     const [columns] = useState(allInfoColumn)
 
     const data = getExportData(rows, columns)
 
+    const fetchAPI = async (data) => {
+        setLoading(true)
+        const res = await filterPartyMember(data)
+        setRows(res)
+        setLoading(false);
+    }
+
     useEffect(() => {
-        // getAllCategory(categoryDispatch, "ethnic")
-        // getAllCategory(categoryDispatch, "religion")
-        // getAllCategory(categoryDispatch, "partycell")
-        // getAllCategory(categoryDispatch, "position")
-        // getAllCategory(categoryDispatch, "flanguage");
-        // getAllCategory(categoryDispatch, "flanguagelevel");
-        // getAllCategory(categoryDispatch, "politics");
-        // getAllCategory(categoryDispatch, "it");
-        // getAllCategory(categoryDispatch, "grade");
-        // getAllCategory(categoryDispatch, "term");
         getAllCategoryPM(categoryDispatch);
         info.info.Quyen["12"] == 1
-            ? getAllPartyMember(partyMemberDispatch)
-            : getAllPartyMember(partyMemberDispatch, info.info.MaChiBo)
+            ? fetchAPI({ status: 1 })
+            : fetchAPI({ status: 1, partycell: info.info.MaChiBo });
     }, [])
 
     useEffect(() => {
         setRows(partyMember.partyMembers)
     }, [partyMember.partyMembers])
+
+    useEffect(() => {
+        console.log(status);
+        if (status.all)
+            info.info.Quyen["12"] == 1
+                ? getAllPartyMember(partyMemberDispatch)
+                : getAllPartyMember(partyMemberDispatch, info.info.MaChiBo);
+        if (status.living)
+            info.info.Quyen["12"] == 1
+                ? fetchAPI({ status: 1 })
+                : fetchAPI({ status: 1, partycell: info.info.MaChiBo });
+        if (status.moving)
+            info.info.Quyen["12"] == 1
+                ? fetchAPI({ status: 2 })
+                : fetchAPI({ status: 2, partycell: info.info.MaChiBo });
+    }, [status])
 
     return (
         <>
@@ -81,14 +104,21 @@ const File = () => {
                         Hồ sơ Đảng viên
                     </Typography>
                 </div>
-                <AddForm data={rows} />
-                {data.length > 0 &&
-                    <CSVLink data={data} filename={"export.csv"}>
-                        <MyButton style={{ marginLeft: 8 }} success>
-                            <SaveAltIcon style={{ marginRight: 4 }} />Excel
-                        </MyButton>
-                    </CSVLink>
-                }
+                <Grid container>
+                    <Grid item xs={6}>
+                        <AddForm data={rows} />
+                        {data.length > 0 &&
+                            <CSVLink data={data} filename={"export.csv"}>
+                                <MyButton style={{ marginLeft: 8 }} success>
+                                    <SaveAltIcon style={{ marginRight: 4 }} />Excel
+                                </MyButton>
+                            </CSVLink>
+                        }
+                    </Grid>
+                    <FormControlLabel control={<Checkbox name="all" checked={status.all} onClick={handleClick} />} label="Tất cả" />
+                    <FormControlLabel control={<Checkbox name="living" checked={status.living} onClick={handleClick} />} label="Đảng viên đang sinh hoạt" />
+                    <FormControlLabel control={<Checkbox name="moving" checked={status.moving} onClick={handleClick} />} label="Đảng viên chuyển sinh hoạt" />
+                </Grid>
                 <TableContainer className="file-table" style={{ maxWidth: "1170px", }} >
                     <MaterialTable
                         components={{
@@ -105,7 +135,7 @@ const File = () => {
                         options={{
                             padding: 'dense',
                         }}
-                        isLoading={partyMember.loading}
+                        isLoading={partyMember.loading || loading}
                     />
                 </TableContainer>
             </Layout>

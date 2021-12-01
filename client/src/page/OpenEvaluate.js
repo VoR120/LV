@@ -22,7 +22,7 @@ import { InfoContext } from '../contextAPI/InfoContext';
 import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import axios from '../helper/axios';
-import { getExportData, getTimeWithStartHour, getTimeWithZeroHour } from '../utils/utils';
+import { getDate, getExportData, getTimeWithStartHour, getTimeWithZeroHour } from '../utils/utils';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import InputGrid from '../component/InputGrid';
@@ -122,16 +122,16 @@ const OpenEvaluate = () => {
         if (res.length > 0) {
             res.map(el => {
                 if (el.MaDVDG == 1) {
-                    setValue("pmFrom", el.ThoiGianBatDau)
-                    setValue("pmTo", el.ThoiGianKetThuc)
+                    setValue("pmFrom", getDate(el.ThoiGianBatDau))
+                    setValue("pmTo", getDate(el.ThoiGianKetThuc))
                 }
                 if (el.MaDVDG == 2) {
-                    setValue("subjectFrom", el.ThoiGianBatDau)
-                    setValue("subjectTo", el.ThoiGianKetThuc)
+                    setValue("subjectFrom", getDate(el.ThoiGianBatDau))
+                    setValue("subjectTo", getDate(el.ThoiGianKetThuc))
                 }
                 if (el.MaDVDG == 3) {
-                    setValue("departmentFrom", el.ThoiGianBatDau)
-                    setValue("departmentTo", el.ThoiGianKetThuc)
+                    setValue("departmentFrom", getDate(el.ThoiGianBatDau))
+                    setValue("departmentTo", getDate(el.ThoiGianKetThuc))
                 }
             })
         }

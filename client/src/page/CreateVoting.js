@@ -91,8 +91,8 @@ const CreateVoting = () => {
                 }
             })
         else {
-            data.UngCuVien = candidate.map(el => el.MaSoDangVien);
-            data.NguoiThamGia = voter.map(el => el.MaSoDangVien);
+            data.UngCuVien = candidate.map(el => el.MaUngCuVien);
+            data.NguoiThamGia = voter.map(el => el.MaNguoiThamGia);
             const res = await createPoll(data);
             if (res) {
                 openSnackbarDispatch({
@@ -248,7 +248,7 @@ const CreateVoting = () => {
                                         <Chip style={{ marginBottom: '12px' }}
                                             size="medium"
                                             varian="outlined"
-                                            label={el.HoTen + " - " + el.MaSoDangVien}
+                                            label={el.HoTen + " - " + el.MaUngCuVien}
                                         />
                                     </Grid>
                                 )
@@ -270,7 +270,7 @@ const CreateVoting = () => {
                                         <Chip style={{ marginBottom: '12px', marginRight: '4px' }}
                                             size="small"
                                             varian="outlined"
-                                            label={el.HoTen + " - " + el.MaSoDangVien}
+                                            label={el.HoTen + " - " + el.MaNguoiThamGia}
                                         />
                                     )
                                 }

@@ -1,27 +1,24 @@
 import EqualizerIcon from '@mui/icons-material/Equalizer';
+import ExpandMore from '@mui/icons-material/ExpandLess';
+import ExpandLess from '@mui/icons-material/ExpandMore';
+import GradeIcon from '@mui/icons-material/Grade';
 import GroupIcon from '@mui/icons-material/Group';
-import HomeIcon from '@mui/icons-material/Home';
-import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import InfoIcon from '@mui/icons-material/Info';
 import LayersIcon from '@mui/icons-material/Layers';
-import ExpandLess from '@mui/icons-material/ExpandMore';
-import ExpandMore from '@mui/icons-material/ExpandLess';
 import ListIcon from '@mui/icons-material/List';
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
 import SearchIcon from '@mui/icons-material/Search';
 import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import ThumbsUpDownIcon from '@mui/icons-material/ThumbsUpDown';
-import GradeIcon from '@mui/icons-material/Grade';
-import { Collapse, Divider, ListItemButton, ListItemIcon } from '@mui/material';
+import { Collapse, ListItemButton, ListItemIcon } from '@mui/material';
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import { makeStyles } from '@mui/styles';
-import { NavLink } from "react-router-dom";
-import '../public/css/Drawer.scss';
 import React, { useContext, useEffect, useState } from 'react';
-import { InfoContext } from '../contextAPI/InfoContext';
 import { useLocation } from 'react-router';
+import { NavLink } from "react-router-dom";
+import { InfoContext } from '../contextAPI/InfoContext';
+import '../public/css/Drawer.scss';
 
 const useStyles = makeStyles(theme => ({
     toolbarMixins: theme.mixins.toolbar,
@@ -64,12 +61,6 @@ const DrawerList = () => {
     return (
         <div className="drawer-list" style={{ overflow: 'hidden' }}>
             <List className={classes.list}>
-                {/* <NavLink to={"/home"}>
-                    <ListItem button>
-                        <HomeIcon />
-                        <ListItemText primary="Trang chủ" />
-                    </ListItem>
-                </NavLink> */}
                 {
                     info.info.Quyen["1"] == 1 &&
                     <NavLink to={"/myfile"}>
@@ -267,7 +258,6 @@ const DrawerList = () => {
                         }
                     </List>
                 </Collapse>
-                <Divider />
                 {
                     info.info.Quyen["11"] == 1 &&
                     <NavLink to={"/decentralization"}>

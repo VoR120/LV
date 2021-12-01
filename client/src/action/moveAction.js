@@ -15,7 +15,9 @@ export const createMove = async (payload, open) => {
         }
         const res = await axios.post('/api/move/create', newPayload)
         if (res.data) {
-            const resPM = await axios.put('/api/partymember/' + MaSoDangVien, { TrangThai: 2 });
+            const resPM = MaHinhThuc == 13
+                ? await axios.put('/api/partymember/' + MaSoDangVien, { MaChiBo: ChuyenDenChiBo })
+                : await axios.put('/api/partymember/' + MaSoDangVien, { TrangThai: 2 })
             if (resPM.data) {
                 open({
                     type: 'SET_OPEN',
@@ -41,9 +43,24 @@ export const getMoveByType = async (payload) => {
         else
             res = await axios.get('/api/move/getbytypeid/' + MaHinhThuc)
         console.log(res);
-        return res.data
+        if (res.status == 200)
+            return res.data
     } catch (error) {
         console.log(error);
+    }
+}
+
+export const getMoveByPMId = async (payload) => {
+    console.log(payload);
+    const { MaSoDangVien } = payload
+    try {
+        const res = MaSoDangVien == "" ?
+            await axios.get('/api/move') :
+            await axios.get('/api/move/getbypmid/' + MaSoDangVien);
+        if (res.status == 200)
+            return res.data
+    } catch (error) {
+        return { error: error.response.data.msg };
     }
 }
 

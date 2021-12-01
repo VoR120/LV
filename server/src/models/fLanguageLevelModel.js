@@ -4,7 +4,7 @@ const sql = require('../configs/db');
 const FLanguageLevel = {
     getAll: (callback) => {
         sql.query(
-            `SELECT trinhdongoaingu.MaTrinhDo, trinhdongoaingu.TenTrinhDo, ngoaingu.TenNgoaiNgu
+            `SELECT trinhdongoaingu.MaTrinhDo, trinhdongoaingu.TenTrinhDo, ngoaingu.TenNgoaiNgu, ngoaingu.MaNgoaiNgu
             FROM ngoaingu, trinhdongoaingu 
             WHERE ngoaingu.MaNgoaiNgu = trinhdongoaingu.MaNgoaiNgu 
             AND ngoaingu.MaNgoaiNgu`,
@@ -47,7 +47,25 @@ const FLanguageLevel = {
             }
         )
     },
-    updateById: updateById("trinhdongoaingu", "MaTrinhDo"),
+    updateById: (id, newValue, callback) => {
+        const { TenTrinhDo, MaNgoaiNgu } = newValue;
+        const newValue1 = { TenTrinhDo, MaNgoaiNgu };
+        sql.query(`UPDATE trinhdongoaingu SET ? WHERE MaTrinhDo = ${id}`, newValue1, ((err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                callback(err, null);
+                return;
+            }
+
+            if (res.affectedRows == 0) {
+                callback({ type: "not_found" }, null);
+                return;
+            }
+
+            console.log("Updated: ", { MaTrinhDo: id, ...newValue1 });
+            callback(null, { MaTrinhDo: id, ...newValue1 });
+        }))
+    },
     remove: (id, callback) => {
         sql.query(`SELECT MaSoDangVien FROM ngoaingudangvien WHERE MaTrinhDo = ${id}`, (err, result) => {
             if (err) {

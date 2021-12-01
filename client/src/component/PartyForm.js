@@ -1,8 +1,9 @@
 import { Divider, FormControl, Grid, MenuItem, TextField, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import MySelect from './UI/MySelect';
 import InputGrid from './InputGrid';
+import { getDate } from '../utils/utils';
 
 const useStyles = makeStyles(theme => ({
     addBtn: {
@@ -70,7 +71,7 @@ const useStyles = makeStyles(theme => ({
 
 const PartyForm = (props) => {
     const classes = useStyles();
-    const { disable, control, errors, setValue } = props
+    const { disable, control, errors, setValue, watch } = props
     const [imageUpload, setImageUpload] = useState('');
     const [loading, setLoading] = useState(false);
     const [addType, setAddType] = useState(0);
@@ -78,6 +79,9 @@ const PartyForm = (props) => {
         setValue(e.target.name, e.target.value)
         setAddType(e.target.value)
     }
+
+    const NgayVaoDang = useRef({});
+    NgayVaoDang.current = watch("NgayVaoDang", "");
 
     return (
         <FormControl margin="dense" fullWidth>
@@ -198,6 +202,14 @@ const PartyForm = (props) => {
                         name={"NgayChinhThuc"}
                         control={control}
                         errors={errors}
+                        rules={{
+                            validate: value => {
+                                const isTrue = new Date(value).getMonth() == new Date(NgayVaoDang.current).getMonth()
+                                    && new Date(value).getDate() == new Date(NgayVaoDang.current).getDate()
+                                    && (new Date(value).getFullYear() - 1) == new Date(NgayVaoDang.current).getFullYear()
+                                return isTrue || "Ngày chính thức không hợp lệ!"
+                            }
+                        }}
                     />
                 </Grid>
                 <Grid item xs={6}>

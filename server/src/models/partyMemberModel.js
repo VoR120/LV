@@ -1,5 +1,5 @@
 const sql = require('../configs/db');
-const { findById, create, updateById, removeAll, remove, getDate, getGender } = require('./utils');
+const { findById, create, updateById, removeAll, remove, getGender } = require('./utils');
 const generator = require('generate-password');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
@@ -24,36 +24,6 @@ const query = {
 }
 
 const PartyMember = {
-    // getAll: (callback) => {
-    //     sql.query(`SELECT dangvien.*, chibo.TenChiBo, dantoc.TenDanToc, tongiao.TenTonGiao, tinhoc.TenTinHoc,  chinhtri.TenChinhTri, chucvu.TenChucVu
-    //         FROM dangvien
-    //         INNER JOIN chibo ON dangvien.MaChiBo = chibo.MaChiBo
-    //         INNER JOIN chucvu ON dangvien.MaChucVu = chucvu.MaChucVu
-    //         INNER JOIN dantoc ON dangvien.MaDanToc = dantoc.MaDanToc
-    //         INNER JOIN tongiao ON dangvien.MaTonGiao = tongiao.MaTonGiao
-    //         INNER JOIN tinhoc ON dangvien.MaTinHoc = tinhoc.MaTinHoc
-    //         INNER JOIN chinhtri ON dangvien.MaChinhTri = chinhtri.MaChinhTri
-    //         AND DaXoa = 0`,
-    //         (err, res) => {
-    //             if (err) {
-    //                 console.log("error: ", err);
-    //                 callback(err, null);
-    //                 return;
-    //             }
-    //             let result = [...res]
-    //             if (res.length) {
-    //                 res.map((el, index) => {
-    //                     delete result[index].HashPassword;
-    //                     result[index].NgaySinh = getDate(result[index].NgaySinh);
-    //                     result[index].NgayVaoDoan = getDate(result[index].NgayVaoDoan);
-    //                     result[index].NgayVaoDang = getDate(result[index].NgayVaoDang);
-    //                     result[index].NgayChinhThuc = getDate(result[index].NgayChinhThuc);
-    //                 })
-    //             }
-    //             console.log("All: ", result);
-    //             callback(null, { data: result });
-    //         })
-    // },
     getAll: async (callback) => {
         try {
             const sqlPromise = sql.promise();
@@ -123,10 +93,6 @@ const PartyMember = {
                         }
                     }))
                     delete result[index].HashPassword;
-                    result[index].NgaySinh = getDate(res[index].NgaySinh);
-                    result[index].NgayVaoDoan = getDate(res[index].NgayVaoDoan);
-                    result[index].NgayVaoDang = getDate(res[index].NgayVaoDang);
-                    result[index].NgayChinhThuc = getDate(res[index].NgayChinhThuc);
                     result[index].NgoaiNgu = lArr;
                     result[index].NgoaiNguTrinhDo = lpArr.join(", ")
                     result[index].DiaChi = addressArr;
@@ -200,10 +166,6 @@ const PartyMember = {
                     }
                 }))
                 delete result[0].HashPassword;
-                result[0].NgaySinh = getDate(res[0].NgaySinh);
-                result[0].NgayVaoDoan = getDate(res[0].NgayVaoDoan);
-                result[0].NgayVaoDang = getDate(res[0].NgayVaoDang);
-                result[0].NgayChinhThuc = getDate(res[0].NgayChinhThuc);
                 result[0].NgoaiNgu = lArr;
                 result[0].NgoaiNguTrinhDo = lpArr.join(", ")
                 result[0].DiaChi = addressArr;
@@ -228,6 +190,10 @@ const PartyMember = {
         sql.query(`INSERT INTO dangvien SET ?`, newValue, (err, res) => {
             if (err) {
                 if (err.errno == 1062) {
+                    if (err.message.includes("PRIMARY")) {
+                        callback({ type: "duplicated", value: "Mã Số Đảng viên", field: "MaSoDangVien" })
+                        return;
+                    }
                     if (err.message.includes("CMND")) {
                         callback({ type: "duplicated", value: "CMND", field: "CMND" })
                         return;
@@ -248,28 +214,28 @@ const PartyMember = {
                 return;
             }
 
-            const mail = nodemailer.createTransport({
-                service: 'gmail',
-                auth: {
-                    user: 'vob1706895@student.ctu.edu.vn',
-                    pass: `${process.env.PASSWORD}`
-                }
-            })
+            // const mail = nodemailer.createTransport({
+            //     service: 'gmail',
+            //     auth: {
+            //         user: 'vob1706895@student.ctu.edu.vn',
+            //         pass: `${process.env.PASSWORD}`
+            //     }
+            // })
 
-            const mailOptions = {
-                from: 'vob1706895@student.ctu.edu.vn',
-                to: `${newValue.Email}`,
-                subject: `Cấp tài khoản truy cập vào website ${process.env.URL}`,
-                text: `Mật khẩu đăng nhập: ${newPassword}`
-            }
+            // const mailOptions = {
+            //     from: 'vob1706895@student.ctu.edu.vn',
+            //     to: `${newValue.Email}`,
+            //     subject: `Cấp tài khoản truy cập vào website ${process.env.URL}`,
+            //     text: `Mật khẩu đăng nhập: ${newPassword}`
+            // }
 
-            mail.sendMail(mailOptions, function (error, info) {
-                if (error) {
-                    console.log(error);
-                } else {
-                    console.log('Email sent: ' + info.response);
-                }
-            });
+            // mail.sendMail(mailOptions, function (error, info) {
+            //     if (error) {
+            //         console.log(error);
+            //     } else {
+            //         console.log('Email sent: ' + info.response);
+            //     }
+            // });
 
             sql.query(query.getDataWithName(newValue.MaSoDangVien),
                 async (err, res) => {
@@ -279,14 +245,9 @@ const PartyMember = {
                         return;
                     }
                     if (res.length) {
-                        let result = [...res]
-                        delete result[0].HashPassword;
-                        result[0].NgaySinh = getDate(result[0].NgaySinh);
-                        result[0].NgayVaoDoan = getDate(result[0].NgayVaoDoan);
-                        result[0].NgayVaoDang = getDate(result[0].NgayVaoDang);
-                        result[0].NgayChinhThuc = getDate(result[0].NgayChinhThuc);
-                        console.log("Created: ", result);
-                        callback(null, { data: result });
+                        delete res[0].HashPassword;
+                        console.log("Created: ", res);
+                        callback(null, { data: res });
                         return;
                     }
                     callback({ type: "not_found" }, null)
@@ -370,10 +331,6 @@ const PartyMember = {
                         }
                     }))
                     delete result[0].HashPassword;
-                    result[0].NgaySinh = getDate(result[0].NgaySinh);
-                    result[0].NgayVaoDoan = getDate(result[0].NgayVaoDoan);
-                    result[0].NgayVaoDang = getDate(result[0].NgayVaoDang);
-                    result[0].NgayChinhThuc = getDate(result[0].NgayChinhThuc);
                     result[0].NgoaiNgu = lArr;
                     result[0].NgoaiNguTrinhDo = lpArr.join(", ")
                     result[0].DiaChi = addressArr;
@@ -507,10 +464,6 @@ const PartyMember = {
                         }
                     }))
                     delete result[index].HashPassword;
-                    result[index].NgaySinh = getDate(res[index].NgaySinh);
-                    result[index].NgayVaoDoan = getDate(res[index].NgayVaoDoan);
-                    result[index].NgayVaoDang = getDate(res[index].NgayVaoDang);
-                    result[index].NgayChinhThuc = getDate(res[index].NgayChinhThuc);
                     result[index].NgoaiNgu = lArr;
                     result[index].NgoaiNguTrinhDo = lpArr.join(", ")
                     result[index].DiaChi = addressArr;

@@ -222,6 +222,8 @@ const Search = () => {
                         </Grid>
                     </Grid>
                 </Paper>
+
+                <MyButton primary onClick={handleSubmit(onSubmit)} >Xem</MyButton>
                 {data.length > 0 &&
                     <CSVLink data={data} filename={"export.csv"}>
                         <MyButton style={{ marginLeft: 8 }} success>
@@ -229,7 +231,6 @@ const Search = () => {
                         </MyButton>
                     </CSVLink>
                 }
-                <MyButton primary onClick={handleSubmit(onSubmit)} >Xem</MyButton>
                 <TableContainer className="search-table" style={{ maxWidth: "1170px", }} >
                     <MaterialTable
                         components={{

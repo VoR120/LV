@@ -28,6 +28,21 @@ exports.findByTypeIdMove = (req, res) => {
     })
 };
 
+exports.findByPMId = (req, res) => {
+    Move.findByPMId(req.params.id, (err, data) => {
+        if (err) {
+            if (err.type == "not_found") {
+                res.status(400).json({ msg: "Không tìm thấy Đảng viên!" })
+            } else
+                res.status(500).send({
+                    message:
+                        err.message || "ERROR!"
+                });
+        }
+        else res.status(200).json(data);
+    })
+}
+
 exports.createMove = create(Move);
 
 exports.updateByIdMove = updateById(Move);

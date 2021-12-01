@@ -22,7 +22,7 @@ import { InfoContext } from '../contextAPI/InfoContext';
 import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import axios from '../helper/axios';
-import { getExportData, getTimeWithEndHour, getTimeWithStartHour } from '../utils/utils';
+import { getDate, getExportData, getLocaleDate, getTimeWithEndHour, getTimeWithStartHour } from '../utils/utils';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import { getTimeEvaluate } from '../action/evaluateAction';
@@ -188,7 +188,8 @@ const Evaluate = () => {
                     isTime.isTime ?
                         <Paper variant="outlined" className={classes.paper}>
                             <Typography style={{ textTransform: 'uppercase', marginBottom: 16 }}>Đánh giá Đảng viên cuối năm</Typography>
-                            <Typography variant="body1">Thời gian: Từ ngày <b>{isTime.NgayBatDau}</b> đến ngày <b>{isTime.NgayKetThuc}</b></Typography>
+                            <Typography variant="body1">Thời gian: Từ ngày <b>{getLocaleDate(isTime.NgayBatDau)}</b> đến ngày <b>{getLocaleDate(isTime.NgayKetThuc)}</b>
+                            </Typography>
                             <div className={classes.flexContainer}>
                                 <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
                                 <Typography style={{ marginRight: 20 }} variant="body1">Loại:</Typography>
@@ -266,7 +267,6 @@ const Evaluate = () => {
                         </TableBody>
                     </Table>
                 </TableContainer> */}
-                <Loading loading={loading} />
             </Layout>
         </>
     );

@@ -60,7 +60,18 @@ const fLpM = {
         })
     },
     updateById: updateById("ngoaingudangvien", "MaSoDangVien"),
-    remove: remove("ngoaingudangvien", "MaSoDangVien"),
+    remove: (id, callback) => {
+        sql.query(`DELETE FROM ngoaingudangvien WHERE MaSoDangVien = "${id}"`, ((err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                callback(err, null);
+                return;
+            }
+
+            console.log("Deleted: ", id);
+            callback(null, res);
+        }))
+    },
     removeAll: removeAll("ngoaingudangvien")
 }
 

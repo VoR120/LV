@@ -124,13 +124,15 @@ exports.logout = async (req, res) => {
 exports.changePassword = async (req, res) => {
     try {
         const { password, newPassword, MaSoDangVien } = req.body
-        sql.query(`SELECT * FROM dangvien WHERE MaSoDangVien = "${MaSoDangVien} AND DaXoa = 0"`,
+        console.log(req.body);
+        sql.query(`SELECT * FROM dangvien WHERE MaSoDangVien = "${MaSoDangVien}" AND DaXoa = 0`,
             async (err, result) => {
                 if (err) {
                     res.status(500).json({ err })
                     return;
                 }
                 if (result.length) {
+                    console.log(result);
                     const isMatch = await bcrypt.compareSync(password, result[0]["HashPassword"]);
                     if (isMatch) {
                         if (password == newPassword) {

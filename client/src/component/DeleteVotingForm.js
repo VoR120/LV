@@ -28,6 +28,7 @@ const useStyles = makeStyles(theme => ({
 
 const DeleteVotingForm = (props) => {
     const classes = useStyles();
+    const { data } = props;
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
 
     const [open, setOpen] = useState(false);
@@ -38,13 +39,13 @@ const DeleteVotingForm = (props) => {
     const handleOpen = () => {
         setOpen(true)
     }
-    const handleSubmit = () => {
-
+    const handleSubmit = async () => {
+        // const
     }
 
     return (
         <>
-            <MyButton onClick={handleOpen} style={{ marginBottom: '20px', marginLeft: "8px" }} error={true} small>Hủy</MyButton>
+            <MyButton onClick={handleOpen} style={{ marginBottom: '20px', marginLeft: "8px" }} error={true} small>Xóa</MyButton>
             <Dialog fullWidth open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">Hủy cuộc  biểu quyết</DialogTitle>
                 <DialogContent className={classes.dialogContent}>

@@ -6,7 +6,8 @@ const uploadCloud = require('../configs/upload');
 Router.post('/', uploadCloud.array('file'), (req, res) => {
     try {
         if (req.files.length === 0)
-            return res.status(400).json({ msg: 'No file uploaded' });
+            // return res.status(400).json({ msg: 'No file uploaded' });
+            return res.status(200).json({ file: [{ public_id: "", url: "" }] })
 
         let fileArray = [];
         for (let file of req.files) {

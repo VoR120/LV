@@ -1,3 +1,4 @@
+import { Typography } from '@mui/material';
 import xlsx from 'xlsx'
 import ActionMenu from '../component/ActionMenu';
 
@@ -17,7 +18,7 @@ export const getKeyField = (key) => {
         case 'religion':
             return ["MaTonGiao", "TenTonGiao", "SoDangVien"]
         case 'position':
-            return ["MaChucVu", "TenChucVu", "SoDangVien"]
+            return ["MaChucVu", "TenChucVu", "BiThu", "PhoBiThu", "SoDangVien"]
         case 'term':
             return ["MaNhiemKy", "NamBatDau", "NamKetThuc"]
         case 'flanguage':
@@ -95,12 +96,49 @@ export const getExportData = (rows, columns) => {
 }
 
 export const getDate = (date) => {
-    const offset = date.getTimezoneOffset()
-    let newDate = new Date(date.getTime() - (offset * 60 * 1000))
-    console.log(newDate.toISOString().split('T')[0]);
+    const dateObj = new Date(date)
+    const offset = dateObj.getTimezoneOffset()
+    let newDate = new Date(dateObj.getTime() - (offset * 60 * 1000))
     return newDate.toISOString().split('T')[0]
 }
+
+export const getDateTime = (date) => {
+    const dateObj = new Date(date)
+    const offset = dateObj.getTimezoneOffset()
+    let newDate = new Date(dateObj.getTime() - (offset * 60 * 1000))
+    return newDate.toISOString().slice(0, 16)
+}
+
+export const getLocaleDate = (date) => new Date(date).toLocaleDateString()
+
+export const getLocaleDateTime = (date) => new Date(date).toLocaleString()
 
 export const getTimeWithStartHour = (date) => new Date(date).setHours(0, 0, 0, 0);
 
 export const getTimeWithEndHour = (date) => new Date(date).setHours(23, 59, 0, 0);
+
+export const getDateStatus = (startDate, finishDate) => {
+    if (new Date() < new Date(startDate)) {
+        return <Typography color="gray" variant="button">Chưa bắt đầu</Typography>
+    }
+    if (new Date() >= new Date(startDate) && new Date() <= new Date(finishDate)) {
+        return <Typography color="green" variant="button">Đang diễn ra</Typography>
+    }
+    if (new Date() >= new Date(finishDate)) {
+        return <Typography color="red" variant="button">Đã kết thúc</Typography>
+    }
+}
+
+export const getStatus = (startDate, finishDate) => {
+    if (new Date() < new Date(startDate)) {
+        return 0
+    }
+    if (new Date() >= new Date(startDate) && new Date() <= new Date(finishDate)) {
+        return 1
+    }
+    if (new Date() >= new Date(finishDate)) {
+        return 2
+    }
+}
+
+export const dateArr = ["NgaySinh", "NgayChinhThuc", "NgayVaoDang", "NgayVaoDoan", "NgayChuyenDi", "NgayChuyenDen"]

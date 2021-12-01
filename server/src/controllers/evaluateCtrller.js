@@ -1,6 +1,5 @@
 const e = require('express');
 const sql = require('../configs/db');
-const { getDate } = require('../models/utils');
 
 exports.getByPartyMember = (req, res) => {
     try {
@@ -28,10 +27,10 @@ exports.getBySubject = (req, res) => {
         const { Nam, MaChiBo } = req.query;
         const sqlQuery = MaChiBo
             ?
-            `SELECT dangvien.MaSoDangVien
+            `SELECT dangvien.MaSoDangVien, dangvien.HoTen
             FROM dangvien, chibo 
             WHERE dangvien.MaChiBo = chibo.MaChiBo AND chibo.MaChiBo = "${MaChiBo}"    `
-            : `SELECT dangvien.MaSoDangVien
+            : `SELECT dangvien.MaSoDangVien, dangvien.HoTen
             FROM dangvien, chibo 
             WHERE dangvien.MaChiBo = chibo.MaChiBo`
         sql.query(sqlQuery
@@ -62,7 +61,6 @@ exports.getBySubject = (req, res) => {
                             res.status(500).json({ msg: err.message })
                             return;
                         }
-                        // console.log(result1);
                         const list = result.map(el => {
                             let newEl = { ...el }
                             newEl.DanhGiaCaNhan = "";
@@ -71,10 +69,9 @@ exports.getBySubject = (req, res) => {
                             newEl.TenDanhGiaCaNhan = "";
                             newEl.TenDanhGiaBoMon = "";
                             newEl.TenDanhGiaKhoa = "";
+                            newEl.HoTen = el.HoTen;
                             result1.map(r => {
-                                console.log(r);
                                 if (r.MaSoDangVien == el.MaSoDangVien) {
-                                    newEl.HoTen = r.HoTen;
                                     if (r.MaDVDG == 1 && r.MaLoai) {
                                         newEl.DanhGiaCaNhan = r.MaLoai
                                         newEl.TenDanhGiaCaNhan = r.TenLoai
@@ -89,7 +86,7 @@ exports.getBySubject = (req, res) => {
                                     }
                                 }
                             })
-                            // console.log(newEl);
+                            console.log(newEl);
                             return newEl;
                         })
                         res.status(200).json(list);
@@ -222,11 +219,6 @@ exports.getTimeEvaluate = (req, res) => {
                     return;
                 }
                 const result1 = [...result];
-                if (result.length > 0)
-                    result.map((el, index) => {
-                        result1[index].ThoiGianBatDau = getDate(result[index].ThoiGianBatDau)
-                        result1[index].ThoiGianKetThuc = getDate(result[index].ThoiGianKetThuc)
-                    })
                 res.status(200).json(result1);
                 return;
             }
