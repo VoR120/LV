@@ -1,7 +1,7 @@
 const { getAll, findById, create, updateById, removeAll, remove } = require('./utils');
 const sql = require('../configs/db');
 
-const PermissionPM = {
+const PermissionPS = {
     getAll: async (callback) => {
         try {
             const sqlPromise = sql.promise();
@@ -74,58 +74,29 @@ const PermissionPM = {
         })
     },
     updateById: async (id, newValue, callback) => {
+        const sqlPromise = sql.promise();
         let isOne = [];
         let isZero = [];
         Object.keys(newValue).map(el => newValue[el] == 1 ? isOne.push(el) : isZero.push(el));
         console.log(isOne.join(", "), isZero);
         let isOneStr = isOne.length > 0 ? isOne.join(",") : '""';
         let isZeroStr = isZero.length > 0 ? isZero.join(",") : '""';
-        sql.query(`UPDATE quyenchucvu 
-                SET CoQuyen = 1
-                WHERE MaChucVu = ${id}
-                AND MaQuyen IN (${isOneStr})
-            `, (err, res) => {
-            if (err) {
-                console.log("error: ", err);
-                callback(err, null);
-                return;
-            }
-            sql.query(`UPDATE quyenchucvu 
-                    SET CoQuyen = 0
-                    WHERE MaChucVu = ${id}
-                    AND MaQuyen IN (${isZeroStr})`,
-                (err, res) => {
-                    if (err) {
-                        console.log("error: ", err);
-                        callback(err, null);
-                        return;
-                    }
-                    console.log("Update", { data: newValue });
-                    callback(null, { data: newValue })
-                }
-            )
-        })
-        // const sqlQuery = `UPDATE quyenchucvu 
-        //     SET CoQuyen = ${newValue.CoQuyen} 
-        //     WHERE MaChucVu = ${id}
-        //     AND MaQuyen = ${newValue.MaQuyen}
-        //     `
-        // sql.query(sqlQuery, newValue, ((err, res) => {
-        //     if (err) {
-        //         console.log("error: ", err);
-        //         callback(err, null);
-        //         return;
-        //     }
-        //     if (res.affectedRows == 0) {
-        //         callback({ type: "not_found" }, null);
-        //         return;
-        //     }
-        //     console.log("Updated: ", { data: newValue });
-        //     callback(null, { data: newValue });
-        // }))
+        const [result1, f1] = await sqlPromise.query(`UPDATE quyenchucvu 
+            SET CoQuyen = 1
+            WHERE MaChucVu = ${id}
+            AND MaQuyen IN (${isOneStr})`)
+        const [result2, f2] = await sqlPromise.query(`UPDATE quyenchucvu 
+            SET CoQuyen = 0
+            WHERE MaChucVu = ${id}
+            AND MaQuyen IN (${isZeroStr})`)
+        const result3 = await Promise.all([result1, result2])
+        if (result3) {
+            console.log("Update", { data: newValue });
+            callback(null, { data: newValue })
+        }
     },
     remove: remove("quyenchucvu", "MaSoDangVien"),
     removeAll: removeAll("quyenchucvu")
 }
 
-module.exports = PermissionPM;
+module.exports = PermissionPS;

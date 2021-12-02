@@ -133,38 +133,40 @@ const PartyMember = {
                     WHERE diachidangvien.MaLoaiDiaChi = loaidiachi.MaLoaiDiaChi
                     AND diachidangvien.MaDiaChi = diachi.MaDiaChi
                     AND diachidangvien.MaSoDangVien = "${res[0].MaSoDangVien}"`)
-                await Promise.all(resAddress.map(async (el, index) => {
-                    const resPro = await axios.get(`https://provinces.open-api.vn/api/p/${el.MaTinh}?depth=1`);
-                    const resDis = await axios.get(`https://provinces.open-api.vn/api/d/${el.MaHuyen}?depth=1`);
-                    const resWard = await axios.get(`https://provinces.open-api.vn/api/w/${el.MaXa}?depth=1`);
-                    if (el.MaLoaiDiaChi == "1") {
-                        addressArr.QueQuan = {
-                            provinceValue: el.MaTinh,
-                            districtValue: el.MaHuyen,
-                            wardValue: el.MaXa,
-                            detail: el.DiaChiCuThe
+                if (resAddress) {
+                    await Promise.all(resAddress.map(async (el, index) => {
+                        const resPro = await axios.get(`https://provinces.open-api.vn/api/p/${el.MaTinh}?depth=1`);
+                        const resDis = await axios.get(`https://provinces.open-api.vn/api/d/${el.MaHuyen}?depth=1`);
+                        const resWard = await axios.get(`https://provinces.open-api.vn/api/w/${el.MaXa}?depth=1`);
+                        if (el.MaLoaiDiaChi == "1") {
+                            addressArr.QueQuan = {
+                                provinceValue: el.MaTinh,
+                                districtValue: el.MaHuyen,
+                                wardValue: el.MaXa,
+                                detail: el.DiaChiCuThe
+                            }
+                            addressFull.QueQuan = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
                         }
-                        addressFull.QueQuan = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
-                    }
-                    if (el.MaLoaiDiaChi == "2") {
-                        addressArr.DiaChiThuongTru = {
-                            provinceValue: el.MaTinh,
-                            districtValue: el.MaHuyen,
-                            wardValue: el.MaXa,
-                            detail: el.DiaChiCuThe
+                        if (el.MaLoaiDiaChi == "2") {
+                            addressArr.DiaChiThuongTru = {
+                                provinceValue: el.MaTinh,
+                                districtValue: el.MaHuyen,
+                                wardValue: el.MaXa,
+                                detail: el.DiaChiCuThe
+                            }
+                            addressFull.DiaChiThuongTru = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
                         }
-                        addressFull.DiaChiThuongTru = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
-                    }
-                    if (el.MaLoaiDiaChi == "3") {
-                        addressArr.NoiOHienTai = {
-                            provinceValue: el.MaTinh,
-                            districtValue: el.MaHuyen,
-                            wardValue: el.MaXa,
-                            detail: el.DiaChiCuThe
+                        if (el.MaLoaiDiaChi == "3") {
+                            addressArr.NoiOHienTai = {
+                                provinceValue: el.MaTinh,
+                                districtValue: el.MaHuyen,
+                                wardValue: el.MaXa,
+                                detail: el.DiaChiCuThe
+                            }
+                            addressFull.NoiOHienTai = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
                         }
-                        addressFull.NoiOHienTai = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
-                    }
-                }))
+                    }))
+                }
                 delete result[0].HashPassword;
                 result[0].NgoaiNgu = lArr;
                 result[0].NgoaiNguTrinhDo = lpArr.join(", ")

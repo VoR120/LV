@@ -156,13 +156,13 @@ const MyFile = () => {
 
     const handleRemove = () => {
         setImageUpload('');
-        setValue("ImageUpload", "");
+        setValue("HinhAnh", "");
     }
     const handleUpload = (e) => {
         const file = e.target.files[0];
         file.preview = URL.createObjectURL(file)
+        setValue("HinhAnh", file);
         setImageUpload(file);
-        setValue("ImageUpload", file);
     }
 
     const handleCancer = () => {
@@ -185,7 +185,6 @@ const MyFile = () => {
     const onSubmit = (newValue) => {
         loadingDispatch({ type: "OPEN_LOADING" })
 
-        JSON.stringify(getValues("NgoaiNgu")) === JSON.stringify(info.info.NgoaiNgu) && delete newValue.NgoaiNgu
         JSON.stringify(getValues("NgoaiNgu")) === JSON.stringify(info.info.NgoaiNgu) && delete newValue.NgoaiNgu
         if (JSON.stringify({ ...qqValue, detail: getValues("QQChiTiet") }) !==
             JSON.stringify(info.info.DiaChi.QueQuan))
@@ -210,9 +209,9 @@ const MyFile = () => {
                 }
                 if (dateArr.includes(key)) {
                     setValue(key, getDate(info.info[key]))
-                    let image = {};
-                    image.preview = info.info["HinhAnh"]
-                    setImageUpload(image)
+                } else if (key == "HinhAnh") {
+                    setValue(key, { preview: info.info[key] })
+                    setImageUpload({ preview: info.info[key] })
                 } else if (key == "NgoaiNgu") {
                     let arr = [];
                     info.info[key].map((el, index) => {
@@ -325,7 +324,7 @@ const MyFile = () => {
                         <Paper variant="outlined" className={classes.paper}>
                             <div className={classes.imageWrapper} >
                                 <>
-                                    {imageUpload ?
+                                    {imageUpload?.preview ?
                                         <>
                                             <img className={classes.fileUpload} style={{ height: '100%' }}
                                                 src={imageUpload.preview}

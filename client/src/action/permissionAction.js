@@ -10,12 +10,19 @@ export const getPermissionPosition = async () => {
     }
 }
 
+export const getPermissionPositionById = async (payload) => {
+    try {
+        const res = await axios.get('/api/permissionps/' + payload.id);
+        if (res.status == 200)
+            return res.data.data
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 export const updatePermissionPosition = async (payload) => {
     const { MaChucVu, data } = payload
     try {
-        // await Promise.all(Object.keys(data).map(async el => {
-        //     const res = await axios.put('/api/permissionps/' + MaChucVu, { MaQuyen: el, CoQuyen: data[el] })
-        // }))
         const resAdd = await axios.put('/api/permissionps/' + MaChucVu, data)
         if (resAdd.status == 200) {
             const res = await axios.get('/api/permissionps/');
@@ -24,5 +31,18 @@ export const updatePermissionPosition = async (payload) => {
         }
     } catch (error) {
         console.log(error);
+    }
+}
+
+export const updatePermissionPM = async (payload) => {
+    const { MaSoDangVien, data } = payload
+    try {
+        const resAdd = await axios.put('/api/permissionpm/' + MaSoDangVien, data)
+        if (resAdd.status == 200) {
+            console.log(resAdd);
+            return resAdd.data.data;
+        }
+    } catch (error) {
+        return { error: error.response.data.message }
     }
 }

@@ -8,6 +8,7 @@ import DeleteForm from './DeleteForm';
 import GradeForm from './GradeForm';
 import MoveForm from './MoveForm';
 import RewardDisciplineForm from './RewardDisciplineForm';
+import DecentralizationForm from './DecentralizationForm';
 
 const useStyles = makeStyles(theme => ({
     icon: {
@@ -30,7 +31,7 @@ const ActionMenu = (props) => {
     const classes = useStyles();
     const [open, setOpen] = useState(null);
     const { info } = useContext(InfoContext)
-    const { data } = props
+    const { data, rows, setRows } = props
     const handleClose = () => {
         setOpen(null)
     }
@@ -62,7 +63,7 @@ const ActionMenu = (props) => {
                 MenuListProps={{ className: classes.menuList }}
             >
                 {info.info.Quyen["2"] == 1 &&
-                    <MenuItem onClick={handleClose}><AddForm edit data={data} /></MenuItem>
+                    <MenuItem onClick={handleClose}><AddForm edit data={data} rows={rows} setRows={setRows} /></MenuItem>
                 }
                 {info.info.Quyen["2"] == 1 &&
                     <MenuItem onClick={handleClose}><DeleteForm name={data.HoTen} id={data.MaSoDangVien} /></MenuItem>
@@ -79,9 +80,9 @@ const ActionMenu = (props) => {
                 {info.info.Quyen["5"] == 1 &&
                     <MenuItem onClick={handleClose}><RewardDisciplineForm name={data.HoTen} id={data.MaSoDangVien} /></MenuItem>
                 }
-                {/* {info.info.Quyen["11"] == 1 &&
-                    <MenuItem onClick={handleClose}><DecentralizationForm data={d} />                </MenuItem>
-                } */}
+                {info.info.Quyen["11"] == 1 &&
+                    <MenuItem onClick={handleClose}><DecentralizationForm pm partycell={data.MaChiBo} id={data.MaSoDangVien}/>                </MenuItem>
+                }
             </Menu>
         </div>
     );

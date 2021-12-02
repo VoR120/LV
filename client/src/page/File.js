@@ -58,14 +58,25 @@ const File = () => {
         setStatus({ ...newStatus, [name]: true })
     }
 
-    const [columns] = useState(allInfoColumn)
+    const [columns, setColumns] = useState(allInfoColumn(rows, setRows))
 
     const data = getExportData(rows, columns)
+
+    useEffect(() => {
+        setColumns(allInfoColumn(rows, setRows));
+    }, [rows])
 
     const fetchAPI = async (data) => {
         setLoading(true)
         const res = await filterPartyMember(data)
         setRows(res)
+        setLoading(false);
+    }
+
+    const fetchAPIAll = async (data) => {
+        setLoading(true);
+        const res = await getAllPartyMember(data)
+        setRows(res);
         setLoading(false);
     }
 
@@ -77,15 +88,11 @@ const File = () => {
     }, [])
 
     useEffect(() => {
-        setRows(partyMember.partyMembers)
-    }, [partyMember.partyMembers])
-
-    useEffect(() => {
         console.log(status);
         if (status.all)
             info.info.Quyen["12"] == 1
-                ? getAllPartyMember(partyMemberDispatch)
-                : getAllPartyMember(partyMemberDispatch, info.info.MaChiBo);
+                ? fetchAPIAll()
+                : fetchAPIAll(info.info.MaChiBo);
         if (status.living)
             info.info.Quyen["12"] == 1
                 ? fetchAPI({ status: 1 })
@@ -104,9 +111,9 @@ const File = () => {
                         Hồ sơ Đảng viên
                     </Typography>
                 </div>
-                <Grid container>
-                    <Grid item xs={6}>
-                        <AddForm data={rows} />
+                <Grid container justifyContent="space-between">
+                    <Grid item>
+                        <AddForm rows={rows} setRows={setRows} />
                         {data.length > 0 &&
                             <CSVLink data={data} filename={"export.csv"}>
                                 <MyButton style={{ marginLeft: 8 }} success>
@@ -115,9 +122,11 @@ const File = () => {
                             </CSVLink>
                         }
                     </Grid>
-                    <FormControlLabel control={<Checkbox name="all" checked={status.all} onClick={handleClick} />} label="Tất cả" />
-                    <FormControlLabel control={<Checkbox name="living" checked={status.living} onClick={handleClick} />} label="Đảng viên đang sinh hoạt" />
-                    <FormControlLabel control={<Checkbox name="moving" checked={status.moving} onClick={handleClick} />} label="Đảng viên chuyển sinh hoạt" />
+                    <Grid item>
+                        <FormControlLabel control={<Checkbox name="all" checked={status.all} onClick={handleClick} />} label="Tất cả" />
+                        <FormControlLabel control={<Checkbox name="living" checked={status.living} onClick={handleClick} />} label="Đảng viên đang sinh hoạt" />
+                        <FormControlLabel control={<Checkbox name="moving" checked={status.moving} onClick={handleClick} />} label="Đảng viên đã chuyển sinh hoạt" />
+                    </Grid>
                 </Grid>
                 <TableContainer className="file-table" style={{ maxWidth: "1170px", }} >
                     <MaterialTable

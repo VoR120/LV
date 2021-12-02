@@ -117,7 +117,6 @@ const Decentralization = () => {
             field: "PhanQuyen",
             render: (params) =>
                 <DecentralizationForm
-                    dataName={category.categories["permission"]}
                     value={params} button
                     setRows={setRows}
                 />

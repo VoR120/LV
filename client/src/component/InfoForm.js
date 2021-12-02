@@ -108,7 +108,7 @@ const InfoForm = (props) => {
         qqValue, setQqValue,
         dcttValue, setDcttValue,
         nohtValue, setNohtValue,
-        setImageUpload } = props
+        imageUpload, setImageUpload } = props
     const classes = useStyles();
 
     // State
@@ -120,13 +120,12 @@ const InfoForm = (props) => {
 
     // Function
     const handleRemove = () => {
-        setValue("HinhAnh", "");
         setImageUpload('');
+        setValue("HinhAnh", "");
     }
     const handleUpload = (e) => {
         const file = e.target.files[0];
         file.preview = URL.createObjectURL(file)
-        console.log(file);
         setValue("HinhAnh", file);
         setImageUpload(file);
     }
@@ -436,10 +435,10 @@ const InfoForm = (props) => {
                 <Grid item xs={3}>
                     <div className={classes.imageWrapper} >
                         <>
-                            {getValues("HinhAnh") ?
+                            {imageUpload?.preview ?
                                 <>
                                     <img className={classes.fileUpload} style={{ height: '100%' }}
-                                        src={getValues("HinhAnh").preview}
+                                        src={imageUpload.preview}
                                         alt=""
                                     />
                                     <IconButton className={classes.closeBtn} size="small" onClick={handleRemove}>

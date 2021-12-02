@@ -72,7 +72,7 @@ const MoveForm = (props) => {
     }
 
     const handleChangeSelect = (e) => {
-        if (e.target.value != "") {
+        if (e.target.value != "0") {
             clearErrors(e.target.name)
         }
         setValue(e.target.name, e.target.value)

@@ -15,7 +15,7 @@ const Loading = (props) => {
     const classes = useStyles();
     const { loading } = React.useContext(LoadingContext)
     return (
-        <Backdrop sx={{ color: '#fff', zIndex: (theme) => 9999999, backgroundColor: 'rgba(0, 0, 0, 0.2)' }} open={loading.open}>
+        <Backdrop sx={{ color: '#fff', zIndex: (theme) => 1399, backgroundColor: 'rgba(0, 0, 0, 0.2)' }} open={loading.open}>
             <CircularProgress color="primary" />
         </Backdrop>
     );

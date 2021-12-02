@@ -49,7 +49,11 @@ const useStyles = makeStyles(theme => ({
 const Search = () => {
 
     const [rows, setRows] = useState([])
-    const [columns] = useState(allInfoColumn.slice(0, -1))
+    const [columns, setColumns] = useState(allInfoColumn(rows, setRows))
+
+    useEffect(() => {
+        setColumns(allInfoColumn(rows, setRows))
+    }, [rows])
 
     const data = getExportData(rows, columns)
 

@@ -15,7 +15,8 @@ import { useForm } from 'react-hook-form';
 import '../public/css/Form.scss';
 import MyButton from './UI/MyButton';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
-import { updatePermissionPosition } from '../action/permissionAction';
+import { getPermissionPositionById, updatePermissionPM, updatePermissionPosition } from '../action/permissionAction';
+import { CategoryContext } from '../contextAPI/CategoryContext';
 
 
 const useStyles = makeStyles(theme => ({
@@ -44,10 +45,11 @@ const useStyles = makeStyles(theme => ({
 
 
 const DecentralizationForm = (props) => {
-    const { dataName, value, setRows } = props
+    const { value, setRows, pm, partycell, id } = props
     const classes = useStyles();
     const [open, setOpen] = useState(false);
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
+    const { category } = useContext(CategoryContext)
     const [quyen, setQuyen] = useState({});
 
     const handleClose = () => {
@@ -109,10 +111,27 @@ const DecentralizationForm = (props) => {
                 })
             }
         }
-        setRow();
+        const setRole = async () => {
+            let newData = { ...quyen };
+            Object.keys(quyen).map(el => newData[el] = Number(quyen[el]));
+            const res = await updatePermissionPM({ MaSoDangVien: id, data: newData }, openSnackbarDispatch)
+        }
+        if (value)
+            setRow();
+        if (id)
+            setRole()
+
     }
 
     useEffect(() => {
+        if (pm) {
+            const fetchRole = async () => {
+                const res = await getPermissionPositionById({ id: partycell });
+                console.log(res);
+                setQuyen(res);
+            }
+            fetchRole();
+        }
         if (value) {
             let obj = {}
             Object.keys(value).map(el => {
@@ -120,6 +139,7 @@ const DecentralizationForm = (props) => {
                     obj[el] = value[el]
                 }
             })
+            console.log(obj);
             setQuyen(obj)
         }
     }, [])
@@ -148,8 +168,8 @@ const DecentralizationForm = (props) => {
                                 />}
                             label={"Toàn quyền'"}
                         />
-                        {dataName.length > 0 &&
-                            dataName.map(el =>
+                        {category.categories["permission"].length > 0 &&
+                            category.categories["permission"].map(el =>
                                 <FormControlLabel
                                     control={
                                         <Checkbox

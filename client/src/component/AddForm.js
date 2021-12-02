@@ -96,7 +96,8 @@ const useStyles = makeStyles(theme => ({
 }))
 
 
-const AddForm = ({ edit, data }) => {
+const AddForm = ({ edit, data, setRows, rows }) => {
+
     const classes = useStyles();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -104,10 +105,11 @@ const AddForm = ({ edit, data }) => {
     const { category, categoryDispatch } = useContext(CategoryContext);
     const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
     const { loadingDispatch } = useContext(LoadingContext);
-    const { openSnackbarDispatch } = useContext(SnackbarContext)
+    const { openSnackbarDispatch } = useContext(SnackbarContext);
     const [flArray, setFlArray] = useState([{ MaNgoaiNgu: "0", MaTrinhDo: "0" }]);
     const [levelArray, setLevelArray] = useState([]);
     const [imageUpload, setImageUpload] = useState("")
+    const [firstImage, setFirstImage] = useState("")
 
     const [qqArr, setQqArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
     const [dcttArr, setDcttArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
@@ -134,25 +136,6 @@ const AddForm = ({ edit, data }) => {
         setOpen(true)
     }
 
-    function TabPanel(props) {
-        const { children, value, index, ...other } = props;
-
-        return (
-            <div
-                role="tabpanel"
-                hidden={value !== index}
-                id={`simple-tabpanel-${index}`}
-                aria-labelledby={`simple-tab-${index}`}
-                {...other}
-            >
-                {value === index && (
-                    <Box p={3}>
-                        {children}
-                    </Box>
-                )}
-            </div>
-        );
-    }
     function a11yProps(index) {
         return {
             id: `simple-tab-${index}`,
@@ -164,10 +147,39 @@ const AddForm = ({ edit, data }) => {
         setStep(newValue);
     };
 
-    const onSubmit = (newValue) => {
+    const updateAndFetch = async (newValue) => {
+        let res = edit
+            ? await updatePartyMember(partyMemberDispatch, newValue)
+            : await addPartyMember(partyMemberDispatch, newValue);
+        console.log(res);
+        if (res.error) {
+            loadingDispatch({ type: 'CLOSE_LOADING' })
+            setStep(0);
+            setError(res.error.type,
+                {
+                    type: "manual",
+                    message: res.error.msg,
+                }
+            )
+        } else {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Đã cập nhật!",
+                    type: "success"
+                }
+            })
+            edit
+                ? setRows(rows.map(el => el.MaSoDangVien == res.MaSoDangVien ? res : el))
+                : setRows([...rows, res])
+            loadingDispatch({ type: 'CLOSE_LOADING' })
+            setOpen(false);
+        }
+    }
 
+    const onSubmit = (newValue) => {
         if (edit) {
-            JSON.stringify(getValues("NgoaiNgu")) === JSON.stringify(data.NgoaiNgu) && delete newValue.NgoaiNgu
+            JSON.stringify(imageUpload.preview) === JSON.stringify(firstImage) && delete newValue.HinhAnh
             JSON.stringify(getValues("NgoaiNgu")) === JSON.stringify(data.NgoaiNgu) && delete newValue.NgoaiNgu
             if (JSON.stringify({ ...qqValue, detail: getValues("QQChiTiet") }) !==
                 JSON.stringify(data.DiaChi.QueQuan))
@@ -183,22 +195,9 @@ const AddForm = ({ edit, data }) => {
             setStep(previewStep => previewStep + 1);
         else {
             loadingDispatch({ type: "OPEN_LOADING" })
-            edit ?
-                updatePartyMember(partyMemberDispatch, newValue, openSnackbarDispatch, setOpen, loadingDispatch) :
-                addPartyMember(partyMemberDispatch, newValue, openSnackbarDispatch, setOpen, loadingDispatch);
+            updateAndFetch(newValue);
         }
     }
-
-    useEffect(() => {
-        if (partyMember.error) {
-            setError(partyMember.error.type,
-                {
-                    type: "manual",
-                    message: partyMember.error.msg,
-                })
-            setStep(0);
-        }
-    }, [partyMember.error])
 
     useEffect(() => {
         if (edit) {
@@ -211,6 +210,7 @@ const AddForm = ({ edit, data }) => {
                 } else if (key == "HinhAnh") {
                     setValue(key, { preview: data[key] })
                     setImageUpload({ preview: data[key] })
+                    setFirstImage(data[key]);
                 } else if (key == "NgoaiNgu") {
                     let arr = [];
                     data[key].map((el, index) => {
@@ -307,16 +307,14 @@ const AddForm = ({ edit, data }) => {
 
     return (
         <>
-            <>
-                {
-                    edit ?
-                        <div className={classes.iconWrapper} onClick={handleOpen}>
-                            <EditIcon className={classes.icon} />Chỉnh sửa
-                        </div>
-                        :
-                        <MyButton onClick={handleOpen} success><AddIcon />Thêm</MyButton>
-                }
-            </>
+            {
+                edit ?
+                    <div className={classes.iconWrapper} onClick={handleOpen}>
+                        <EditIcon className={classes.icon} />Chỉnh sửa
+                    </div>
+                    :
+                    <MyButton onClick={handleOpen} success><AddIcon />Thêm</MyButton>
+            }
             <Dialog PaperProps={{ style: { minWidth: '1100px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">Thêm Đảng viên</DialogTitle>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -360,6 +358,7 @@ const AddForm = ({ edit, data }) => {
                                     setDcttValue={setDcttValue}
                                     nohtValue={nohtValue}
                                     setNohtValue={setNohtValue}
+                                    imageUpload={imageUpload}
                                     setImageUpload={setImageUpload}
                                 />
                             </Box>
@@ -400,6 +399,7 @@ const AddForm = ({ edit, data }) => {
                                     errors={errors}
                                     setValue={setValue}
                                     watch={watch}
+                                    clearErrors={clearErrors}
                                 />
                             </Box>
                         )}
@@ -426,7 +426,6 @@ const AddForm = ({ edit, data }) => {
                     </MyButton>
                 </DialogActions>
             </Dialog>
-            <Loading loading={loading} />
         </>
     );
 };

@@ -49,50 +49,53 @@ export const getGender = (gender) => {
     return genderObj[gender];
 }
 
-export const allInfoColumn = [
-    { title: "Mã Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
-    { title: "Họ tên", field: "HoTen", minWidth: 200 },
-    { title: "Chi bộ", field: "TenChiBo", },
-    { title: "Chức vụ", field: "TenChucVu", },
-    { title: "CMND", field: "CMND", },
-    { title: "Giới tính", field: "TenGioiTinh", },
-    { title: "Ngày sinh", field: "NgaySinh", type: 'date' },
-    { title: "Quê quán", field: "QueQuan", },
-    { title: "Dân tộc", field: "TenDanToc", },
-    { title: "Tôn giáo", field: "TenTonGiao", },
-    { title: "Trình độ học vấn", field: "TrinhDoHocVan", },
-    { title: "Ngoại ngữ", field: "NgoaiNguTrinhDo", },
-    { title: "Trình độ tin học", field: "TenTinHoc", },
-    { title: "Trình độ chính trị", field: "TenChinhTri", },
-    { title: "Số điện thoại", field: "SoDienThoai", },
-    { title: "Email", field: "Email", },
-    { title: "Nghề nghiệp", field: "NgheNghiep", },
-    { title: "Địa chỉ thường trú", field: "DiaChiThuongTru", },
-    { title: "Nơi ở hiện tại", field: "NoiOHienTai", },
-    { title: "Ngày vào Đoàn", field: "NgayVaoDoan", type: 'date' },
-    { title: "Nơi vào Đoàn", field: "NoiVaoDoan", },
-    { title: "Ngày vào Đảng lần đầu", field: "NgayVaoDang", type: 'date' },
-    { title: "Ngày vào Đảng chính thức", field: "NgayChinhThuc", type: 'date' },
-    { title: "Người giới thiệu", field: "NguoiGioiThieu", },
-    {
-        title: "Chức năng", field: "action", sorting: false,
-        render: (params) => {
-            return <ActionMenu data={params} />
-        }
-    },
-]
+export const allInfoColumn = (rows, setRows) => {
+    return [
+        { title: "Mã Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
+        { title: "Họ tên", field: "HoTen", minWidth: 200 },
+        { title: "Chi bộ", field: "TenChiBo", },
+        { title: "Chức vụ", field: "TenChucVu", },
+        { title: "CMND", field: "CMND", },
+        { title: "Giới tính", field: "TenGioiTinh", },
+        { title: "Ngày sinh", field: "NgaySinh", type: 'date' },
+        { title: "Quê quán", field: "QueQuan", },
+        { title: "Dân tộc", field: "TenDanToc", },
+        { title: "Tôn giáo", field: "TenTonGiao", },
+        { title: "Trình độ học vấn", field: "TrinhDoHocVan", },
+        { title: "Ngoại ngữ", field: "NgoaiNguTrinhDo", },
+        { title: "Trình độ tin học", field: "TenTinHoc", },
+        { title: "Trình độ chính trị", field: "TenChinhTri", },
+        { title: "Số điện thoại", field: "SoDienThoai", },
+        { title: "Email", field: "Email", },
+        { title: "Nghề nghiệp", field: "NgheNghiep", },
+        { title: "Địa chỉ thường trú", field: "DiaChiThuongTru", },
+        { title: "Nơi ở hiện tại", field: "NoiOHienTai", },
+        { title: "Ngày vào Đoàn", field: "NgayVaoDoan", type: 'date' },
+        { title: "Nơi vào Đoàn", field: "NoiVaoDoan", },
+        { title: "Ngày vào Đảng lần đầu", field: "NgayVaoDang", type: 'date' },
+        { title: "Ngày vào Đảng chính thức", field: "NgayChinhThuc", type: 'date' },
+        { title: "Người giới thiệu", field: "NguoiGioiThieu", },
+        {
+            title: "Chức năng", field: "action", sorting: false,
+            render: (params) => {
+                return <ActionMenu data={params} rows={rows} setRows={setRows} />
+            }
+        },
+    ]
+}
 
 export const getExportData = (rows, columns) => {
-    const headers = columns.map(el => el.field);
+    const headers = columns.map(el => ({ label: el.title, key: el.field })).filter(el => el.key != "action");
+    const headerArr = columns.map(el => el.field);
     const newRows = rows.map(el => {
         let newEl = {};
         Object.keys(el).map(key => {
-            if (headers.includes(key))
-                newEl[key] = el[key]
+            if (headerArr.includes(key))
+                newEl[key] = dateArr.includes(key) ? getDate(el[key]) : el[key]
         })
         return newEl;
     })
-    return newRows
+    return { data: newRows, headers: headers }
 }
 
 export const getDate = (date) => {

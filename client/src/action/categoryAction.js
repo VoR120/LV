@@ -5,7 +5,7 @@ import { getKeyField } from '../utils/utils';
 export const getAllCategoryPM = async (dispatch) => {
     const categoryArr = [
         "ethnic", "religion", "partycell", "position", "flanguage",
-        "flanguagelevel", "politics", "it", "grade", "term"
+        "flanguagelevel", "politics", "it", "grade", "term", "permission"
     ]
     try {
         dispatch({ type: categoryConstant.GET_ALL_CATEGORYPM_REQUEST })

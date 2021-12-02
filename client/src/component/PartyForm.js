@@ -1,9 +1,10 @@
 import { Divider, FormControl, Grid, MenuItem, TextField, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import MySelect from './UI/MySelect';
 import InputGrid from './InputGrid';
 import { getDate } from '../utils/utils';
+import { CategoryContext } from '../contextAPI/CategoryContext';
 
 const useStyles = makeStyles(theme => ({
     addBtn: {
@@ -71,13 +72,23 @@ const useStyles = makeStyles(theme => ({
 
 const PartyForm = (props) => {
     const classes = useStyles();
-    const { disable, control, errors, setValue, watch } = props
+    const { disable, control, errors, setValue, watch, clearErrors } = props
     const [imageUpload, setImageUpload] = useState('');
     const [loading, setLoading] = useState(false);
     const [addType, setAddType] = useState(0);
+
+    const { category, categoryDispatch } = useContext(CategoryContext);
+
     const hanleChangeType = (e) => {
         setValue(e.target.name, e.target.value)
         setAddType(e.target.value)
+    }
+
+    const handleChangeSelect = (e) => {
+        if (e.target.value != "0") {
+            clearErrors(e.target.name)
+        }
+        setValue(e.target.name, e.target.value)
     }
 
     const NgayVaoDang = useRef({});
@@ -132,11 +143,21 @@ const PartyForm = (props) => {
                             </Grid>
                             <Grid item xs={6}>
                                 <InputGrid
-                                    nameTitle={`Chuyển đến Chi bộ`}
-                                    name={"ChuyenDenChiBo"}
+                                    select
+                                    onChange={handleChangeSelect}
+                                    nameTitle={"Chuyển đến chi bộ"}
+                                    name={`ChuyenDenChiBo`}
+                                    defaultValue={'0'}
                                     control={control}
                                     errors={errors}
-                                />
+                                >
+                                    <MenuItem value="0">Chọn chi bộ</MenuItem>
+                                    {category.categories.partycell.length > 0 &&
+                                        category.categories.partycell.map(el =>
+                                            <MenuItem key={el.MaChiBo} value={el.MaChiBo}>{el.TenChiBo}</MenuItem>
+                                        )
+                                    }
+                                </InputGrid>
                             </Grid>
                             <Grid item xs={6}>
                                 <InputGrid

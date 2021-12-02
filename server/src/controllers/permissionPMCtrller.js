@@ -7,7 +7,7 @@ exports.findByIdPermissionPM = findById(PermissionPM);
 
 exports.createPermissionPM = create(PermissionPM);
 
-// exports.updateByIdPermissionPM = updateById(PermissionPM);
+exports.updateByIdPermissionPM = updateById(PermissionPM);
 
 exports.removePermissionPM = remove(PermissionPM);
 

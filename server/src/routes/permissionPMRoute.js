@@ -3,7 +3,7 @@ const {
     getAllPermissionPM,
     findByIdPermissionPM,
     createPermissionPM,
-    // updateByIdPermissionPM,
+    updateByIdPermissionPM,
     removePermissionPM,
     removeAllPermissionPM
 } = require('../controllers/permissionPMCtrller');
@@ -12,7 +12,7 @@ const Router = express.Router();
 Router.get('/permissionpm', getAllPermissionPM);
 Router.get('/permissionpm/:id', findByIdPermissionPM);
 Router.post('/permissionpm/create', createPermissionPM);
-// Router.put('/permissionpm/:id', updateByIdPermissionPM);
+Router.put('/permissionpm/:id', updateByIdPermissionPM);
 Router.delete('/permissionpm/:id', removePermissionPM);
 Router.delete('/permissionpm/removeall', removeAllPermissionPM);
 

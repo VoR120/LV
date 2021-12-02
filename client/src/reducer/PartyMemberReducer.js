@@ -52,7 +52,8 @@ const PartyMemberReducer = (state, action) => {
         case partyMemberConstant.UPDATE_PARTYMEMBER_SUCCESS:
             let { data } = action.payload
             console.log("Data: ", data);
-            newPartyMember.forEach((el, index) => {
+            newPartyMember.map((el, index) => {
+                console.log(el);
                 if (el.MaSoDangVien == data.MaSoDangVien)
                     newPartyMember[index] = data
             })

@@ -10,7 +10,6 @@ const getIdField = (field) => {
         ethnic: "MaDanToc",
         religion: "MaTonGiao",
         gender: "GioiTinh",
-        status: "TrangThai",
         name: "HoTen",
         province: "QQTinh",
         achievement: "MaThanhTich",
@@ -31,23 +30,18 @@ const getParamsAge = (value) => {
     return paramsAge[value];
 }
 
-export const getAllPartyMember = async (dispatch, partycell) => {
+export const getAllPartyMember = async (partycell) => {
     try {
-        dispatch({ type: partyMemberConstant.GET_ALL_PARTYMEMBER_REQUEST })
         let res;
         if (partycell) {
             res = await axios.get(`/api/partymember?MaChiBo=${partycell}`);
         } else
             res = await axios.get('/api/partymember');
         if (res.status == 200) {
-            console.log(res.data);
-            dispatch({
-                type: partyMemberConstant.GET_ALL_PARTYMEMBER_SUCCESS,
-                payload: { data: res.data }
-            })
+            return res.data
         }
     } catch (error) {
-        console.log(error);
+        return { error: error.response.data.msg }
     }
 }
 
@@ -60,7 +54,7 @@ export const addPartyMember = async (dispatch, payload, open, setOpen, loading) 
         NgoaiNgu, HinhThucThem, QQAddress, DCTTAddress, NOHTAddress, HinhAnh, MaNhiemKy
     } = payload
     try {
-        dispatch({ type: partyMemberConstant.ADD_PARTYMEMBER_REQUEST })
+        // dispatch({ type: partyMemberConstant.ADD_PARTYMEMBER_REQUEST })
         let newPayload = {
             HoTen, MaSoDangVien, GioiTinh, CMND, NgaySinh, NoiSinh, QuocTich,
             SoDienThoai, Email, NgheNghiep, TrinhDoHocVan, NgayVaoDoan, NoiVaoDoan,
@@ -68,7 +62,6 @@ export const addPartyMember = async (dispatch, payload, open, setOpen, loading) 
             MaChiBo, MaChinhTri, MaDanToc, MaTinHoc, MaTonGiao, MaChucVu,
         }
 
-        console.log(HinhAnh)
         let formData = new FormData();
         formData.append('file', HinhAnh);
         const resUpload = await axios.post('/upload', formData);
@@ -186,31 +179,32 @@ export const addPartyMember = async (dispatch, payload, open, setOpen, loading) 
             result[0].TenGioiTinh = getGender(result[0].GioiTinh)
             console.log(result);
             if (res.status == 201) {
-                dispatch({
-                    type: partyMemberConstant.ADD_PARTYMEMBER_SUCCESS,
-                    payload: {
-                        data: result[0]
-                    }
-                })
-                open({
-                    type: 'SET_OPEN',
-                    payload: {
-                        msg: "Đã cập nhật!",
-                        type: "success"
-                    }
-                })
-                loading({ type: 'CLOSE_LOADING' })
-                setOpen(false);
+                return result[0];
+                // dispatch({
+                //     type: partyMemberConstant.ADD_PARTYMEMBER_SUCCESS,
+                //     payload: {
+                //         data: result[0]
+                //     }
+                // })
+                // open({
+                //     type: 'SET_OPEN',
+                //     payload: {
+                //         msg: "Đã cập nhật!",
+                //         type: "success"
+                //     }
+                // })
+                // loading({ type: 'CLOSE_LOADING' })
+                // setOpen(false);
             }
         }
     } catch (error) {
+        return { error: error.response.data }
         dispatch({
             type: partyMemberConstant.ADD_PARTYMEMBER_FAILURE,
             payload: {
                 error: error.response.data
             }
         })
-        loading({ type: 'CLOSE_LOADING' })
         // open({
         //     type: 'SET_OPEN',
         //     payload: {
@@ -230,14 +224,13 @@ export const updatePartyMember = async (dispatch, payload, open, setOpen, loadin
         NgoaiNgu, HinhThucThem, QQAddress, DCTTAddress, NOHTAddress, HinhAnh
     } = payload
     try {
-        dispatch({ type: partyMemberConstant.UPDATE_PARTYMEMBER_REQUEST });
+        // dispatch({ type: partyMemberConstant.UPDATE_PARTYMEMBER_REQUEST });
 
         let newPayload = {
             HoTen, MaSoDangVien, GioiTinh, CMND, NgaySinh, NoiSinh, QuocTich,
             SoDienThoai, Email, NgheNghiep, TrinhDoHocVan, NgayVaoDoan, NoiVaoDoan,
             NgayVaoDang, NoiVaoDangLanDau, NgayChinhThuc, NoiVaoDangChinhThuc, NguoiGioiThieu,
             MaChiBo, MaChinhTri, MaChucVu, MaDanToc, MaTinHoc, MaTonGiao,
-            TrangThai: 1
         }
 
         if (HinhAnh) {
@@ -304,31 +297,31 @@ export const updatePartyMember = async (dispatch, payload, open, setOpen, loadin
         result[0].Quyen = resPer.data.data
 
         if (res.status == 200) {
-            dispatch({
-                type: partyMemberConstant.UPDATE_PARTYMEMBER_SUCCESS,
-                payload: {
-                    data: result[0]
-                }
-            })
-            open({
-                type: 'SET_OPEN',
-                payload: {
-                    msg: "Đã cập nhật!",
-                    type: "success"
-                }
-            })
-            loading({ type: 'CLOSE_LOADING' })
+            return result[0];
+            // dispatch({
+            //     type: partyMemberConstant.UPDATE_PARTYMEMBER_SUCCESS,
+            //     payload: {
+            //         data: result[0]
+            //     }
+            // })
+            // open({
+            //     type: 'SET_OPEN',
+            //     payload: {
+            //         msg: "Đã cập nhật!",
+            //         type: "success"
+            //     }
+            // })
+            // setOpen(false);
+            // loading({ type: 'CLOSE_LOADING' })
         }
-        if (res.status == 400)
-            dispatch({
-                type: partyMemberConstant.UPDATE_PARTYMEMBER_FAILURE,
-                payload: {
-                    error: res
-                }
-            })
-        loading({ type: 'CLOSE_LOADING' })
     } catch (error) {
-        console.log(error);
+        return { error: error.response.data.message }
+        // dispatch({
+        //     type: partyMemberConstant.UPDATE_PARTYMEMBER_FAILURE,
+        //     payload: {
+        //         error: error.response.data.message
+        //     }
+        // })
         // throw new Error(error)
     }
 }
