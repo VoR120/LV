@@ -7,11 +7,9 @@ export const login = async (dispatch, payload) => {
         const res = await axios.post('/auth/login', payload);
         console.log("Data: ", res.data); // msg, user, token
         if (res.status === 200) {
-            ;
             const { info, token } = res.data
             let newInfo = { ...info }
-            const resPer = await axios.get('/api/permissionps/' + info.MaChucVu);
-            newInfo.Quyen = resPer.data.data
+            
             dispatch({ type: userConstant.LOGIN_SUCCESS, payload: { token, info: newInfo } });
             localStorage.setItem('token', JSON.stringify(token));
             localStorage.setItem('info', JSON.stringify(newInfo));
@@ -33,10 +31,8 @@ export const isLogin = async (dispatch) => {
     try {
         dispatch({ type: userConstant.LOGIN_REQUEST });
         const token = JSON.parse(localStorage.getItem('token'));
-        console.log(token);
         if (token) {
             const info = JSON.parse(localStorage.getItem('info'));
-            console.log(info);
             dispatch({ type: userConstant.LOGIN_SUCCESS, payload: { token, info } });
             // axios.defaults.headers.common['Authorization'] = token;
             // axios.defaults.headers("Access-Control-Allow-Origin", "*");
@@ -50,7 +46,6 @@ export const isLogin = async (dispatch) => {
 }
 
 export const getInfo = async (dispatch, payload) => {
-    console.log(payload);
     try {
         dispatch({ type: infoConstant.GET_INFO_REQUEST })
         const res = await axios.get('/api/partymember/' + payload.id);
@@ -135,7 +130,6 @@ export const updateInfo = async (dispatch, payload, open) => {
             formData.append('file', HinhAnh);
 
             const resUpload = await axios.post('/upload', formData);
-            console.log(resUpload.data.file[0]);
 
             newPayload.HinhAnh = resUpload.data.file[0].url;
         }

@@ -1,7 +1,8 @@
-import { Typography } from '@mui/material';
+import { MenuItem, Typography } from '@mui/material';
 import xlsx from 'xlsx'
 import ActionMenu from '../component/ActionMenu';
-
+import pdfMake from 'pdfmake/build/pdfmake'
+import pdfFonts from 'pdfmake/build/vfs_fonts'
 export const downloadExcel = (rows) => {
     const workSheet = xlsx.utils.json_to_sheet(rows);
     const workBook = xlsx.utils.book_new();
@@ -98,6 +99,13 @@ export const getExportData = (rows, columns) => {
     return { data: newRows, headers: headers }
 }
 
+// var today = new Date();
+// var dd = String(today.getDate()).padStart(2, '0');
+// var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+// var yyyy = today.getFullYear();
+
+// today = mm + '/' + dd + '/' + yyyy;
+
 export const getDate = (date) => {
     const dateObj = new Date(date)
     const offset = dateObj.getTimezoneOffset()
@@ -145,3 +153,8 @@ export const getStatus = (startDate, finishDate) => {
 }
 
 export const dateArr = ["NgaySinh", "NgayChinhThuc", "NgayVaoDang", "NgayVaoDoan", "NgayChuyenDi", "NgayChuyenDen"]
+
+export const pdfmakedownload = (documentDefination) => {
+    pdfMake.vfs = pdfFonts.pdfMake.vfs;
+    pdfMake.createPdf(documentDefination).print();
+};

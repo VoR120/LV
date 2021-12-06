@@ -228,8 +228,8 @@ const Search = () => {
                 </Paper>
 
                 <MyButton primary onClick={handleSubmit(onSubmit)} >Xem</MyButton>
-                {data.length > 0 &&
-                    <CSVLink data={data} filename={"export.csv"}>
+                {data.data.length > 0 &&
+                    <CSVLink data={data.data} headers={data.headers} filename={"export.csv"}>
                         <MyButton style={{ marginLeft: 8 }} success>
                             <SaveAltIcon style={{ marginRight: 4 }} />Excel
                         </MyButton>

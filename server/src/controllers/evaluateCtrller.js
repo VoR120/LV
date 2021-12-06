@@ -29,10 +29,12 @@ exports.getBySubject = (req, res) => {
             ?
             `SELECT dangvien.MaSoDangVien, dangvien.HoTen
             FROM dangvien, chibo 
-            WHERE dangvien.MaChiBo = chibo.MaChiBo AND chibo.MaChiBo = "${MaChiBo}"    `
+            WHERE dangvien.MaChiBo = chibo.MaChiBo AND chibo.MaChiBo = "${MaChiBo}"    
+            AND dangvien.DaXoa = 0`
             : `SELECT dangvien.MaSoDangVien, dangvien.HoTen
             FROM dangvien, chibo 
-            WHERE dangvien.MaChiBo = chibo.MaChiBo`
+            WHERE dangvien.MaChiBo = chibo.MaChiBo
+            AND dangvien.DaXoa = 0`
         sql.query(sqlQuery
             , (err, result) => {
                 if (err) {
@@ -45,6 +47,7 @@ exports.getBySubject = (req, res) => {
                 WHERE dg.MaSoDangVien IN (
                 SELECT dangvien.MaSoDangVien FROM dangvien, chibo WHERE dangvien.MaChiBo = chibo.MaChiBo
                 AND chibo.MaChiBo = ${MaChiBo}
+                AND dangvien.DaXoa = 0
                 ) AND dg.Nam = ${Nam}
                 AND loai.MaLoai = dg.MaLoai
                 AND dv.MaSoDangVien = dg.MaSoDangVien`
@@ -52,6 +55,7 @@ exports.getBySubject = (req, res) => {
                 FROM danhgiadangvien dg, dangvien dv, loai
                 WHERE dg.MaSoDangVien IN (
                 SELECT dangvien.MaSoDangVien FROM dangvien, chibo WHERE dangvien.MaChiBo = chibo.MaChiBo
+                AND dangvien.DaXoa = 0
                 ) AND dg.Nam = ${Nam}
                 AND loai.MaLoai = dg.MaLoai
                 AND dv.MaSoDangVien = dg.MaSoDangVien`
@@ -108,6 +112,7 @@ exports.getEvaluated = (req, res) => {
                 WHERE dg.MaSoDangVien IN (
                 SELECT dangvien.MaSoDangVien FROM dangvien, chibo WHERE dangvien.MaChiBo = chibo.MaChiBo
                 AND chibo.MaChiBo = ${MaChiBo}
+                AND dangvien.DaXoa = 0
                 )
                 AND cb.MaChiBo = dv.MaChiBo
                 AND loai.MaLoai = dg.MaLoai
@@ -117,6 +122,7 @@ exports.getEvaluated = (req, res) => {
                 FROM danhgiadangvien dg, dangvien dv, loai, chibo cb
                 WHERE dg.MaSoDangVien IN (
                 SELECT dangvien.MaSoDangVien FROM dangvien, chibo WHERE dangvien.MaChiBo = chibo.MaChiBo
+                AND dangvien.DaXoa = 0
                 )
                 AND cb.MaChiBo = dv.MaChiBo
                 AND loai.MaLoai = dg.MaLoai
@@ -218,8 +224,28 @@ exports.getTimeEvaluate = (req, res) => {
                     res.status(500).json({ msg: err.message })
                     return;
                 }
-                const result1 = [...result];
-                res.status(200).json(result1);
+                res.status(200).json(result);
+                return;
+            }
+        )
+    } catch (error) {
+        res.status(500).json({ msg: error.message });
+    }
+}
+
+exports.checkOpen = (req, res) => {
+    try {
+        const { MaDVDG } = req.query
+        let query = MaDVDG
+            ? `SELECT * FROM thoigiandanhgia WHERE TrangThai = 1 AND MaDVDG = ${MaDVDG}`
+            : `SELECT * FROM thoigiandanhgia WHERE TrangThai = 1`
+        sql.query(query,
+            (err, result) => {
+                if (err) {
+                    res.status(500).json({ msg: err.message })
+                    return;
+                }
+                res.status(200).json(result);
                 return;
             }
         )
@@ -230,7 +256,7 @@ exports.getTimeEvaluate = (req, res) => {
 
 exports.setTimeEvaluate = (req, res) => {
     try {
-        const { Nam, MaDVDG, ThoiGianBatDau, ThoiGianKetThuc } = req.body
+        const { Nam, MaDVDG, ThoiGianBatDau, ThoiGianKetThuc, TrangThai } = req.body
         sql.query(`SELECT *
         FROM thoigiandanhgia
         WHERE Nam = ${Nam}
@@ -242,7 +268,8 @@ exports.setTimeEvaluate = (req, res) => {
                 }
                 if (result.length) {
                     sql.query(`UPDATE thoigiandanhgia SET ThoiGianBatDau = "${ThoiGianBatDau}",
-                    ThoiGianKetThuc = "${ThoiGianKetThuc}"
+                    ThoiGianKetThuc = "${ThoiGianKetThuc}",
+                    TrangThai = 1
                     WHERE Nam = ${Nam}
                     AND MaDVDG = ${MaDVDG}
                     `,
@@ -256,7 +283,6 @@ exports.setTimeEvaluate = (req, res) => {
                             return;
                         })
                 } else {
-                    console.log(req.body);
                     sql.query(`INSERT INTO thoigiandanhgia SET ?`, req.body,
                         (err, result2) => {
                             if (err) {
@@ -271,6 +297,27 @@ exports.setTimeEvaluate = (req, res) => {
                     )
                 }
             })
+    } catch (error) {
+        res.status(500).json({ msg: error.message });
+    }
+}
+
+exports.resetStatus = async (req, res) => {
+    try {
+        const sqlPromise = sql.promise();
+        const [all, fAll] = await sqlPromise.query(`SELECT MaDVDG, Nam FROM thoigiandanhgia`);
+        if (all.length) {
+            await Promise.all(all.map(async el => {
+                await sqlPromise.query(`
+                    UPDATE thoigiandanhgia SET TrangThai = 0 
+                    WHERE MaDVDG = ${el.MaDVDG}
+                    AND Nam = ${el.Nam}
+                `)
+            }))
+            res.status(200).json({ msg: "Reset status success!" })
+            return;
+        }
+        res.status(200).json({ msg: "Reset status successfully!" })
     } catch (error) {
         res.status(500).json({ msg: error.message });
     }

@@ -122,7 +122,7 @@ const Move = () => {
                 title: "Chức năng", field: "action", sorting: false,
                 render: (params) => {
                     console.log(params);
-                    return <ActionMoveMenu type={typeChoose} data={params} />
+                    return <ActionMoveMenu typeFirst={typeFirst} type={typeChoose} data={params} />
                 }
             },
         ],
@@ -171,6 +171,7 @@ const Move = () => {
 
     const handleChangeTypeFirst = (e) => {
         setTypeFirst(e.target.value);
+        setId('');
     }
 
     const handleChangeType = (e) => {
@@ -179,6 +180,7 @@ const Move = () => {
     }
 
     const fetchApi = async () => {
+        console.log(typeFirst);
         let res;
         typeFirst == "type"
             ? res = await getMoveByType({ LoaiHinhThuc: typeChoose, MaHinhThuc: type })
@@ -193,11 +195,10 @@ const Move = () => {
                 }
             })
         } else {
-            const newRes = [...res];
-            setRows(res);
             typeFirst == "type"
                 ? setColumns(columnArr[typeChoose])
                 : setColumns(columnArr["Chuyển sinh hoạt theo Mã"])
+            setRows(res);
         }
         setLoading(false)
     };

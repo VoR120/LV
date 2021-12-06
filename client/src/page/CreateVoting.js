@@ -103,7 +103,7 @@ const CreateVoting = () => {
                     }
                 })
                 reset({
-                    TenBieuQuyet: 0,
+                    TenBieuQuyet: "",
                     ThoiGianBatDau: "",
                     ThoiGianKetThuc: "",
                     SoPhieuToiDa: 1,

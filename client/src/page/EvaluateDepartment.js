@@ -13,7 +13,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { getAllCategory } from '../action/categoryAction';
-import { evaluate, getTimeEvaluate } from '../action/evaluateAction';
+import { checkIsOpen, evaluate, getTimeEvaluate } from '../action/evaluateAction';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
 import MySelect from '../component/UI/MySelect';
@@ -26,6 +26,7 @@ import axios from '../helper/axios';
 import { getExportData, getLocaleDate, getTimeWithEndHour, getTimeWithStartHour } from '../utils/utils';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
+import { LoadingContext } from '../contextAPI/LoadingContext';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -77,6 +78,7 @@ const EvaluateDepartment = () => {
     const { info, infoDispatch } = useContext(InfoContext);
     const { category, categoryDispatch } = useContext(CategoryContext);
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
+    const { loadingDispatch } = useContext(LoadingContext)
 
     // State
     const columns = [
@@ -162,6 +164,7 @@ const EvaluateDepartment = () => {
                 setRows(res.data);
             }
             setLoading(false);
+            loadingDispatch({ type: 'CLOSE_LOADING' })
         } catch (error) {
             console.log(error.message)
         }
@@ -175,31 +178,32 @@ const EvaluateDepartment = () => {
     // UseEffect
     useEffect(() => {
         setLoading(true)
+        loadingDispatch({ type: 'OPEN_LOADING' })
         getAllCategory(categoryDispatch, "grade");
         getAllCategory(categoryDispatch, "partycell");
-        fetchAPI();
         checkTime();
     }, [])
 
     const checkTime = async () => {
-        const res = await getTimeEvaluate({ Nam: year });
-        if (res.length > 0) {
-            let NgayBatDau;
-            let NgayKetThuc;
-            res.map(el => {
-                if (el.MaDVDG == 3) {
-                    NgayBatDau = el.ThoiGianBatDau;
-                    NgayKetThuc = el.ThoiGianKetThuc;
-                }
-            });
-            let NgayKetThucCheck = getTimeWithEndHour(NgayKetThuc)
-            let NgayBatDauCheck = getTimeWithStartHour(NgayBatDau)
+        const res = await checkIsOpen({ id: 3 });
+        console.log(res);
+        if (res) {
+            const { ThoiGianBatDau, ThoiGianKetThuc, Nam } = res
+            setYear(Nam)
+            let ThoiGianKetThucCheck = getTimeWithEndHour(ThoiGianKetThuc)
+            let ThoiGianBatDauCheck = getTimeWithStartHour(ThoiGianBatDau)
 
-            if (new Date() >= NgayBatDauCheck && new Date() <= NgayKetThucCheck) {
-                setIsTime({ isTime: true, NgayBatDau, NgayKetThuc });
+            if (new Date() >= ThoiGianBatDauCheck && new Date() <= ThoiGianKetThucCheck) {
+                setIsTime({ isTime: true, ThoiGianBatDau, ThoiGianKetThuc });
             }
         }
     }
+
+    useEffect(() => {
+        if (isTime.isTime) {
+            fetchAPI();
+        }
+    }, [isTime])
 
     useEffect(() => {
         if (category.categories.grade.length > 0) {
@@ -223,8 +227,8 @@ const EvaluateDepartment = () => {
                             <Paper variant="outlined" className={classes.paper}>
                                 <Typography style={{ textTransform: 'uppercase', marginBottom: 8 }}>Đánh giá Đảng viên cuối năm</Typography>
                                 <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
-                                <Typography variant="body1">
-                                    Thời gian: Từ ngày <b>{getLocaleDate(isTime.NgayBatDau)}</b> đến ngày <b>{getLocaleDate(isTime.NgayKetThuc)}</b>
+                                <Typography marginBottom={2} variant="body1">
+                                    Thời gian: Từ ngày <b>{getLocaleDate(isTime.ThoiGianBatDau)}</b> đến ngày <b>{getLocaleDate(isTime.ThoiGianKetThuc)}</b>
                                 </Typography>
                                 <MySelect
                                     nameTitle="Chi bộ"

@@ -24,7 +24,9 @@ const Move = {
             await Promise.all(res.map(async (el, index) => {
                 if (el.MaHinhThuc == 1 || el.MaHinhThuc == 2) {
                     const [result1, f] = await sqlPromise.query(`
-                                        SELECT TenChiBo FROM chibo WHERE MaChiBo = ${el.ChuyenTuChiBo}
+                    SELECT chibo.TenChiBo FROM chibo, chuyensinhhoat 
+                    WHERE chibo.MaChiBo = ${el.ChuyenTuChiBo}
+                    AND chuyensinhhoat.MaChuyenSinhHoat = ${el.MaChuyenSinhHoat}
                                     `)
                     if (err) {
                         console.log("error: ", err);
@@ -32,12 +34,14 @@ const Move = {
                         return;
                     }
                     result[index].TenChiBoTu = result1[0].TenChiBo
-                    result[index].TenChiBoDen = result[0].ChuyenDenChiBo
+                    result[index].TenChiBoDen = result[index].ChuyenDenChiBo
 
                 }
                 if (el.MaHinhThuc == 3 || el.MaHinhThuc == 4) {
                     const [result2, f] = await sqlPromise.query(`
-                                        SELECT TenChiBo FROM chibo WHERE MaChiBo = ${el.ChuyenDenChiBo}
+                    SELECT chibo.TenChiBo FROM chibo, chuyensinhhoat 
+                    WHERE chibo.MaChiBo = ${el.ChuyenDenChiBo}
+                    AND chuyensinhhoat.MaChuyenSinhHoat = ${el.MaChuyenSinhHoat}
                                     `)
                     if (err) {
                         console.log("error: ", err);
@@ -45,15 +49,17 @@ const Move = {
                         return;
                     }
                     result[index].TenChiBoDen = result2[0].TenChiBo
-                    result[index].TenChiBoTu = result[0].ChuyenTuChiBo
+                    result[index].TenChiBoTu = result[index].ChuyenTuChiBo
                 }
                 if (el.MaHinhThuc == 13) {
                     const [result2, f] = await sqlPromise.query(`
-                                        SELECT chibo.TenChiBo as TenChiBoDen, chibotu.TenChiBoTu FROM chibo,
-                                        (SELECT TenChiBo as TenChiBoTu FROM chibo
-                                        WHERE MaChiBo = ${el.ChuyenTuChiBo}    
-                                        ) as chibotu
-                                        WHERE MaChiBo = ${el.ChuyenDenChiBo}
+                    SELECT chibo.TenChiBo as TenChiBoDen, chibotu.TenChiBoTu FROM chibo, chuyensinhhoat,
+                    (SELECT chibo.TenChiBo as TenChiBoTu FROM chibo, chuyensinhhoat
+                    WHERE chibo.MaChiBo = ${el.ChuyenTuChiBo}
+                    AND chuyensinhhoat.MaChuyenSinhHoat = ${el.MaChuyenSinhHoat}
+                    ) as chibotu
+                    WHERE MaChiBo = ${el.ChuyenDenChiBo}
+                    AND chuyensinhhoat.MaChuyenSinhHoat = ${el.MaChuyenSinhHoat}
                                     `)
                     if (err) {
                         console.log("error: ", err);
@@ -93,35 +99,43 @@ const Move = {
             await Promise.all(res.map(async (el, index) => {
                 if (el.MaHinhThuc == 1 || el.MaHinhThuc == 2) {
                     const [result1, f] = await sqlPromise.query(`
-                                        SELECT TenChiBo FROM chibo WHERE MaChiBo = ${el.ChuyenTuChiBo}
-                                    `)
+                    SELECT chibo.TenChiBo FROM chibo, chuyensinhhoat 
+                    WHERE chibo.MaChiBo = ${el.ChuyenTuChiBo}
+                    AND chuyensinhhoat.MaChuyenSinhHoat = ${el.MaChuyenSinhHoat}
+                `)
                     if (err) {
                         console.log("error: ", err);
                         callback(err, null);
                         return;
                     }
                     result[index].TenChiBoTu = result1[0].TenChiBo
+                    result[index].TenChiBoDen = result[index].ChuyenDenChiBo
 
                 }
                 if (el.MaHinhThuc == 3 || el.MaHinhThuc == 4) {
                     const [result2, f] = await sqlPromise.query(`
-                                        SELECT TenChiBo FROM chibo WHERE MaChiBo = ${el.ChuyenDenChiBo}
-                                    `)
+                    SELECT chibo.TenChiBo FROM chibo, chuyensinhhoat 
+                    WHERE chibo.MaChiBo = ${el.ChuyenDenChiBo}
+                    AND chuyensinhhoat.MaChuyenSinhHoat = ${el.MaChuyenSinhHoat}
+                `)
                     if (err) {
                         console.log("error: ", err);
                         callback(err, null);
                         return;
                     }
                     result[index].TenChiBoDen = result2[0].TenChiBo
+                    result[index].TenChiBoTu = result[index].ChuyenTuChiBo
                 }
                 if (el.MaHinhThuc == 13) {
                     const [result2, f] = await sqlPromise.query(`
-                                        SELECT chibo.TenChiBo as TenChiBoDen, chibotu.TenChiBoTu FROM chibo,
-                                        (SELECT TenChiBo as TenChiBoTu FROM chibo
-                                        WHERE MaChiBo = ${el.ChuyenTuChiBo}    
-                                        ) as chibotu
-                                        WHERE MaChiBo = ${el.ChuyenDenChiBo}
-                                    `)
+                    SELECT chibo.TenChiBo as TenChiBoDen, chibotu.TenChiBoTu FROM chibo, chuyensinhhoat,
+                    (SELECT chibo.TenChiBo as TenChiBoTu FROM chibo, chuyensinhhoat
+                    WHERE chibo.MaChiBo = ${el.ChuyenTuChiBo}
+                    AND chuyensinhhoat.MaChuyenSinhHoat = ${el.MaChuyenSinhHoat}
+                    ) as chibotu
+                    WHERE MaChiBo = ${el.ChuyenDenChiBo}
+                    AND chuyensinhhoat.MaChuyenSinhHoat = ${el.MaChuyenSinhHoat}
+                    `)
                     if (err) {
                         console.log("error: ", err);
                         callback(err, null);
@@ -162,9 +176,13 @@ const Move = {
                             }
                             const result = [...res];
                             await Promise.all(res.map(async (el, index) => {
+                                console.log(el);
                                 if (el.MaHinhThuc == 1 || el.MaHinhThuc == 2) {
                                     const [result1, f] = await sqlPromise.query(`
-                                        SELECT TenChiBo FROM chibo WHERE MaChiBo = ${el.ChuyenTuChiBo}
+                                        SELECT chibo.TenChiBo FROM chibo, chuyensinhhoat 
+                                        WHERE chibo.MaChiBo = ${el.ChuyenTuChiBo}
+                                        AND chibo.MaChiBo = chuyensinhhoat.ChuyenTuChiBo
+                                        AND chuyensinhhoat.MaChuyenSinhHoat = ${el.MaChuyenSinhHoat}
                                     `)
                                     if (err) {
                                         console.log("error: ", err);
@@ -172,11 +190,14 @@ const Move = {
                                         return;
                                     }
                                     result[index].TenChiBoTu = result1[0].TenChiBo
-
+                                    result[index].TenChiBoDen = result[index].ChuyenDenChiBo
                                 }
                                 if (el.MaHinhThuc == 3 || el.MaHinhThuc == 4) {
                                     const [result2, f] = await sqlPromise.query(`
-                                        SELECT TenChiBo FROM chibo WHERE MaChiBo = ${el.ChuyenDenChiBo}
+                                    SELECT chibo.TenChiBo FROM chibo, chuyensinhhoat
+                                    WHERE chibo.MaChiBo = ${el.ChuyenDenChiBo}
+                                    AND chibo.MaChiBo = chuyensinhhoat.ChuyenDenChiBo
+                                    AND chuyensinhhoat.MaChuyenSinhHoat = ${el.MaChuyenSinhHoat}
                                     `)
                                     if (err) {
                                         console.log("error: ", err);
@@ -184,15 +205,19 @@ const Move = {
                                         return;
                                     }
                                     result[index].TenChiBoDen = result2[0].TenChiBo
+                                    result[index].TenChiBoTu = result[index].ChuyenTuChiBo
                                 }
                                 if (el.MaHinhThuc == 13) {
                                     const [result2, f] = await sqlPromise.query(`
-                                        SELECT chibo.TenChiBo as TenChiBoDen, chibotu.TenChiBoTu FROM chibo,
-                                        (SELECT TenChiBo as TenChiBoTu FROM chibo
-                                        WHERE MaChiBo = ${el.ChuyenTuChiBo}    
+                                        SELECT chibo.TenChiBo as TenChiBoDen, chibotu.TenChiBoTu FROM chibo, chuyensinhhoat,
+                                        (SELECT chibo.TenChiBo as TenChiBoTu FROM chibo, chuyensinhhoat
+                                        WHERE chibo.MaChiBo = ${el.ChuyenTuChiBo}
+                                        AND chuyensinhhoat.MaChuyenSinhHoat = ${el.MaChuyenSinhHoat}
                                         ) as chibotu
                                         WHERE MaChiBo = ${el.ChuyenDenChiBo}
+                                        AND chuyensinhhoat.MaChuyenSinhHoat = ${el.MaChuyenSinhHoat}
                                     `)
+                                    console.log(result2)
                                     if (err) {
                                         console.log("error: ", err);
                                         callback(err, null);

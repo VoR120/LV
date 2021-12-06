@@ -18,6 +18,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 import { NavLink } from "react-router-dom";
 import { InfoContext } from '../contextAPI/InfoContext';
+import { ListDrawerContext } from '../contextAPI/ListDrawerContext';
 import '../public/css/Drawer.scss';
 
 const useStyles = makeStyles(theme => ({
@@ -36,28 +37,34 @@ const DrawerList = () => {
     const { info } = useContext(InfoContext);
     const location = useLocation();
 
-    const [open, setOpen] = useState(false);
-    const [open1, setOpen1] = useState(false);
-    const path = location.pathname;
-    const pathList = ["/grade", "/evaluate", "/evaluatesubject", "/evaluatedepartment", "/openevaluate"]
-    const pathList2 = ["/createvoting", "/voting", "/votingmanage"]
+    let permission = [];
 
-    useEffect(() => {
-        if (pathList.includes(path)) {
-            setOpen(true)
-        }
-        if (pathList2.includes(path)) {
-            setOpen1(true)
-        }
-    }, [path])
+    Object.keys(info.info.Quyen).forEach(el => {
+        if (info.info.Quyen[el] == 1)
+            permission.push(Number(el));
+    })
+
+    const { listOpen, listOpenDispatch } = useContext(ListDrawerContext)
 
     const handleClick = () => {
-        setOpen(!open);
+        listOpenDispatch({ type: 'TOGGLE_LIST1' })
+        // setOpen(!open);
     };
 
     const handleClick1 = () => {
-        setOpen1(!open1);
+        listOpenDispatch({ type: 'TOGGLE_LIST2' })
+        // setOpen1(!open1);
     };
+
+    const handleStayOpen1 = () => {
+        listOpenDispatch({ type: 'OPEN_LIST1' })
+    }
+
+    const handleStayOpen2 = () => {
+        listOpenDispatch({ type: 'OPEN_LIST2' })
+    }
+
+
     return (
         <div className="drawer-list" style={{ overflow: 'hidden' }}>
             <List className={classes.list}>
@@ -73,10 +80,7 @@ const DrawerList = () => {
                     </NavLink>
                 }
                 {
-                    (
-                        info.info.Quyen["2"] == 1 ||
-                        info.info.Quyen["3"] == 1
-                    ) &&
+                    permission.some(p => [2, 3, 5].includes(p)) &&
                     <NavLink to={"/file"}>
                         <ListItemButton>
                             <ListItemIcon>
@@ -86,18 +90,20 @@ const DrawerList = () => {
                         </ListItemButton>
                     </NavLink>
                 }
-                <ListItemButton onClick={handleClick}>
-                    <ListItemIcon>
-                        <ThumbsUpDownIcon />
-                    </ListItemIcon>
-                    <ListItemText primary="Đánh giá" />
-                    {!open ? <ExpandLess /> : <ExpandMore />}
-                </ListItemButton>
-                <Collapse in={open} timeout="auto" unmountOnExit>
+                {permission.some(p => [13, 14, 15].includes(p)) &&
+                    <ListItemButton onClick={handleClick}>
+                        <ListItemIcon>
+                            <ThumbsUpDownIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Đánh giá" />
+                        {!listOpen.list1 ? <ExpandLess /> : <ExpandMore />}
+                    </ListItemButton>
+                }
+                <Collapse in={listOpen.list1} timeout="auto" unmountOnExit>
                     <List component="div" disablePadding>
                         {
                             info.info.Quyen["15"] == 1 &&
-                            <NavLink to={"/grade"}>
+                            <NavLink onClick={handleStayOpen1} to={"/grade"}>
                                 <ListItemButton >
                                     <ListItemIcon>
                                         <GradeIcon />
@@ -108,7 +114,7 @@ const DrawerList = () => {
                         }
                         {
                             info.info.Quyen["14"] == 1 &&
-                            <NavLink to={"/openevaluate"}>
+                            <NavLink onClick={handleStayOpen1} to={"/openevaluate"}>
                                 <ListItemButton >
                                     <ListItemIcon>
                                         <GradeIcon />
@@ -117,7 +123,7 @@ const DrawerList = () => {
                                 </ListItemButton>
                             </NavLink>
                         }
-                        <NavLink to={"/evaluate"}>
+                        <NavLink onClick={handleStayOpen1} to={"/evaluate"}>
                             <ListItemButton >
                                 <ListItemIcon>
                                     <GradeIcon />
@@ -127,7 +133,7 @@ const DrawerList = () => {
                         </NavLink>
                         {
                             info.info.Quyen["14"] == 1 &&
-                            <NavLink to={"/evaluatesubject"}>
+                            <NavLink onClick={handleStayOpen1} to={"/evaluatesubject"}>
                                 <ListItemButton >
                                     <ListItemIcon>
                                         <GradeIcon />
@@ -138,7 +144,7 @@ const DrawerList = () => {
                         }
                         {
                             info.info.Quyen["15"] == 1 &&
-                            <NavLink to={"/evaluatedepartment"}>
+                            <NavLink onClick={handleStayOpen1} to={"/evaluatedepartment"}>
                                 <ListItemButton >
                                     <ListItemIcon>
                                         <GradeIcon />
@@ -219,13 +225,13 @@ const DrawerList = () => {
                         <ThumbsUpDownIcon />
                     </ListItemIcon>
                     <ListItemText primary="Biểu quyết" />
-                    {!open1 ? <ExpandLess /> : <ExpandMore />}
+                    {!listOpen.list2 ? <ExpandLess /> : <ExpandMore />}
                 </ListItemButton>
-                <Collapse in={open1} timeout="auto" unmountOnExit>
+                <Collapse in={listOpen.list2} timeout="auto" unmountOnExit>
                     <List component="div" disablePadding>
                         {
                             info.info.Quyen["9"] == 1 &&
-                            <NavLink to={"/createvoting"}>
+                            <NavLink handleStayOpen2 to={"/createvoting"}>
                                 <ListItemButton >
                                     <ListItemIcon>
                                         <GradeIcon />
@@ -236,7 +242,7 @@ const DrawerList = () => {
                         }
                         {
                             info.info.Quyen["9"] == 1 &&
-                            <NavLink to={"/votingmanage"}>
+                            <NavLink handleStayOpen2 to={"/votingmanage"}>
                                 <ListItemButton >
                                     <ListItemIcon>
                                         <GradeIcon />
@@ -247,7 +253,7 @@ const DrawerList = () => {
                         }
                         {
                             info.info.Quyen["10"] == 1 &&
-                            <NavLink to={"/voting"}>
+                            <NavLink handleStayOpen2 to={"/voting"}>
                                 <ListItemButton >
                                     <ListItemIcon>
                                         <GradeIcon />

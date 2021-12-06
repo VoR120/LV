@@ -5,14 +5,16 @@ const { getDate, getGender } = require('../models/utils');
 const axios = require('axios');
 
 const query = {
-    getDataWithName: (id) => `SELECT dangvien.*, chibo.TenChiBo, dantoc.TenDanToc, tongiao.TenTonGiao, tinhoc.TenTinHoc,  chinhtri.TenChinhTri
+    getDataByEmail: (email) => `SELECT dangvien.*, chibo.TenChiBo, dantoc.TenDanToc, tongiao.TenTonGiao, tinhoc.TenTinHoc,  chinhtri.TenChinhTri
         FROM dangvien
         INNER JOIN chibo ON dangvien.MaChiBo = chibo.MaChiBo
         INNER JOIN chucvu ON dangvien.MaChucVu = chucvu.MaChucVu
         INNER JOIN dantoc ON dangvien.MaDanToc = dantoc.MaDanToc
         INNER JOIN tongiao ON dangvien.MaTonGiao = tongiao.MaTonGiao
         INNER JOIN tinhoc ON dangvien.MaTinHoc = tinhoc.MaTinHoc
-        INNER JOIN chinhtri ON dangvien.MaChinhTri = chinhtri.MaChinhTri WHERE MaSoDangVien = "${id}"`,
+        INNER JOIN chinhtri ON dangvien.MaChinhTri = chinhtri.MaChinhTri 
+        WHERE Email = "${email}"
+        AND DaXoa = 0`,
     getFLanguageWithName: (id) => `SELECT ngoaingudangvien.*, ngoaingu.TenNgoaiNgu, trinhdongoaingu.TenTrinhDo
         FROM ngoaingudangvien, ngoaingu, trinhdongoaingu
         WHERE ngoaingudangvien.MaNgoaiNgu = ngoaingu.MaNgoaiNgu
@@ -24,7 +26,7 @@ exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
         const sqlPromise = sql.promise();
-        sql.query(`SELECT * FROM dangvien WHERE Email = "${email}" AND DaXoa = 0`,
+        sql.query(query.getDataByEmail(email),
             async (err, result) => {
                 if (err) {
                     res.status(500).json({ err })
@@ -86,7 +88,33 @@ exports.login = async (req, res) => {
                                 addressFull.NoiOHienTai = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
                             }
                         }))
+
+                        const [resPermission, f2] = await sqlPromise.query(`
+                        SELECT MaQuyen, CoQuyen 
+                        FROM quyendangvien 
+                        WHERE quyendangvien.MaSoDangVien = "${result[0].MaSoDangVien}"
+                        `)
+
+                        let resultPermission = {};
+                        if (resPermission.length > 0) {
+                            resPermission.map(e => {
+                                resultPermission[e.MaQuyen] = e.CoQuyen
+                            })
+                        } else {
+                            const [resPermissionPS, f2] = await sqlPromise.query(`
+                        SELECT MaQuyen, CoQuyen 
+                        FROM quyenchucvu 
+                        WHERE quyenchucvu.MaChucVu = ${result[0].MaChucVu}
+                        `)
+                            if (resPermissionPS.length > 0) {
+                                resPermissionPS.map(e => {
+                                    resultPermission[e.MaQuyen] = e.CoQuyen
+                                })
+                            }
+                        }
+
                         delete result[0].HashPassword;
+                        result1[0].Quyen = resultPermission;
                         result1[0].NgoaiNgu = lArr;
                         result1[0].NgoaiNguTrinhDo = lpArr.join(", ")
                         result1[0].DiaChi = addressArr;

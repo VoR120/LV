@@ -21,12 +21,12 @@ import { CategoryContext } from '../contextAPI/CategoryContext';
 import { InfoContext } from '../contextAPI/InfoContext';
 import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import { LoadingContext } from '../contextAPI/LoadingContext';
 import axios from '../helper/axios';
 import { getDate, getExportData, getLocaleDate, getTimeWithEndHour, getTimeWithStartHour } from '../utils/utils';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
-import { getTimeEvaluate } from '../action/evaluateAction';
-import Loading from '../component/CustomLoadingOverlay';
+import { checkIsOpen, getTimeEvaluate } from '../action/evaluateAction';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -79,17 +79,16 @@ const Evaluate = () => {
     const { info, infoDispatch } = useContext(InfoContext);
     const { category, categoryDispatch } = useContext(CategoryContext);
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
-
+    const { loadingDispatch } = useContext(LoadingContext)
     // State
 
 
     const [year, setYear] = useState((new Date).getFullYear());
     const [loading, setLoading] = useState(true);
-    console.log(year);
     const [grade, setGrade] = useState("0");
     const [gradeArr, setGradeArr] = useState([]);
     const [isEvaluate, setIsEvaluate] = useState(false);
-    const [isTime, setIsTime] = useState({ isTime: false, NgayBatDau: "", NgayKetThuc: "" });
+    const [isTime, setIsTime] = useState({ isTime: false, ThoiGianBatDau: "", ThoiGianKetThuc: "" });
 
     // Handle Function
     const handleChange = (e) => {
@@ -98,16 +97,16 @@ const Evaluate = () => {
 
     const fetchGetEvaluate = async () => {
         try {
+            loadingDispatch({ type: 'OPEN_LOADING' })
             const res = await axios.get(`/api/evaluate/getbypm?MaSoDangVien=${info.info.MaSoDangVien}&Nam=${year}`)
             console.log(res.data);
             if (res.status == 200) {
                 if (res.data.length > 0) {
                     setGrade(res.data[0].MaLoai)
                     setIsEvaluate(true)
-                    setLoading(false);
                 }
-            } else
-                setLoading(false);
+            }
+            loadingDispatch({ type: 'CLOSE_LOADING' })
         } catch (error) {
             console.log(error.message)
         }
@@ -122,7 +121,7 @@ const Evaluate = () => {
                 MaDVDG: 1
             })
             if (res.status == 201) {
-                fetchGetEvaluate();
+                await fetchGetEvaluate();
             }
             openSnackbarDispatch({
                 type: 'SET_OPEN',
@@ -143,30 +142,31 @@ const Evaluate = () => {
     }
     // UseEffect
     useEffect(() => {
+        loadingDispatch({ type: 'OPEN_LOADING' })
         getAllCategory(categoryDispatch, "grade");
-        fetchGetEvaluate();
         checkTime();
     }, [])
 
     const checkTime = async () => {
-        const res = await getTimeEvaluate({ Nam: year });
-        if (res.length > 0) {
-            let NgayBatDau;
-            let NgayKetThuc;
-            res.map(el => {
-                if (el.MaDVDG == 1) {
-                    NgayBatDau = el.ThoiGianBatDau;
-                    NgayKetThuc = el.ThoiGianKetThuc;
-                }
-            });
-            let NgayKetThucCheck = getTimeWithEndHour(NgayKetThuc)
-            let NgayBatDauCheck = getTimeWithStartHour(NgayBatDau)
+        const res = await checkIsOpen({ id: 1 });
+        console.log(res);
+        if (res) {
+            const { ThoiGianBatDau, ThoiGianKetThuc, Nam } = res
+            setYear(Nam)
+            let NgayKetThucCheck = getTimeWithEndHour(ThoiGianKetThuc)
+            let NgayBatDauCheck = getTimeWithStartHour(ThoiGianBatDau)
 
             if (new Date() >= NgayBatDauCheck && new Date() <= NgayKetThucCheck) {
-                setIsTime({ isTime: true, NgayBatDau, NgayKetThuc });
+                setIsTime({ isTime: true, ThoiGianBatDau, ThoiGianKetThuc });
             }
         }
     }
+
+    useEffect(() => {
+        if (isTime.isTime) {
+            fetchGetEvaluate();
+        }
+    }, [isTime])
 
     useEffect(() => {
         if (category.categories.grade.length > 0) {
@@ -188,7 +188,7 @@ const Evaluate = () => {
                     isTime.isTime ?
                         <Paper variant="outlined" className={classes.paper}>
                             <Typography style={{ textTransform: 'uppercase', marginBottom: 16 }}>Đánh giá Đảng viên cuối năm</Typography>
-                            <Typography variant="body1">Thời gian: Từ ngày <b>{getLocaleDate(isTime.NgayBatDau)}</b> đến ngày <b>{getLocaleDate(isTime.NgayKetThuc)}</b>
+                            <Typography variant="body1">Thời gian: Từ ngày <b>{getLocaleDate(isTime.ThoiGianBatDau)}</b> đến ngày <b>{getLocaleDate(isTime.ThoiGianKetThuc)}</b>
                             </Typography>
                             <div className={classes.flexContainer}>
                                 <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>

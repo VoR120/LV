@@ -45,7 +45,7 @@ const useStyles = makeStyles(theme => ({
 
 
 const DecentralizationForm = (props) => {
-    const { value, setRows, pm, partycell, id } = props
+    const { value, setRows, pm, partycell, id, permission } = props
     const classes = useStyles();
     const [open, setOpen] = useState(false);
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
@@ -114,7 +114,17 @@ const DecentralizationForm = (props) => {
         const setRole = async () => {
             let newData = { ...quyen };
             Object.keys(quyen).map(el => newData[el] = Number(quyen[el]));
-            const res = await updatePermissionPM({ MaSoDangVien: id, data: newData }, openSnackbarDispatch)
+            const res = await updatePermissionPM({ MaSoDangVien: id, data: newData })
+            if (res) {
+                openSnackbarDispatch({
+                    type: 'SET_OPEN',
+                    payload: {
+                        msg: "Đã cập nhật!",
+                        type: "success"
+                    }
+                })
+            }
+            setOpen(false)
         }
         if (value)
             setRow();
@@ -125,12 +135,7 @@ const DecentralizationForm = (props) => {
 
     useEffect(() => {
         if (pm) {
-            const fetchRole = async () => {
-                const res = await getPermissionPositionById({ id: partycell });
-                console.log(res);
-                setQuyen(res);
-            }
-            fetchRole();
+            setQuyen(permission);
         }
         if (value) {
             let obj = {}
@@ -139,7 +144,6 @@ const DecentralizationForm = (props) => {
                     obj[el] = value[el]
                 }
             })
-            console.log(obj);
             setQuyen(obj)
         }
     }, [])
@@ -188,8 +192,8 @@ const DecentralizationForm = (props) => {
                     <Button onClick={handleClose} >
                         Cancel
                     </Button>
-                    <MyButton onClick={handleSubmit} success>
-                        Add
+                    <MyButton onClick={handleSubmit} info>
+                        Lưu
                     </MyButton>
                 </DialogActions>
             </Dialog>

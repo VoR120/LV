@@ -45,13 +45,13 @@ export const getAllPartyMember = async (partycell) => {
     }
 }
 
-export const addPartyMember = async (dispatch, payload, open, setOpen, loading) => {
+export const addPartyMember = async (dispatch, payload) => {
     let { HoTen, MaSoDangVien, GioiTinh, CMND, NgaySinh, NoiSinh, QuocTich,
         SoDienThoai, Email, NgheNghiep, TrinhDoHocVan, NgayVaoDoan, NoiVaoDoan,
         MaChiBo, MaChinhTri, MaChucVu, MaDanToc, MaTinHoc, MaTonGiao,
         NgayVaoDang, NoiVaoDangLanDau, NgayChinhThuc, NoiVaoDangChinhThuc, NguoiGioiThieu,
         ChuyenDenDangBo, ChuyenDenChiBo, ChuyenTuChiBo, ChuyenTuDangBo, NgayChuyenDen, GhiChu,
-        NgoaiNgu, HinhThucThem, QQAddress, DCTTAddress, NOHTAddress, HinhAnh, MaNhiemKy
+        NgoaiNgu, HinhThucThem, QQAddress, DCTTAddress, NOHTAddress, HinhAnh, SoThe
     } = payload
     try {
         // dispatch({ type: partyMemberConstant.ADD_PARTYMEMBER_REQUEST })
@@ -59,7 +59,7 @@ export const addPartyMember = async (dispatch, payload, open, setOpen, loading) 
             HoTen, MaSoDangVien, GioiTinh, CMND, NgaySinh, NoiSinh, QuocTich,
             SoDienThoai, Email, NgheNghiep, TrinhDoHocVan, NgayVaoDoan, NoiVaoDoan,
             NgayVaoDang, NoiVaoDangLanDau, NgayChinhThuc, NoiVaoDangChinhThuc, NguoiGioiThieu,
-            MaChiBo, MaChinhTri, MaDanToc, MaTinHoc, MaTonGiao, MaChucVu,
+            MaChiBo, MaChinhTri, MaDanToc, MaTinHoc, MaTonGiao, MaChucVu, SoThe
         }
 
         let formData = new FormData();
@@ -123,6 +123,7 @@ export const addPartyMember = async (dispatch, payload, open, setOpen, loading) 
 
             let addressArr = {};
             let addressFull = {};
+
             const resAddQQP = await axios.get(`https://provinces.open-api.vn/api/p/${resAddQQ.data.MaTinh}?depth=1`);
             const resAddQQD = await axios.get(`https://provinces.open-api.vn/api/d/${resAddQQ.data.MaHuyen}?depth=1`);
             const resAddQQW = await axios.get(`https://provinces.open-api.vn/api/w/${resAddQQ.data.MaXa}?depth=1`);
@@ -221,7 +222,7 @@ export const updatePartyMember = async (dispatch, payload, open, setOpen, loadin
         MaChiBo, MaChinhTri, MaChucVu, MaDanToc, MaTinHoc, MaTonGiao,
         NgayVaoDang, NoiVaoDangLanDau, NgayChinhThuc, NoiVaoDangChinhThuc, NguoiGioiThieu,
         ChuyenDenChiBo, ChuyenTuChiBo, ChuyenTuDangBo, NgayChuyenDen, GhiChu,
-        NgoaiNgu, HinhThucThem, QQAddress, DCTTAddress, NOHTAddress, HinhAnh
+        NgoaiNgu, HinhThucThem, QQAddress, DCTTAddress, NOHTAddress, HinhAnh, SoThe
     } = payload
     try {
         // dispatch({ type: partyMemberConstant.UPDATE_PARTYMEMBER_REQUEST });
@@ -230,7 +231,7 @@ export const updatePartyMember = async (dispatch, payload, open, setOpen, loadin
             HoTen, MaSoDangVien, GioiTinh, CMND, NgaySinh, NoiSinh, QuocTich,
             SoDienThoai, Email, NgheNghiep, TrinhDoHocVan, NgayVaoDoan, NoiVaoDoan,
             NgayVaoDang, NoiVaoDangLanDau, NgayChinhThuc, NoiVaoDangChinhThuc, NguoiGioiThieu,
-            MaChiBo, MaChinhTri, MaChucVu, MaDanToc, MaTinHoc, MaTonGiao,
+            MaChiBo, MaChinhTri, MaChucVu, MaDanToc, MaTinHoc, MaTonGiao, SoThe
         }
 
         if (HinhAnh) {
@@ -292,9 +293,6 @@ export const updatePartyMember = async (dispatch, payload, open, setOpen, loadin
         console.log("Add: ", res);
 
         let result = [...res.data];
-        const resPer = await axios.get('/api/permissionps/' + MaChucVu);
-        console.log(resPer.data.data);
-        result[0].Quyen = resPer.data.data
 
         if (res.status == 200) {
             return result[0];

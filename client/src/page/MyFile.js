@@ -3,8 +3,9 @@ import { Box, Button, Grid, IconButton, MenuItem, Paper, Tab, Tabs, Typography }
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { getAllCategory, getAllCategoryPM, getFlanguageLevel } from '../action/categoryAction';
-import { getInfo, updateInfo } from '../action/infoAction';
+import { getAllCategoryPM, getFlanguageLevel } from '../action/categoryAction';
+import { updateInfo } from '../action/infoAction';
+import ExportFile from '../component/ExportFile';
 import InputGrid from '../component/InputGrid';
 import Layout from '../component/Layout';
 import MyInfo from '../component/MyInfo';
@@ -16,7 +17,6 @@ import { InfoContext } from '../contextAPI/InfoContext';
 import { LoadingContext } from '../contextAPI/LoadingContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import axios from '../helper/axios';
-import image from '../public/image/anhthe1.png';
 import { getDate } from '../utils/utils';
 
 const useStyles = makeStyles(theme => ({
@@ -99,6 +99,7 @@ const MyFile = () => {
     const [flArray, setFlArray] = useState([]);
     const [levelArray, setLevelArray] = useState([]);
     const [imageUpload, setImageUpload] = useState([]);
+    const [firstImage, setFirstImage] = useState("")
 
     const [qqArr, setQqArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
     const [dcttArr, setDcttArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
@@ -185,7 +186,8 @@ const MyFile = () => {
     const onSubmit = (newValue) => {
         loadingDispatch({ type: "OPEN_LOADING" })
 
-        JSON.stringify(getValues("NgoaiNgu")) === JSON.stringify(info.info.NgoaiNgu) && delete newValue.NgoaiNgu
+        JSON.stringify(getValues("NgoaiNgu")) === JSON.stringify(info.info.NgoaiNgu) && delete newValue.NgoaiNgu;
+        JSON.stringify(imageUpload.preview) === JSON.stringify(firstImage) && delete newValue.HinhAnh
         if (JSON.stringify({ ...qqValue, detail: getValues("QQChiTiet") }) !==
             JSON.stringify(info.info.DiaChi.QueQuan))
             newValue.QQAddress = { ...qqValue, detail: getValues("QQChiTiet") };
@@ -211,7 +213,8 @@ const MyFile = () => {
                     setValue(key, getDate(info.info[key]))
                 } else if (key == "HinhAnh") {
                     setValue(key, { preview: info.info[key] })
-                    setImageUpload({ preview: info.info[key] })
+                    setImageUpload({ preview: info.info[key] });
+                    setFirstImage(info.info[key]);
                 } else if (key == "NgoaiNgu") {
                     let arr = [];
                     info.info[key].map((el, index) => {
@@ -318,6 +321,7 @@ const MyFile = () => {
                     </>
                 )
             }
+            <ExportFile data={info.info} button />
             {loading.open ||
                 <Grid container spacing={2} className={classes.wrapper}>
                     <Grid item xs={4}>

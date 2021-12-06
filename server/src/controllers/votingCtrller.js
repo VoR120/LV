@@ -63,7 +63,7 @@ exports.updatePoll = async (req, res) => {
     }
 }
 
-exports.getAllVoting = async (req, res) => {
+exports.getAllPoll = async (req, res) => {
     try {
         const sqlPromise = sql.promise();
         const [result, f] = await sqlPromise.query(`SELECT * FROM bieuquyet WHERE TrangThai = 1 ORDER BY MaBieuQuyet DESC`);
@@ -94,7 +94,7 @@ exports.getAllVoting = async (req, res) => {
     }
 }
 
-exports.getVoting = async (req, res) => {
+exports.getPoll = async (req, res) => {
     try {
         const sqlPromise = sql.promise();
         const { id } = req.params
@@ -112,16 +112,26 @@ exports.createVoting = async (req, res) => {
         const sqlPromise = sql.promise();
         const { MaBieuQuyet, MaNguoiThamGia, UngCuVien } = req.body
         let datetime = moment().format('YYYY-MM-DD,HH:mm:ss.000');
-        const result = await Promise.all(UngCuVien.map(async (el, index) => {
-            const [result1, f] = await sqlPromise.query(
-                `INSERT INTO phieu SET MaBieuQuyet = ${MaBieuQuyet},
-                 MaNguoiThamGia = "${MaNguoiThamGia}",
-                 MaUngCuVien = "${el}",
-                 ThoiGianBoPhieu = "${datetime}"
-                `
-            )
-            return result1
-        }))
+
+        const [resultAddVoting, fRAV] = await sqlPromise.query(`
+            INSERT INTO phieu SET MaBieuQuyet = ${MaBieuQuyet},
+            MaNguoiThamGia = "${MaNguoiThamGia}",
+            ThoiGianBoPhieu = "${datetime}"            
+            `)
+        if (resultAddVoting) {
+            const result = await Promise.all(Object.keys(UngCuVien).map(async (el, index) => {
+                const [result1, f1] = await sqlPromise.query(`
+                    INSERT INTO chitietphieu SET MaPhieu = ${resultAddVoting.insertId},
+                    MaUngCuVien = "${el}",
+                    DongY = ${UngCuVien[el]}
+                `)
+                return result1;
+            }))
+            if (result) {
+                res.status(201).json({ msg: "Đã biểu quyết!" })
+                return;
+            }
+        }
         if (result.length > 0) {
             res.status(201).json({ msg: "Đã biểu quyết!" })
         }
@@ -141,7 +151,16 @@ exports.checkIsVoted = async (req, res) => {
             AND MaNguoiThamGia = "${MaNguoiThamGia}" 
         `);
         if (result.length) {
-            res.status(200).json({ isVoted: true });
+            const [resultDetail, fRD] = await sqlPromise.query(`
+                SELECT * FROM chitietphieu WHERE MaPhieu = ${result[0].MaPhieu}
+            `)
+            const resultObj = {};
+            if (resultDetail.length) {
+                resultDetail.map(el => {
+                    resultObj[el.MaUngCuVien] = el.DongY
+                })
+            }
+            res.status(200).json({ isVoted: true, MaBieuQuyet, MaNguoiThamGia, Phieu: resultObj });
             return;
         }
         res.status(200).json({ isVoted: false })
@@ -155,12 +174,21 @@ exports.getResult = async (req, res) => {
         const { id } = req.params;
         const sqlPromise = sql.promise();
         const [statistic, f] = await sqlPromise.query(`
-            SELECT MaUngCuVien,dangvien.HoTen, COUNT(MaNguoiThamGia) 
-            AS SoPhieu 
-            FROM phieu, dangvien
-            WHERE phieu.MaUngCuVien = dangvien.MaSoDangVien
-            AND phieu.MaBieuQuyet = ${id}
-            GROUP BY MaUngCuVien;
+        SELECT DISTINCT MaSoDangVien, HoTen, ifnull(chitietphieu1.SoPhieu, 0) AS SoPhieu
+        FROM chitietphieu
+        INNER JOIN dangvien
+                    ON dangvien.MaSoDangVien = chitietphieu.MaUngCuVien
+                    INNER JOIN phieu
+                    ON phieu.MaBieuQuyet = ${id}
+                    AND phieu.MaPhieu = chitietphieu.MaPhieu
+        LEFT JOIN
+        (
+        SELECT chitietphieu.*,  COUNT(*) AS SoPhieu 
+        FROM chitietphieu
+        WHERE DongY = 1
+        GROUP BY MaUngCuVien
+        ) AS chitietphieu1
+        ON chitietphieu1.MaUngCuVien = chitietphieu.MaUngCuVien
         `)
         const [quantity, f1] = await sqlPromise.query(`
             SELECT COUNT(MaNguoiThamGia) AS SoLuong FROM nguoithamgia WHERE MaBieuQuyet = ${id}
@@ -188,7 +216,7 @@ exports.removePoll = async (req, res) => {
         const [result, f] = await sqlPromise.query(`
             UPDATE bieuquyet SET TrangThai = 0 WHERE MaBieuQuyet = ${id}
         `)
-        if(result) {
+        if (result) {
             res.status(200).json({ msg: "Đã xóa!" });
         }
     } catch (error) {

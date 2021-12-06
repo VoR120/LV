@@ -12,7 +12,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { getAllCategory } from '../action/categoryAction';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
@@ -22,11 +22,12 @@ import { InfoContext } from '../contextAPI/InfoContext';
 import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import axios from '../helper/axios';
-import { getDate, getExportData, getTimeWithStartHour, getTimeWithZeroHour } from '../utils/utils';
+import { getDate, getExportData, getTimeWithStartHour, getTimeWithZeroHour, yearSelect } from '../utils/utils';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import InputGrid from '../component/InputGrid';
 import { getTimeEvaluate, setTimeEvaluate } from '../action/evaluateAction';
+import { LoadingContext } from '../contextAPI/LoadingContext';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -76,6 +77,7 @@ const OpenEvaluate = () => {
 
     // ContextAPI
     const { openSnackbarDispatch } = useContext(SnackbarContext)
+    const { loadingDispatch } = useContext(LoadingContext)
 
     // State
     const {
@@ -89,6 +91,8 @@ const OpenEvaluate = () => {
         formState: { errors }
     } = useForm();
 
+    const [year, setYear] = useState((new Date).getFullYear())
+
     const pmFrom = useRef({});
     pmFrom.current = watch("pmFrom", "");
     const subjectFrom = useRef({});
@@ -97,15 +101,17 @@ const OpenEvaluate = () => {
     departmentFrom.current = watch("departmentFrom", "")
 
     // Handle Function
-    const handleChange = (e) => {
-        setValue(e.target.name, e.target.value)
+    const handleChangeYear = (e) => {
+        setValue(e.target.name, e.target.value);
+        setYear(e.target.value)
     }
 
+
+
     const onSubmit = async (data) => {
-        data.year = (new Date).getFullYear();
         const res = await setTimeEvaluate(data);
         if (res.status == 201) {
-            fetchAPI();
+            await fetchAPI();
             openSnackbarDispatch({
                 type: 'SET_OPEN',
                 payload: {
@@ -118,7 +124,9 @@ const OpenEvaluate = () => {
 
     // UseEffect
     const fetchAPI = async () => {
-        const res = await getTimeEvaluate({ Nam: (new Date).getFullYear() });
+        loadingDispatch({ type: 'OPEN_LOADING' })
+        const res = await getTimeEvaluate({ Nam: year });
+        console.log(res);
         if (res.length > 0) {
             res.map(el => {
                 if (el.MaDVDG == 1) {
@@ -134,12 +142,24 @@ const OpenEvaluate = () => {
                     setValue("departmentTo", getDate(el.ThoiGianKetThuc))
                 }
             })
+        } else {
+            setValue("pmFrom", "")
+            setValue("pmTo", "")
+            setValue("subjectFrom", "")
+            setValue("subjectTo", "")
+            setValue("departmentFrom", "")
+            setValue("departmentTo", "")
         }
+        loadingDispatch({ type: 'CLOSE_LOADING' })
     }
 
     useEffect(() => {
         fetchAPI();
     }, [])
+
+    useEffect(() => {
+        fetchAPI();
+    }, [year])
 
     return (
         <>
@@ -151,6 +171,23 @@ const OpenEvaluate = () => {
                 </div>
                 <Paper variant="outlined" className={classes.paper}>
                     <Typography style={{ textTransform: 'uppercase', marginBottom: 30 }}>Mở đánh giá Đảng viên cuối năm</Typography>
+                    <Grid xs={3}>
+                        <InputGrid
+                            select
+                            name="year"
+                            nameTitle="Năm"
+                            defaultValue={(new Date).getFullYear()}
+                            onChange={handleChangeYear}
+                            control={control}
+                            errors={errors}
+                        >
+                            <MenuItem value={`${(new Date).getFullYear() - 2}`}>{(new Date).getFullYear() - 2}</MenuItem>
+                            <MenuItem value={`${(new Date).getFullYear() - 1}`}>{(new Date).getFullYear() - 1}</MenuItem>
+                            <MenuItem value={`${(new Date).getFullYear()}`}>{(new Date).getFullYear()}</MenuItem>
+                            <MenuItem value={`${(new Date).getFullYear() + 1}`}>{(new Date).getFullYear() + 1}</MenuItem>
+                            <MenuItem value={`${(new Date).getFullYear() + 2}`}>{(new Date).getFullYear() + 2}</MenuItem>
+                        </InputGrid>
+                    </Grid>
                     <Grid container alignItems="center" spacing={2} marginBottom={2}>
                         <Grid item xs={2} marginTop={2}>Cá nhân đánh giá</Grid>
                         <Grid item container xs={4}>
@@ -239,7 +276,7 @@ const OpenEvaluate = () => {
                             />
                         </Grid>
                     </Grid>
-                    <MyButton onClick={handleSubmit(onSubmit)} style={{ marginTop: 16 }} info>Lưu</MyButton>
+                    <MyButton onClick={handleSubmit(onSubmit)} style={{ marginTop: 16 }} info>Mở đánh giá</MyButton>
                 </Paper>
                 {/* <TableContainer variant="outlined" component={Paper}>
                     <Table aria-label="simple table">

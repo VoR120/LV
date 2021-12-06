@@ -48,7 +48,7 @@ const RewardDiscipline = () => {
             { title: "Mã số Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
             { title: "Họ tên", field: "HoTen", },
             { title: "Tên khen thưởng", field: "TenKhenThuong", },
-            { title: "Ngày khen thưởng", field: "NgayKhenThuong", },
+            { title: "Ngày khen thưởng", field: "NgayKhenThuong", type: "date"},
             { title: "Hình thức", field: "TenHinhThuc", },
             // {
             //     title: "Chức năng", field: "action", sorting: false,
@@ -62,7 +62,7 @@ const RewardDiscipline = () => {
             { title: "Mã số Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
             { title: "Họ tên", field: "HoTen", },
             { title: "Tên kỷ luật", field: "TenKyLuat", },
-            { title: "Ngày kỷ luật", field: "NgayKyLuat", },
+            { title: "Ngày kỷ luật", field: "NgayKyLuat", type: "date"},
             { title: "Hình thức", field: "TenHinhThuc", },
             // {
             //     title: "Chức năng", field: "action", sorting: false,

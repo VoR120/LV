@@ -185,12 +185,12 @@ const MyInfo = (props) => {
                             select
                             nameTitle={"Tôn giáo"}
                             name={"MaTonGiao"}
+                            defaultValue=""
                             control={control}
                             errors={errors}
                             disabled={disable}
                             onChange={handleChangeInput}
                         >
-                            <MenuItem value={"0"}>Không</MenuItem>
                             {category.categories.religion.length > 0 &&
                                 category.categories.religion.map(rel =>
                                     <MenuItem key={rel.MaTonGiao} value={rel.MaTonGiao}>{rel.TenTonGiao}</MenuItem>

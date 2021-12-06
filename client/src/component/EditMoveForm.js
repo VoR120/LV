@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
-import RedoIcon from '@mui/icons-material/Redo';
+import EditIcon from '@mui/icons-material/Edit';
 import { useForm } from 'react-hook-form';
 import MySelect from './UI/MySelect';
 import MyButton from './UI/MyButton';
@@ -42,7 +42,6 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const EditMoveForm = (props) => {
-    console.log(props)
     const classes = useStyles();
     const { data, type } = props
     const [open, setOpen] = useState(false);
@@ -92,68 +91,43 @@ const EditMoveForm = (props) => {
     return (
         <>
             <div className={classes.iconWrapper} onClick={handleOpen}>
-                <RedoIcon className={classes.icon} />Chỉnh sửa
+                <EditIcon className={classes.icon} />Chỉnh sửa
             </div>
             <Dialog PaperProps={{ style: { minWidth: '1000px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">Cập nhật chuyển sinh hoạt</DialogTitle>
                 <DialogContent>
                     <FormControl margin="dense" fullWidth>
                         <Grid container spacing={1}>
-                            {type == "Chuyển sinh hoạt đi" &&
+                            {(data.MaHinhThuc == 1 || data.MaHinhThuc == 2) &&
                                 <>
-                                    {(data.MaHinhThuc == 1 || data.MaHinhThuc == 2) ?
-                                        <>
-                                            <Grid item xs={6}>
-                                                <InputGrid
-                                                    nameTitle={`Chuyển từ Đảng bộ`}
-                                                    name={"ChuyenTuDangBo"}
-                                                    defaultValue={"DHCT"}
-                                                    disabled={true}
-                                                    control={control}
-                                                    errors={errors}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={6}>
-                                                <InputGrid
-                                                    select
-                                                    onChange={handleChangeSelect}
-                                                    nameTitle={"Chuyển từ chi bộ"}
-                                                    name={`ChuyenTuChiBo`}
-                                                    disabled={true}
-                                                    control={control}
-                                                    errors={errors}
-                                                >
-                                                    <MenuItem value="0">Chọn chi bộ</MenuItem>
-                                                    {category.categories.partycell.length > 0 &&
-                                                        category.categories.partycell.map(el =>
-                                                            <MenuItem key={el.MaChiBo} value={el.MaChiBo}>{el.TenChiBo}</MenuItem>
-                                                        )
-                                                    }
-                                                </InputGrid>
-                                            </Grid>
-                                        </>
-                                        :
-                                        <>
-                                            <Grid item xs={6}>
-                                                <InputGrid
-                                                    nameTitle={`Chuyển từ Đảng bộ`}
-                                                    name={"ChuyenTuDangBo"}
-                                                    defaultValue={""}
-                                                    control={control}
-                                                    errors={errors}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={6}>
-                                                <InputGrid
-                                                    nameTitle={`Chuyển từ chi bộ`}
-                                                    name={"ChuyenTuChiBo"}
-                                                    defaultValue={""}
-                                                    control={control}
-                                                    errors={errors}
-                                                />
-                                            </Grid>
-                                        </>
-                                    }
+                                    <Grid item xs={6}>
+                                        <InputGrid
+                                            nameTitle={`Chuyển từ Đảng bộ`}
+                                            name={"ChuyenTuDangBo"}
+                                            defaultValue={"DHCT"}
+                                            disabled={true}
+                                            control={control}
+                                            errors={errors}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <InputGrid
+                                            select
+                                            onChange={handleChangeSelect}
+                                            nameTitle={"Chuyển từ chi bộ"}
+                                            name={`ChuyenTuChiBo`}
+                                            disabled={true}
+                                            control={control}
+                                            errors={errors}
+                                        >
+                                            <MenuItem value="0">Chọn chi bộ</MenuItem>
+                                            {category.categories.partycell.length > 0 &&
+                                                category.categories.partycell.map(el =>
+                                                    <MenuItem key={el.MaChiBo} value={el.MaChiBo}>{el.TenChiBo}</MenuItem>
+                                                )
+                                            }
+                                        </InputGrid>
+                                    </Grid>
                                     <Grid item xs={6}>
                                         <InputGrid
                                             nameTitle={`Chuyển đến Đảng bộ`}
@@ -166,7 +140,7 @@ const EditMoveForm = (props) => {
                                     <Grid item xs={6}>
                                         <InputGrid
                                             nameTitle={`Chuyển đến chi bộ`}
-                                            name={"ChuyenDenChiBo"}
+                                            name={"TenChiBoDen"}
                                             defaultValue={""}
                                             control={control}
                                             errors={errors}
@@ -192,12 +166,12 @@ const EditMoveForm = (props) => {
                                     </Grid>
                                 </>
                             }
-                            {type == "Chuyển sinh hoạt đến" &&
+                            {(data.MaHinhThuc == 3 || data.MaHinhThuc == 4) &&
                                 <>
                                     <Grid item xs={6}>
                                         <InputGrid
                                             nameTitle={`Chuyển từ Đảng bộ`}
-                                            name={"ChuyenTuChiBo"}
+                                            name={"ChuyenTuDangBo"}
                                             defaultValue={""}
                                             control={control}
                                             errors={errors}
@@ -206,6 +180,15 @@ const EditMoveForm = (props) => {
                                     <Grid item xs={6}>
                                         <InputGrid
                                             nameTitle={`Chuyển từ chi bộ`}
+                                            name={"ChuyenTuChiBo"}
+                                            defaultValue={""}
+                                            control={control}
+                                            errors={errors}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <InputGrid
+                                            nameTitle={`Chuyển đến Đảng bộ`}
                                             name={"ChuyenDenDangBo"}
                                             defaultValue={""}
                                             control={control}
@@ -214,8 +197,68 @@ const EditMoveForm = (props) => {
                                     </Grid>
                                     <Grid item xs={6}>
                                         <InputGrid
-                                            nameTitle={`Chuyển đến chi bộ`}
-                                            name={"ChuyenDenChiBo"}
+                                            select
+                                            onChange={handleChangeSelect}
+                                            nameTitle={"Chuyển đến chi bộ"}
+                                            name={`ChuyenDenChiBo`}
+                                            disabled={true}
+                                            control={control}
+                                            errors={errors}
+                                        >
+                                            <MenuItem value="0">Chọn chi bộ</MenuItem>
+                                            {category.categories.partycell.length > 0 &&
+                                                category.categories.partycell.map(el =>
+                                                    <MenuItem key={el.MaChiBo} value={el.MaChiBo}>{el.TenChiBo}</MenuItem>
+                                                )
+                                            }
+                                        </InputGrid>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <InputGrid
+                                            type="date"
+                                            nameTitle={`Ngày chuyển đến`}
+                                            name={"NgayChuyenDen"}
+                                            control={control}
+                                            errors={errors}
+                                        />
+                                    </Grid>
+                                </>
+                            }
+                            {data.MaHinhThuc == 13 &&
+                                <>
+                                    <Grid item xs={6}>
+                                        <InputGrid
+                                            nameTitle={`Chuyển từ Đảng bộ`}
+                                            name={"ChuyenTuDangBo"}
+                                            defaultValue={""}
+                                            disabled={true}
+                                            control={control}
+                                            errors={errors}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <InputGrid
+                                            select
+                                            onChange={handleChangeSelect}
+                                            nameTitle={"Chuyển từ chi bộ"}
+                                            name={`ChuyenTuChiBo`}
+                                            disabled={true}
+                                            control={control}
+                                            errors={errors}
+                                        >
+                                            <MenuItem value="0">Chọn chi bộ</MenuItem>
+                                            {category.categories.partycell.length > 0 &&
+                                                category.categories.partycell.map(el =>
+                                                    <MenuItem key={el.MaChiBo} value={el.MaChiBo}>{el.TenChiBo}</MenuItem>
+                                                )
+                                            }
+                                        </InputGrid>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <InputGrid
+                                            nameTitle={`Chuyển đến Đảng bộ`}
+                                            name={"ChuyenDenDangBo"}
+                                            disabled={true}
                                             defaultValue={""}
                                             control={control}
                                             errors={errors}
@@ -223,9 +266,27 @@ const EditMoveForm = (props) => {
                                     </Grid>
                                     <Grid item xs={6}>
                                         <InputGrid
+                                            select
+                                            onChange={handleChangeSelect}
+                                            nameTitle={"Chuyển đến chi bộ"}
+                                            name={`ChuyenDenChiBo`}
+                                            disabled={true}
+                                            control={control}
+                                            errors={errors}
+                                        >
+                                            <MenuItem value="0">Chọn chi bộ</MenuItem>
+                                            {category.categories.partycell.length > 0 &&
+                                                category.categories.partycell.map(el =>
+                                                    <MenuItem key={el.MaChiBo} value={el.MaChiBo}>{el.TenChiBo}</MenuItem>
+                                                )
+                                            }
+                                        </InputGrid>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <InputGrid
                                             type="date"
-                                            nameTitle={`Ngày chuyển đến`}
-                                            name={"NgayChuyenDen"}
+                                            nameTitle={`Ngày chuyển`}
+                                            name={"NgayChuyenDi"}
                                             control={control}
                                             errors={errors}
                                         />

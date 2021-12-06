@@ -1,5 +1,5 @@
 const express = require('express');
-const { createEvaluate, getByPartyMember, getBySubject, getEvaluated, setTimeEvaluate, getTimeEvaluate } = require('../controllers/evaluateCtrller');
+const { createEvaluate, getByPartyMember, getBySubject, getEvaluated, setTimeEvaluate, getTimeEvaluate, checkOpen, resetStatus } = require('../controllers/evaluateCtrller');
 
 const Router = express.Router();
 
@@ -7,8 +7,10 @@ Router.get('/evaluate/getbypm', getByPartyMember);
 Router.get('/evaluate/getbysubject', getBySubject);
 Router.get('/evaluate/getevaluated', getEvaluated);
 Router.post('/evaluate/create', createEvaluate);
+Router.get('/evaluate/checkopen', checkOpen);
 Router.get('/evaluate/gettime', getTimeEvaluate);
 Router.post('/evaluate/settime', setTimeEvaluate);
+Router.post('/evaluate/resetstatus', resetStatus);
 
 module.exports = Router;
 

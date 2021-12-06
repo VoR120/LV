@@ -99,7 +99,7 @@ const Voting = () => {
                                 <Paper className={classes.paper} variant="outlined">
                                     <Grid container justifyContent="space-between" marginBottom="40px">
                                         <Typography variant="button">
-                                        {getLocaleDateTime(el.ThoiGianBatDau)} - {getLocaleDateTime(el.ThoiGianKetThuc)} 
+                                            {getLocaleDateTime(el.ThoiGianBatDau)} - {getLocaleDateTime(el.ThoiGianKetThuc)}
                                         </Typography>
                                         <Typography color="gray" variant="button">{getDateStatus(el.ThoiGianBatDau, el.ThoiGianKetThuc)}</Typography>
                                     </Grid>
@@ -180,10 +180,17 @@ const VotingForm = ({ data }) => {
                 }
             })
         } else {
+            const candidateArr = {};
+            data.UngCuVien.map(el => {
+                if (checkedValues.includes(el.MaUngCuVien))
+                    candidateArr[el.MaUngCuVien] = 1
+                else
+                    candidateArr[el.MaUngCuVien] = 0
+            })
             const votes = {
                 MaBieuQuyet: data.MaBieuQuyet,
                 MaNguoiThamGia: info.info.MaSoDangVien,
-                UngCuVien: checkedValues,
+                UngCuVien: candidateArr,
             }
             const res = await vote(votes)
             if (res) {
@@ -206,6 +213,7 @@ const VotingForm = ({ data }) => {
             MaNguoiThamGia: info.info.MaSoDangVien,
         });
         if (res) {
+            console.log(res);
             setIsVoted(res.isVoted);
         }
     }
@@ -217,7 +225,10 @@ const VotingForm = ({ data }) => {
     return (
         <>
             {isVoted ?
-                <Button disableRipple disableElevation className={classes.votedBtn} variant="contained" color="success">Đã biểu quyết</Button>
+                <>
+                    <Button disableRipple disableElevation className={classes.votedBtn} variant="contained" color="success">Đã biểu quyết</Button>
+                    <Button onClick={handleOpen} sx={{ marginLeft: 1 }} variant="outlined">Xem</Button>
+                </>
                 :
                 <MyButton
                     disabled={getStatus(data.ThoiGianBatDau, data.ThoiGianKetThuc) != 1}
@@ -261,12 +272,21 @@ const VotingForm = ({ data }) => {
                     </FormGroup>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose} >
-                        Hủy
-                    </Button>
-                    <MyButton onClick={handleSubmit} success>
-                        Đồng ý
-                    </MyButton>
+                    {
+                        isVoted ?
+                            <Button onClick={handleClose} >
+                                Thoát
+                            </Button>
+                            :
+                            <>
+                                <Button onClick={handleClose} >
+                                    Hủy
+                                </Button>
+                                <MyButton onClick={handleSubmit} success>
+                                    Đồng ý
+                                </MyButton>
+                            </>
+                    }
                 </DialogActions>
             </Dialog>
         </>

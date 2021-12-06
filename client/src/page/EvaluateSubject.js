@@ -14,7 +14,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { getAllCategory } from '../action/categoryAction';
-import { evaluate, getTimeEvaluate } from '../action/evaluateAction';
+import { checkIsOpen, evaluate, getTimeEvaluate } from '../action/evaluateAction';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
 import MySelect from '../component/UI/MySelect';
@@ -28,6 +28,7 @@ import { getExportData, getLocaleDate, getTimeWithEndHour, getTimeWithStartHour 
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import Loading from '../component/CustomLoadingOverlay';
+import { LoadingContext } from '../contextAPI/LoadingContext';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -79,6 +80,7 @@ const EvaluateSubject = () => {
     const { info, infoDispatch } = useContext(InfoContext);
     const { category, categoryDispatch } = useContext(CategoryContext);
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
+    const { loadingDispatch } = useContext(LoadingContext)
 
     // State
     const columns = [
@@ -112,8 +114,7 @@ const EvaluateSubject = () => {
     const [gradeArr, setGradeArr] = useState([]);
     const [isEvaluate, setIsEvaluate] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [loading2, setLoading2] = useState(true);
-    const [isTime, setIsTime] = useState({ isTime: false, NgayBatDau: "", NgayKetThuc: "" });
+    const [isTime, setIsTime] = useState({ isTime: false, ThoiGianBatDau: "", ThoiGianKetThuc: "" });
 
     // Handle Function
     const handleChange = async (e, id) => {
@@ -149,6 +150,7 @@ const EvaluateSubject = () => {
 
     const fetchAPI = async () => {
         try {
+            loadingDispatch({ type: 'OPEN_LOADING' })
             const res = await axios.get(`/api/evaluate/getbysubject?MaChiBo=${info.info.MaChiBo}&Nam=${year}`)
             console.log(res.data);
             if (res.status == 200) {
@@ -160,7 +162,7 @@ const EvaluateSubject = () => {
                     // setIsEvaluate(true)
                 }
             }
-            setLoading2(false);
+            loadingDispatch({ type: 'CLOSE_LOADING' })
             setLoading(false);
         } catch (error) {
             console.log(error.message)
@@ -168,31 +170,33 @@ const EvaluateSubject = () => {
     }
 
     const checkTime = async () => {
-        const res = await getTimeEvaluate({ Nam: year });
-        if (res.length > 0) {
-            let NgayBatDau;
-            let NgayKetThuc;
-            res.map(el => {
-                if (el.MaDVDG == 2) {
-                    NgayBatDau = el.ThoiGianBatDau;
-                    NgayKetThuc = el.ThoiGianKetThuc;
-                }
-            })
-            let NgayKetThucCheck = getTimeWithEndHour(NgayKetThuc)
-            let NgayBatDauCheck = getTimeWithStartHour(NgayBatDau)
+        const res = await checkIsOpen({ id: 2 });
+        console.log(res);
+        if (res) {
+            const { ThoiGianBatDau, ThoiGianKetThuc, Nam } = res
+            setYear(Nam)
+            let ThoiGianKetThucCheck = getTimeWithEndHour(ThoiGianKetThuc)
+            let ThoiGianBatDauCheck = getTimeWithStartHour(ThoiGianBatDau)
 
-            if (new Date() >= NgayBatDauCheck && new Date() <= NgayKetThucCheck) {
-                setIsTime({ isTime: true, NgayBatDau, NgayKetThuc });
+            if (new Date() >= ThoiGianBatDauCheck && new Date() <= ThoiGianKetThucCheck) {
+                setIsTime({ isTime: true, ThoiGianBatDau, ThoiGianKetThuc });
             }
         }
+        loadingDispatch({ type: 'CLOSE_LOADING' })
     }
     // UseEffect
     useEffect(() => {
         setLoading(true)
+        loadingDispatch({ type: 'OPEN_LOADING' })
         getAllCategory(categoryDispatch, "grade");
-        fetchAPI();
         checkTime();
     }, [])
+
+    useEffect(() => {
+        if (isTime.isTime) {
+            fetchAPI();
+        }
+    }, [isTime])
 
     useEffect(() => {
         if (category.categories.grade.length > 0) {
@@ -217,7 +221,7 @@ const EvaluateSubject = () => {
                                 <Typography style={{ textTransform: 'uppercase' }}>Đánh giá Đảng viên cuối năm</Typography>
                                 <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
                                 <Typography variant="body1">
-                                    Thời gian: Từ ngày <b>{getLocaleDate(isTime.NgayBatDau)}</b> đến ngày <b>{getLocaleDate(isTime.NgayKetThuc)}</b>
+                                    Thời gian: Từ ngày <b>{getLocaleDate(isTime.ThoiGianBatDau)}</b> đến ngày <b>{getLocaleDate(isTime.ThoiGianKetThuc)}</b>
                                 </Typography>
                             </Paper>
                             <TableContainer className="decentralization-table" style={{ maxWidth: "1170px", }} >
@@ -248,7 +252,6 @@ const EvaluateSubject = () => {
                             </Grid>
                         </Paper>
                 }
-                <Loading loading={loading2} />
             </Layout>
         </>
     );

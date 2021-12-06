@@ -329,11 +329,17 @@ const InfoForm = (props) => {
                             errors={errors}
                         />
                         <InputGrid
-                            nameTitle={`Quốc tịch`}
-                            defaultValue={"Việt Nam"}
-                            name={"QuocTich"}
+                            nameTitle={`Số thẻ`}
+                            defaultValue={""}
+                            name={"SoThe"}
+                            rules={{
+                                pattern: {
+                                    value:  /^\d+$/,
+                                    message: "Số thẻ không hợp lệ!"
+                                }
+                            }}
                             control={control}
-                            errors={errors}
+                        errors={errors}
                         />
                     </Grid>
                     <Grid item xs={6}>
@@ -430,6 +436,13 @@ const InfoForm = (props) => {
                                 )
                             }
                         </InputGrid>
+                        <InputGrid
+                            nameTitle={`Quốc tịch`}
+                            defaultValue={"Việt Nam"}
+                            name={"QuocTich"}
+                            control={control}
+                            errors={errors}
+                        />
                     </Grid>
                 </Grid>
                 <Grid item xs={3}>
@@ -471,6 +484,12 @@ const InfoForm = (props) => {
                             name={"SoDienThoai"}
                             control={control}
                             errors={errors}
+                            rules={{
+                                pattern: {
+                                    value:  /^\d+$/,
+                                    message: "Số điện thoại không hợp lệ!"
+                                }
+                            }}
                         />
                     </Grid>
                 </Grid>

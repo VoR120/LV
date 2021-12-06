@@ -27,7 +27,7 @@ const PartyMember = {
     getAll: async (callback) => {
         try {
             const sqlPromise = sql.promise();
-            const [res, f] = await sqlPromise.execute(`
+            const [res, f] = await sqlPromise.query(`
                     SELECT dangvien.*, chibo.TenChiBo, dantoc.TenDanToc, tongiao.TenTonGiao, tinhoc.TenTinHoc,  chinhtri.TenChinhTri, chucvu.TenChucVu
                     FROM dangvien
                     INNER JOIN chibo ON dangvien.MaChiBo = chibo.MaChiBo
@@ -42,7 +42,7 @@ const PartyMember = {
                 await Promise.all(res.map(async (data, index) => {
                     let lArr = [];
                     let lpArr = [];
-                    const [resFlpm, f] = await sqlPromise.execute(`
+                    const [resFlpm, f] = await sqlPromise.query(`
                     SELECT ngoaingudangvien.*, ngoaingu.TenNgoaiNgu, trinhdongoaingu.TenTrinhDo
                     FROM ngoaingudangvien, ngoaingu, trinhdongoaingu
                     WHERE ngoaingudangvien.MaNgoaiNgu = ngoaingu.MaNgoaiNgu
@@ -54,7 +54,7 @@ const PartyMember = {
                     });
                     let addressArr = {};
                     let addressFull = {};
-                    const [resAddress, f1] = await sqlPromise.execute(`
+                    const [resAddress, f1] = await sqlPromise.query(`
                     SELECT diachi.*, loaidiachi.MaLoaiDiaChi 
                     FROM diachidangvien, diachi, loaidiachi 
                     WHERE diachidangvien.MaLoaiDiaChi = loaidiachi.MaLoaiDiaChi
@@ -92,7 +92,33 @@ const PartyMember = {
                             addressFull.NoiOHienTai = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
                         }
                     }))
+
+                    const [resPermission, f2] = await sqlPromise.query(`
+                        SELECT MaQuyen, CoQuyen 
+                        FROM quyendangvien 
+                        WHERE quyendangvien.MaSoDangVien = "${data.MaSoDangVien}"
+                    `)
+
+                    let resultPermission = {};
+                    if (resPermission.length > 0) {
+                        resPermission.map(e => {
+                            resultPermission[e.MaQuyen] = e.CoQuyen
+                        })
+                    } else {
+                        const [resPermissionPS, f2] = await sqlPromise.query(`
+                        SELECT MaQuyen, CoQuyen 
+                        FROM quyenchucvu 
+                        WHERE quyenchucvu.MaChucVu = ${data.MaChucVu}
+                        `)
+                        if (resPermissionPS.length > 0) {
+                            resPermissionPS.map(e => {
+                                resultPermission[e.MaQuyen] = e.CoQuyen
+                            })
+                        }
+                    }
+
                     delete result[index].HashPassword;
+                    result[index].Quyen = resultPermission
                     result[index].NgoaiNgu = lArr;
                     result[index].NgoaiNguTrinhDo = lpArr.join(", ")
                     result[index].DiaChi = addressArr;
@@ -110,12 +136,12 @@ const PartyMember = {
     findById: async (id, callback) => {
         try {
             const sqlPromise = sql.promise();
-            const [res, f] = await sqlPromise.execute(query.getDataWithName(id))
+            const [res, f] = await sqlPromise.query(query.getDataWithName(id))
             let result = [...res]
             if (res.length > 0) {
                 let lArr = [];
                 let lpArr = [];
-                const [resFlpm, f] = await sqlPromise.execute(`
+                const [resFlpm, f] = await sqlPromise.query(`
                     SELECT ngoaingudangvien.*, ngoaingu.TenNgoaiNgu, trinhdongoaingu.TenTrinhDo
                     FROM ngoaingudangvien, ngoaingu, trinhdongoaingu
                     WHERE ngoaingudangvien.MaNgoaiNgu = ngoaingu.MaNgoaiNgu
@@ -127,7 +153,7 @@ const PartyMember = {
                 });
                 let addressArr = {};
                 let addressFull = {};
-                const [resAddress, f1] = await sqlPromise.execute(`
+                const [resAddress, f1] = await sqlPromise.query(`
                     SELECT diachi.*, loaidiachi.MaLoaiDiaChi 
                     FROM diachidangvien, diachi, loaidiachi 
                     WHERE diachidangvien.MaLoaiDiaChi = loaidiachi.MaLoaiDiaChi
@@ -167,7 +193,33 @@ const PartyMember = {
                         }
                     }))
                 }
+
+                const [resPermission, f2] = await sqlPromise.query(`
+                        SELECT MaQuyen, CoQuyen 
+                        FROM quyendangvien 
+                        WHERE quyendangvien.MaSoDangVien = "${res[0].MaSoDangVien}"
+                    `)
+
+                let resultPermission = {};
+                if (resPermission.length > 0) {
+                    resPermission.map(e => {
+                        resultPermission[e.MaQuyen] = e.CoQuyen
+                    })
+                } else {
+                    const [resPermissionPS, f2] = await sqlPromise.query(`
+                        SELECT MaQuyen, CoQuyen 
+                        FROM quyenchucvu 
+                        WHERE quyenchucvu.MaChucVu = ${res[0].MaChucVu}
+                        `)
+                    if (resPermissionPS.length > 0) {
+                        resPermissionPS.map(e => {
+                            resultPermission[e.MaQuyen] = e.CoQuyen
+                        })
+                    }
+                }
+
                 delete result[0].HashPassword;
+                result[0].Quyen = resultPermission;
                 result[0].NgoaiNgu = lArr;
                 result[0].NgoaiNguTrinhDo = lpArr.join(", ")
                 result[0].DiaChi = addressArr;
@@ -183,7 +235,8 @@ const PartyMember = {
     },
     create: async (newValue, callback) => {
 
-        const newPassword = generator.generate({
+            const sqlPromise = sql.promise();
+            const newPassword = generator.generate({
             length: 8,
             numbers: true,
         })
@@ -206,6 +259,10 @@ const PartyMember = {
                     }
                     if (err.message.includes("SoDienThoai")) {
                         callback({ type: "duplicated", value: "Số điện thoại", field: "SoDienThoai" })
+                        return;
+                    }
+                    if (err.message.includes("SoThe")) {
+                        callback({ type: "duplicated", value: "Số thẻ", field: "SoThe" })
                         return;
                     }
                     callback(err, null)
@@ -247,7 +304,23 @@ const PartyMember = {
                         return;
                     }
                     if (res.length) {
+
+                        let resultPermission = {};
+
+                        const [resPermissionPS, f2] = await sqlPromise.query(`
+                        SELECT MaQuyen, CoQuyen 
+                        FROM quyenchucvu 
+                        WHERE quyenchucvu.MaChucVu = ${newValue.MaChucVu}
+                        `)
+                        if (resPermissionPS.length > 0) {
+                            resPermissionPS.map(e => {
+                                resultPermission[e.MaQuyen] = e.CoQuyen
+                            })
+                        }
+
+
                         delete res[0].HashPassword;
+                        res[0].Quyen = resultPermission;
                         console.log("Created: ", res);
                         callback(null, { data: res });
                         return;
@@ -272,7 +345,7 @@ const PartyMember = {
                     return;
                 }
 
-                const [res, f] = await sqlPromise.execute(query.getDataWithName(id))
+                const [res, f] = await sqlPromise.query(query.getDataWithName(id))
                 if (err) {
                     console.log("error: ", err);
                     callback(err, null);
@@ -282,7 +355,7 @@ const PartyMember = {
                 if (res.length > 0) {
                     let lArr = [];
                     let lpArr = [];
-                    const [resFlpm, f] = await sqlPromise.execute(`
+                    const [resFlpm, f] = await sqlPromise.query(`
                         SELECT ngoaingudangvien.*, ngoaingu.TenNgoaiNgu, trinhdongoaingu.TenTrinhDo
                         FROM ngoaingudangvien, ngoaingu, trinhdongoaingu
                         WHERE ngoaingudangvien.MaNgoaiNgu = ngoaingu.MaNgoaiNgu
@@ -294,7 +367,7 @@ const PartyMember = {
                     });
                     let addressArr = {};
                     let addressFull = {};
-                    const [resAddress, f1] = await sqlPromise.execute(`
+                    const [resAddress, f1] = await sqlPromise.query(`
                     SELECT diachi.*, loaidiachi.MaLoaiDiaChi 
                     FROM diachidangvien, diachi, loaidiachi 
                     WHERE diachidangvien.MaLoaiDiaChi = loaidiachi.MaLoaiDiaChi
@@ -332,7 +405,33 @@ const PartyMember = {
                             addressFull.NoiOHienTai = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
                         }
                     }))
+
+                    const [resPermission, f2] = await sqlPromise.query(`
+                        SELECT MaQuyen, CoQuyen 
+                        FROM quyendangvien 
+                        WHERE quyendangvien.MaSoDangVien = "${res[0].MaSoDangVien}"
+                    `)
+
+                    let resultPermission = {};
+                    if (resPermission.length > 0) {
+                        resPermission.map(e => {
+                            resultPermission[e.MaQuyen] = e.CoQuyen
+                        })
+                    } else {
+                        const [resPermissionPS, f2] = await sqlPromise.query(`
+                        SELECT MaQuyen, CoQuyen 
+                        FROM quyenchucvu 
+                        WHERE quyenchucvu.MaChucVu = ${res[0].MaChucVu}
+                        `)
+                        if (resPermissionPS.length > 0) {
+                            resPermissionPS.map(e => {
+                                resultPermission[e.MaQuyen] = e.CoQuyen
+                            })
+                        }
+                    }
+
                     delete result[0].HashPassword;
+                    result[0].Quyen = resultPermission;
                     result[0].NgoaiNgu = lArr;
                     result[0].NgoaiNguTrinhDo = lpArr.join(", ")
                     result[0].DiaChi = addressArr;
@@ -409,13 +508,13 @@ const PartyMember = {
                 AND dangvien.DaXoa = 0
                 ${dataStr}`;
             const sqlPromise = sql.promise();
-            const [res, f] = await sqlPromise.execute(query)
+            const [res, f] = await sqlPromise.query(query)
             let result = [...res]
             if (res.length > 0) {
                 await Promise.all(res.map(async (data, index) => {
                     let lArr = [];
                     let lpArr = [];
-                    const [resFlpm, f] = await sqlPromise.execute(`
+                    const [resFlpm, f] = await sqlPromise.query(`
                     SELECT ngoaingudangvien.*, ngoaingu.TenNgoaiNgu, trinhdongoaingu.TenTrinhDo
                     FROM ngoaingudangvien, ngoaingu, trinhdongoaingu
                     WHERE ngoaingudangvien.MaNgoaiNgu = ngoaingu.MaNgoaiNgu
@@ -427,7 +526,7 @@ const PartyMember = {
                     });
                     let addressArr = {};
                     let addressFull = {};
-                    const [resAddress, f1] = await sqlPromise.execute(`
+                    const [resAddress, f1] = await sqlPromise.query(`
                     SELECT diachi.*, loaidiachi.MaLoaiDiaChi 
                     FROM diachidangvien, diachi, loaidiachi 
                     WHERE diachidangvien.MaLoaiDiaChi = loaidiachi.MaLoaiDiaChi
@@ -465,7 +564,33 @@ const PartyMember = {
                             addressFull.NoiOHienTai = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
                         }
                     }))
+
+                    const [resPermission, f2] = await sqlPromise.query(`
+                        SELECT MaQuyen, CoQuyen 
+                        FROM quyendangvien 
+                        WHERE quyendangvien.MaSoDangVien = "${data.MaSoDangVien}"
+                    `)
+
+                    let resultPermission = {};
+                    if (resPermission.length > 0) {
+                        resPermission.map(e => {
+                            resultPermission[e.MaQuyen] = e.CoQuyen
+                        })
+                    } else {
+                        const [resPermissionPS, f2] = await sqlPromise.query(`
+                        SELECT MaQuyen, CoQuyen 
+                        FROM quyenchucvu 
+                        WHERE quyenchucvu.MaChucVu = ${data.MaChucVu}
+                        `)
+                        if (resPermissionPS.length > 0) {
+                            resPermissionPS.map(e => {
+                                resultPermission[e.MaQuyen] = e.CoQuyen
+                            })
+                        }
+                    }
+
                     delete result[index].HashPassword;
+                    result[index].Quyen = resultPermission;
                     result[index].NgoaiNgu = lArr;
                     result[index].NgoaiNguTrinhDo = lpArr.join(", ")
                     result[index].DiaChi = addressArr;

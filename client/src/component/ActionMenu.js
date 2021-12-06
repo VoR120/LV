@@ -4,11 +4,11 @@ import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useState } from 'react';
 import { InfoContext } from '../contextAPI/InfoContext';
 import AddForm from './AddForm';
+import DecentralizationForm from './DecentralizationForm';
 import DeleteForm from './DeleteForm';
-import GradeForm from './GradeForm';
+import ExportFile from './ExportFile';
 import MoveForm from './MoveForm';
 import RewardDisciplineForm from './RewardDisciplineForm';
-import DecentralizationForm from './DecentralizationForm';
 
 const useStyles = makeStyles(theme => ({
     icon: {
@@ -31,7 +31,9 @@ const ActionMenu = (props) => {
     const classes = useStyles();
     const [open, setOpen] = useState(null);
     const { info } = useContext(InfoContext)
-    const { data, rows, setRows } = props
+    const { data, rows, setRows } = props;
+    console.log(data);
+
     const handleClose = () => {
         setOpen(null)
     }
@@ -81,8 +83,11 @@ const ActionMenu = (props) => {
                     <MenuItem onClick={handleClose}><RewardDisciplineForm name={data.HoTen} id={data.MaSoDangVien} /></MenuItem>
                 }
                 {info.info.Quyen["11"] == 1 &&
-                    <MenuItem onClick={handleClose}><DecentralizationForm pm partycell={data.MaChiBo} id={data.MaSoDangVien}/>                </MenuItem>
+                    <MenuItem onClick={handleClose}><DecentralizationForm pm partycell={data.MaChiBo} id={data.MaSoDangVien} permission={data.Quyen} />                </MenuItem>
                 }
+                <MenuItem>
+                    <ExportFile data={data} />
+                </MenuItem>
             </Menu>
         </div>
     );

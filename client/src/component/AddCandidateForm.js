@@ -14,6 +14,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { filterPartyMember } from '../action/partyMemberAction';
 import { CategoryContext } from '../contextAPI/CategoryContext';
+import { LoadingContext } from '../contextAPI/LoadingContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import InputGrid from './InputGrid';
 import MyButton from './UI/MyButton';
@@ -41,6 +42,7 @@ const AddCandidateForm = (props) => {
 
     const { category, categoryDispatch } = useContext(CategoryContext);
     const { openSnackbarDispatch } = useContext(SnackbarContext);
+    const { loadingDispatch } = useContext(LoadingContext);
 
     const [gradeArr, setGradeArr] = useState([])
     const [checked, setChecked] = useState([]);
@@ -80,11 +82,12 @@ const AddCandidateForm = (props) => {
         setOpen(true)
     }
     const onSubmit = async (data) => {
-        // setLoading(true)
         // setRight([]);
+        loadingDispatch({ type: 'OPEN_LOADING' })
         const res = await filterPartyMember(data);
         setLeft(res)
-        // setLoading(false)
+        loadingDispatch({ type: 'CLOSE_LOADING' })
+
     }
 
     const handleChangeSelect = (e) => {

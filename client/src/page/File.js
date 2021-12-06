@@ -16,7 +16,6 @@ import MyButton from '../component/UI/MyButton';
 import { CSVLink } from 'react-csv'
 import SaveAltIcon from '@mui/icons-material/SaveAlt';
 
-
 const useStyles = makeStyles(theme => ({
     header: {
         marginBottom: '40px'
@@ -61,6 +60,7 @@ const File = () => {
     const [columns, setColumns] = useState(allInfoColumn(rows, setRows))
 
     const data = getExportData(rows, columns)
+    console.log(data);
 
     useEffect(() => {
         setColumns(allInfoColumn(rows, setRows));
@@ -114,8 +114,8 @@ const File = () => {
                 <Grid container justifyContent="space-between">
                     <Grid item>
                         <AddForm rows={rows} setRows={setRows} />
-                        {data.length > 0 &&
-                            <CSVLink data={data} filename={"export.csv"}>
+                        {data.data.length > 0 &&
+                            <CSVLink data={data.data} headers={data.headers} filename={"export.csv"}>
                                 <MyButton style={{ marginLeft: 8 }} success>
                                     <SaveAltIcon style={{ marginRight: 4 }} />Excel
                                 </MyButton>

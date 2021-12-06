@@ -51,8 +51,8 @@ export const getMoveByType = async (payload) => {
 }
 
 export const getMoveByPMId = async (payload) => {
-    console.log(payload);
     const { MaSoDangVien } = payload
+    console.log(MaSoDangVien);
     try {
         const res = MaSoDangVien == "" ?
             await axios.get('/api/move') :

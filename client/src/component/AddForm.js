@@ -190,6 +190,10 @@ const AddForm = ({ edit, data, setRows, rows }) => {
             if (JSON.stringify({ ...nohtValue, detail: getValues("NOHTChiTiet") }) !==
                 JSON.stringify(data.DiaChi.NoiOHienTai))
                 newValue.NOHTAddress = { ...nohtValue, detail: getValues("NOHTChiTiet") };
+        } else {
+            newValue.QQAddress = { ...qqValue, detail: getValues("QQChiTiet") };
+            newValue.DCTTAddress = { ...dcttValue, detail: getValues("DCTTChiTiet") };
+            newValue.NOHTAddress = { ...nohtValue, detail: getValues("NOHTChiTiet") };
         }
         if (step != 2)
             setStep(previewStep => previewStep + 1);
@@ -198,6 +202,7 @@ const AddForm = ({ edit, data, setRows, rows }) => {
             updateAndFetch(newValue);
         }
     }
+
 
     useEffect(() => {
         if (edit) {
@@ -422,7 +427,7 @@ const AddForm = ({ edit, data, setRows, rows }) => {
                         Hủy
                     </Button>
                     <MyButton onClick={handleSubmit(onSubmit)} success>
-                        Lưu
+                        {step != 2 ? "Tiếp" : "Lưu"}
                     </MyButton>
                 </DialogActions>
             </Dialog>

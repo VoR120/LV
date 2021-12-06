@@ -129,8 +129,7 @@ const Voting = () => {
     useEffect(() => {
         const getResultAPI = async () => {
             const res = await getResult({ id: resultState.MaBieuQuyet })
-            console.log(res);
-            setLabel(res.Data.map(el => `${el.MaUngCuVien} - ${el.HoTen}`));
+            setLabel(res.Data.map(el => `${el.MaSoDangVien} - ${el.HoTen}`));
             setQuantity(res.Data.map(el => el.SoPhieu));
             setQuantityPer(res.SoLuongBieuQuyet + "/" + res.SoLuong)
         }
@@ -139,6 +138,7 @@ const Voting = () => {
     }, [resultState])
 
     const onSubmit = async (data) => {
+        loadingDispatch({ type: 'OPEN_LOADING' })
         data.UngCuVien = candidate.map(el => el.MaUngCuVien);
         data.NguoiThamGia = voter.map(el => el.MaNguoiThamGia);
         const res = await updatePoll(data);
@@ -150,7 +150,6 @@ const Voting = () => {
                     type: "success"
                 }
             })
-            loadingDispatch({ type: 'OPEN_LOADING' })
             fetchAllPoll();
         } else
             openSnackbarDispatch({
@@ -160,6 +159,7 @@ const Voting = () => {
                     type: "error"
                 }
             })
+        loadingDispatch({ type: 'CLOSE_LOADING' })
         setEditOpen([]);
     }
 

@@ -30,27 +30,47 @@ export const getTimeEvaluate = async (payload) => {
     }
 }
 
+export const checkIsOpen = async (payload) => {
+    try {
+        const res = payload.id
+            ? await axios.get(`/api/evaluate/checkopen?MaDVDG=${payload.id}`)
+            : await axios.get(`/api/evaluate/checkopen`)
+        console.log(res);
+        if (res.status == 200) {
+            return res.data[0];
+        }
+    } catch (error) {
+        console.log(error.response)
+    }
+}
+
 export const setTimeEvaluate = async (payload) => {
     const { pmFrom, pmTo, subjectFrom, subjectTo, departmentFrom, departmentTo, year } = payload
     try {
-        console.log(payload);
+
+        const resetStatus = await axios.post('/api/evaluate/resetstatus')
+        console.log(resetStatus);
+        
         const resPm = await axios.post('/api/evaluate/settime', {
             Nam: year,
             MaDVDG: 1,
             ThoiGianBatDau: pmFrom,
-            ThoiGianKetThuc: pmTo
+            ThoiGianKetThuc: pmTo,
+            TrangThai: 1
         })
         const resSubject = await axios.post('/api/evaluate/settime', {
             Nam: year,
             MaDVDG: 2,
             ThoiGianBatDau: subjectFrom,
-            ThoiGianKetThuc: subjectTo
+            ThoiGianKetThuc: subjectTo,
+            TrangThai: 1
         })
         const resDepartment = await axios.post('/api/evaluate/settime', {
             Nam: year,
             MaDVDG: 3,
             ThoiGianBatDau: departmentFrom,
-            ThoiGianKetThuc: departmentTo
+            ThoiGianKetThuc: departmentTo,
+            TrangThai: 1
         })
         console.log(resPm)
         console.log(resSubject)

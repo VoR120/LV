@@ -15,6 +15,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { filterPartyMember } from '../action/partyMemberAction';
 import { CategoryContext } from '../contextAPI/CategoryContext';
+import { LoadingContext } from '../contextAPI/LoadingContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import InputGrid from './InputGrid';
 import MyButton from './UI/MyButton';
@@ -42,6 +43,7 @@ const AddVoterForm = (props) => {
 
     const { category, categoryDispatch } = useContext(CategoryContext);
     const { openSnackbarDispatch } = useContext(SnackbarContext);
+    const { loadingDispatch } = useContext(LoadingContext);
 
     const [includeReserve, setIncludeReserve] = useState(true)
     const [gradeArr, setGradeArr] = useState([])
@@ -82,13 +84,12 @@ const AddVoterForm = (props) => {
         setOpen(true)
     }
     const onSubmit = async (data) => {
-        // setLoading(true)
         // setRight([]);
+        loadingDispatch({ type: 'OPEN_LOADING' })
         data.notreserve = includeReserve
         const res = await filterPartyMember(data);
-        console.log(res);
         setLeft(res)
-        // setLoading(false)
+        loadingDispatch({ type: 'CLOSE_LOADING' })
     }
 
     const handleChangeSelect = (e) => {
