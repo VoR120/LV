@@ -79,12 +79,11 @@ const Evaluate = () => {
     const { info, infoDispatch } = useContext(InfoContext);
     const { category, categoryDispatch } = useContext(CategoryContext);
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
-    const { loadingDispatch } = useContext(LoadingContext)
+    const { loading, loadingDispatch } = useContext(LoadingContext)
     // State
 
 
     const [year, setYear] = useState((new Date).getFullYear());
-    const [loading, setLoading] = useState(true);
     const [grade, setGrade] = useState("0");
     const [gradeArr, setGradeArr] = useState([]);
     const [isEvaluate, setIsEvaluate] = useState(false);
@@ -160,6 +159,7 @@ const Evaluate = () => {
                 setIsTime({ isTime: true, ThoiGianBatDau, ThoiGianKetThuc });
             }
         }
+        loadingDispatch({ type: 'CLOSE_LOADING' })
     }
 
     useEffect(() => {
@@ -179,55 +179,57 @@ const Evaluate = () => {
     return (
         <>
             <Layout sidebar>
-                <div className={classes.header} >
-                    <Typography className={classes.headerContent} variant="h5">
-                        Cá nhân đánh giá
-                    </Typography>
-                </div>
-                {
-                    isTime.isTime ?
-                        <Paper variant="outlined" className={classes.paper}>
-                            <Typography style={{ textTransform: 'uppercase', marginBottom: 16 }}>Đánh giá Đảng viên cuối năm</Typography>
-                            <Typography variant="body1">Thời gian: Từ ngày <b>{getLocaleDate(isTime.ThoiGianBatDau)}</b> đến ngày <b>{getLocaleDate(isTime.ThoiGianKetThuc)}</b>
+                {!loading.open &&
+                    <>
+                        <div className={classes.header} >
+                            <Typography className={classes.headerContent} variant="h5">
+                                Cá nhân đánh giá
                             </Typography>
-                            <div className={classes.flexContainer}>
-                                <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
-                                <Typography style={{ marginRight: 20 }} variant="body1">Loại:</Typography>
-                                <MySelect
-                                    value={grade}
-                                    onChange={handleChange}
-                                >
-                                    <MenuItem value="0">Chọn loại</MenuItem>
-                                    {
-                                        gradeArr.length > 0 &&
-                                        gradeArr.map(el => <MenuItem key={el.MaLoai} value={el.MaLoai}>{el.TenLoai}</MenuItem>)
+                        </div>
+                        {
+                            isTime.isTime ?
+                                <Paper variant="outlined" className={classes.paper}>
+                                    <Typography style={{ textTransform: 'uppercase', marginBottom: 16 }}>Đánh giá Đảng viên cuối năm</Typography>
+                                    <Typography variant="body1">Thời gian: Từ ngày <b>{getLocaleDate(isTime.ThoiGianBatDau)}</b> đến ngày <b>{getLocaleDate(isTime.ThoiGianKetThuc)}</b>
+                                    </Typography>
+                                    <div className={classes.flexContainer}>
+                                        <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
+                                        <Typography style={{ marginRight: 20 }} variant="body1">Loại:</Typography>
+                                        <MySelect
+                                            value={grade}
+                                            onChange={handleChange}
+                                        >
+                                            <MenuItem value="0">Chọn loại</MenuItem>
+                                            {
+                                                gradeArr.length > 0 &&
+                                                gradeArr.map(el => <MenuItem key={el.MaLoai} value={el.MaLoai}>{el.TenLoai}</MenuItem>)
+                                            }
+                                        </MySelect>
+                                        <MyButton disabled={grade == 0} onClick={handleSubmit} style={{ marginLeft: 20 }} info>Đánh giá</MyButton>
+                                    </div>
+                                    {isEvaluate ?
+                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                            <CheckIcon color="success" fontSize="large" />
+                                            <Typography alignItems="center" style={{ textTransform: "uppercase" }} variant="h5" color="green">Đã đánh giá</Typography>
+                                        </div>
+                                        :
+                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                            <ClearIcon color="error" fontSize="large" />
+                                            <Typography alignItems="center" style={{ textTransform: "uppercase" }} variant="h5" color="red">Chưa đánh giá</Typography>
+                                        </div>
                                     }
-                                </MySelect>
-                                <MyButton disabled={grade == 0} onClick={handleSubmit} style={{ marginLeft: 20 }} info>Đánh giá</MyButton>
-                            </div>
-                            {isEvaluate ?
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <CheckIcon color="success" fontSize="large" />
-                                    <Typography alignItems="center" style={{ textTransform: "uppercase" }} variant="h5" color="green">Đã đánh giá</Typography>
-                                </div>
+                                </Paper>
                                 :
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <ClearIcon color="error" fontSize="large" />
-                                    <Typography alignItems="center" style={{ textTransform: "uppercase" }} variant="h5" color="red">Chưa đánh giá</Typography>
-                                </div>
-                            }
-                        </Paper>
-                        :
-                        <Paper variant="outlined" className={classes.paper}>
-                            <Grid marginBottom={2}>
-                                <Typography style={{ textTransform: 'uppercase' }}>Đánh giá Đảng viên cuối năm</Typography>
-                                <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
-                                <Typography variant="body1">Chưa đến thời gian đánh giá</Typography>
-                            </Grid>
-                        </Paper>
-                }
+                                <Paper variant="outlined" className={classes.paper}>
+                                    <Grid marginBottom={2}>
+                                        <Typography style={{ textTransform: 'uppercase' }}>Đánh giá Đảng viên cuối năm</Typography>
+                                        <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
+                                        <Typography variant="body1">Chưa đến thời gian đánh giá</Typography>
+                                    </Grid>
+                                </Paper>
+                        }
 
-                {/* <TableContainer variant="outlined" component={Paper}>
+                        {/* <TableContainer variant="outlined" component={Paper}>
                     <Table aria-label="simple table">
                         <TableHead>
                             <TableRow>
@@ -267,6 +269,8 @@ const Evaluate = () => {
                         </TableBody>
                     </Table>
                 </TableContainer> */}
+                    </>
+                }
             </Layout>
         </>
     );

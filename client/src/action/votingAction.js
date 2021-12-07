@@ -79,3 +79,14 @@ export const deletePoll = async (payload) => {
         console.log(error.response);
     }
 }
+
+export const getPollByTime = async (payload) => {
+    try {
+        const res = await axios.post('/api/voting/getbytime', payload);
+        if (res.status == 200) {
+            return res.data
+        }
+    } catch (error) {
+        console.log(error.response);
+    }
+}

@@ -1,34 +1,22 @@
+import MaterialTable from '@material-table/core';
 import {
-    Button,
     Grid,
     MenuItem,
     Paper,
     TableContainer, Typography
 } from '@mui/material';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { getAllCategory } from '../action/categoryAction';
-import { checkIsOpen, evaluate, getTimeEvaluate } from '../action/evaluateAction';
+import { checkIsOpen } from '../action/evaluateAction';
 import Layout from '../component/Layout';
-import MyButton from '../component/UI/MyButton';
 import MySelect from '../component/UI/MySelect';
 import { CategoryContext } from '../contextAPI/CategoryContext';
 import { InfoContext } from '../contextAPI/InfoContext';
-import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
-import { SnackbarContext } from '../contextAPI/SnackbarContext';
-import MaterialTable from '@material-table/core';
-import axios from '../helper/axios';
-import { getExportData, getLocaleDate, getTimeWithEndHour, getTimeWithStartHour } from '../utils/utils';
-import CheckIcon from '@mui/icons-material/Check';
-import ClearIcon from '@mui/icons-material/Clear';
-import Loading from '../component/CustomLoadingOverlay';
 import { LoadingContext } from '../contextAPI/LoadingContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import axios from '../helper/axios';
+import { getLocaleDate, getTimeWithEndHour, getTimeWithStartHour } from '../utils/utils';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -80,7 +68,7 @@ const EvaluateSubject = () => {
     const { info, infoDispatch } = useContext(InfoContext);
     const { category, categoryDispatch } = useContext(CategoryContext);
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
-    const { loadingDispatch } = useContext(LoadingContext)
+    const { loading, loadingDispatch } = useContext(LoadingContext)
 
     // State
     const columns = [
@@ -113,13 +101,13 @@ const EvaluateSubject = () => {
     const [grade, setGrade] = useState("0");
     const [gradeArr, setGradeArr] = useState([]);
     const [isEvaluate, setIsEvaluate] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [loadingTable, setLoadingTable] = useState(false);
     const [isTime, setIsTime] = useState({ isTime: false, ThoiGianBatDau: "", ThoiGianKetThuc: "" });
 
     // Handle Function
     const handleChange = async (e, id) => {
         try {
-            setLoading(true)
+            setLoadingTable(true)
             const res = await axios.post('/api/evaluate/create', {
                 MaSoDangVien: id,
                 Nam: year,
@@ -136,7 +124,7 @@ const EvaluateSubject = () => {
                     }
                 })
             }
-            setLoading(false)
+            setLoadingTable(false)
         } catch (error) {
             openSnackbarDispatch({
                 type: 'SET_OPEN',
@@ -163,7 +151,7 @@ const EvaluateSubject = () => {
                 }
             }
             loadingDispatch({ type: 'CLOSE_LOADING' })
-            setLoading(false);
+            setLoadingTable(false);
         } catch (error) {
             console.log(error.message)
         }
@@ -186,7 +174,7 @@ const EvaluateSubject = () => {
     }
     // UseEffect
     useEffect(() => {
-        setLoading(true)
+        setLoadingTable(true)
         loadingDispatch({ type: 'OPEN_LOADING' })
         getAllCategory(categoryDispatch, "grade");
         checkTime();
@@ -209,48 +197,53 @@ const EvaluateSubject = () => {
     return (
         <>
             <Layout sidebar>
-                <div className={classes.header} >
-                    <Typography className={classes.headerContent} variant="h5">
-                        Bộ môn đánh giá
-                    </Typography>
-                </div>
                 {
-                    isTime.isTime ?
-                        <>
-                            <Paper variant="outlined" className={classes.paper}>
-                                <Typography style={{ textTransform: 'uppercase' }}>Đánh giá Đảng viên cuối năm</Typography>
-                                <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
-                                <Typography variant="body1">
-                                    Thời gian: Từ ngày <b>{getLocaleDate(isTime.ThoiGianBatDau)}</b> đến ngày <b>{getLocaleDate(isTime.ThoiGianKetThuc)}</b>
-                                </Typography>
-                            </Paper>
-                            <TableContainer className="decentralization-table" style={{ maxWidth: "1170px", }} >
-                                <MaterialTable
-                                    components={{
-                                        Container: (props) => <Paper
-                                            {...props}
-                                            className={classes.table}
-                                            variant="outlined"
+                    !loading.open &&
+                    <>
+                        <div className={classes.header} >
+                            <Typography className={classes.headerContent} variant="h5">
+                                Bộ môn đánh giá
+                            </Typography>
+                        </div>
+                        {
+                            isTime.isTime ?
+                                <>
+                                    <Paper variant="outlined" className={classes.paper}>
+                                        <Typography style={{ textTransform: 'uppercase' }}>Đánh giá Đảng viên cuối năm</Typography>
+                                        <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
+                                        <Typography variant="body1">
+                                            Thời gian: Từ ngày <b>{getLocaleDate(isTime.ThoiGianBatDau)}</b> đến ngày <b>{getLocaleDate(isTime.ThoiGianKetThuc)}</b>
+                                        </Typography>
+                                    </Paper>
+                                    <TableContainer className="decentralization-table" style={{ maxWidth: "1170px", }} >
+                                        <MaterialTable
+                                            components={{
+                                                Container: (props) => <Paper
+                                                    {...props}
+                                                    className={classes.table}
+                                                    variant="outlined"
+                                                />
+                                            }}
+                                            options={{
+                                                padding: 'dense'
+                                            }}
+                                            title={"Bộ môn đánh giá"}
+                                            columns={columns}
+                                            data={rows}
+                                            isLoading={loadingTable}
                                         />
-                                    }}
-                                    options={{
-                                        padding: 'dense'
-                                    }}
-                                    title={"Bộ môn đánh giá"}
-                                    columns={columns}
-                                    data={rows}
-                                    isLoading={loading}
-                                />
-                            </TableContainer>
-                        </>
-                        :
-                        <Paper variant="outlined" className={classes.paper}>
-                            <Grid marginBottom={2}>
-                                <Typography style={{ textTransform: 'uppercase' }}>Đánh giá Đảng viên cuối năm</Typography>
-                                <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
-                                <Typography variant="body1">Chưa đến thời gian đánh giá</Typography>
-                            </Grid>
-                        </Paper>
+                                    </TableContainer>
+                                </>
+                                :
+                                <Paper variant="outlined" className={classes.paper}>
+                                    <Grid marginBottom={2}>
+                                        <Typography style={{ textTransform: 'uppercase' }}>Đánh giá Đảng viên cuối năm</Typography>
+                                        <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
+                                        <Typography variant="body1">Chưa đến thời gian đánh giá</Typography>
+                                    </Grid>
+                                </Paper>
+                        }
+                    </>
                 }
             </Layout>
         </>

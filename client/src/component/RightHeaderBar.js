@@ -60,7 +60,6 @@ const RightHeaderBar = () => {
             newPassword: data.newPassword,
             MaSoDangVien: info.info.MaSoDangVien
         });
-        console.log(res);
         if (res.error) {
             setError(res.type, {
                 type: "manual",

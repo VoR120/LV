@@ -151,7 +151,6 @@ const AddForm = ({ edit, data, setRows, rows }) => {
         let res = edit
             ? await updatePartyMember(partyMemberDispatch, newValue)
             : await addPartyMember(partyMemberDispatch, newValue);
-        console.log(res);
         if (res.error) {
             loadingDispatch({ type: 'CLOSE_LOADING' })
             setStep(0);

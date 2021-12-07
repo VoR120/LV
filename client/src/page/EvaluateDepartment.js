@@ -78,7 +78,7 @@ const EvaluateDepartment = () => {
     const { info, infoDispatch } = useContext(InfoContext);
     const { category, categoryDispatch } = useContext(CategoryContext);
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
-    const { loadingDispatch } = useContext(LoadingContext)
+    const { loading, loadingDispatch } = useContext(LoadingContext)
 
     // State
     const columns = [
@@ -111,7 +111,7 @@ const EvaluateDepartment = () => {
     const [grade, setGrade] = useState("0");
     const [gradeArr, setGradeArr] = useState([]);
     const [isEvaluate, setIsEvaluate] = useState(false);
-    const [loading, setLoading] = useState(false)
+    const [loadingTable, setLoadingTable] = useState(false)
     const [field, setField] = useState('all')
     const [isTime, setIsTime] = useState({ isTime: false, NgayBatDau: "", NgayKetThuc: "" });
 
@@ -123,7 +123,7 @@ const EvaluateDepartment = () => {
 
     const handleChange = async (e, id) => {
         try {
-            setLoading(true)
+            setLoadingTable(true)
             const res = await axios.post('/api/evaluate/create', {
                 MaSoDangVien: id,
                 Nam: year,
@@ -140,7 +140,7 @@ const EvaluateDepartment = () => {
                     type: "success"
                 }
             })
-            setLoading(false)
+            setLoadingTable(false)
         } catch (error) {
             openSnackbarDispatch({
                 type: 'SET_OPEN',
@@ -163,7 +163,7 @@ const EvaluateDepartment = () => {
             if (res.status == 200) {
                 setRows(res.data);
             }
-            setLoading(false);
+            setLoadingTable(false);
             loadingDispatch({ type: 'CLOSE_LOADING' })
         } catch (error) {
             console.log(error.message)
@@ -171,13 +171,13 @@ const EvaluateDepartment = () => {
     }
 
     const handleSubmit = async () => {
-        setLoading(true)
+        setLoadingTable(true)
         fetchAPI();
     }
 
     // UseEffect
     useEffect(() => {
-        setLoading(true)
+        setLoadingTable(true)
         loadingDispatch({ type: 'OPEN_LOADING' })
         getAllCategory(categoryDispatch, "grade");
         getAllCategory(categoryDispatch, "partycell");
@@ -197,6 +197,7 @@ const EvaluateDepartment = () => {
                 setIsTime({ isTime: true, ThoiGianBatDau, ThoiGianKetThuc });
             }
         }
+        loadingDispatch({ type: 'CLOSE_LOADING' })
     }
 
     useEffect(() => {
@@ -215,63 +216,68 @@ const EvaluateDepartment = () => {
 
     return (
         <>
+
             <Layout sidebar>
-                <div className={classes.header} >
-                    <Typography className={classes.headerContent} variant="h5">
-                        Khoa đánh giá
-                    </Typography>
-                </div>
-                {
-                    isTime.isTime ?
-                        <>
-                            <Paper variant="outlined" className={classes.paper}>
-                                <Typography style={{ textTransform: 'uppercase', marginBottom: 8 }}>Đánh giá Đảng viên cuối năm</Typography>
-                                <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
-                                <Typography marginBottom={2} variant="body1">
-                                    Thời gian: Từ ngày <b>{getLocaleDate(isTime.ThoiGianBatDau)}</b> đến ngày <b>{getLocaleDate(isTime.ThoiGianKetThuc)}</b>
-                                </Typography>
-                                <MySelect
-                                    nameTitle="Chi bộ"
-                                    value={field}
-                                    onChange={handleChangeField}
-                                    autowidth
-                                >
-                                    <MenuItem value="all">Tất cả</MenuItem>
-                                    {
-                                        category.categories.partycell.map(el =>
-                                            <MenuItem value={el.MaChiBo} key={el.MaChiBo}>{el.TenChiBo}</MenuItem>
-                                        )
-                                    }
-                                </MySelect>
-                            </Paper>
-                            <MyButton onClick={handleSubmit} primary>Xem</MyButton>
-                            <TableContainer className="decentralization-table" style={{ maxWidth: "1170px", }} >
-                                <MaterialTable
-                                    components={{
-                                        Container: (props) => <Paper
-                                            {...props}
-                                            className={classes.table}
-                                            variant="outlined"
+                {!loading.open &&
+                    <>
+                        <div className={classes.header} >
+                            <Typography className={classes.headerContent} variant="h5">
+                                Khoa đánh giá
+                            </Typography>
+                        </div>
+                        {
+                            isTime.isTime ?
+                                <>
+                                    <Paper variant="outlined" className={classes.paper}>
+                                        <Typography style={{ textTransform: 'uppercase', marginBottom: 8 }}>Đánh giá Đảng viên cuối năm</Typography>
+                                        <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
+                                        <Typography marginBottom={2} variant="body1">
+                                            Thời gian: Từ ngày <b>{getLocaleDate(isTime.ThoiGianBatDau)}</b> đến ngày <b>{getLocaleDate(isTime.ThoiGianKetThuc)}</b>
+                                        </Typography>
+                                        <MySelect
+                                            nameTitle="Chi bộ"
+                                            value={field}
+                                            onChange={handleChangeField}
+                                            autowidth
+                                        >
+                                            <MenuItem value="all">Tất cả</MenuItem>
+                                            {
+                                                category.categories.partycell.map(el =>
+                                                    <MenuItem value={el.MaChiBo} key={el.MaChiBo}>{el.TenChiBo}</MenuItem>
+                                                )
+                                            }
+                                        </MySelect>
+                                    </Paper>
+                                    <MyButton onClick={handleSubmit} primary>Xem</MyButton>
+                                    <TableContainer className="decentralization-table" style={{ maxWidth: "1170px", }} >
+                                        <MaterialTable
+                                            components={{
+                                                Container: (props) => <Paper
+                                                    {...props}
+                                                    className={classes.table}
+                                                    variant="outlined"
+                                                />
+                                            }}
+                                            options={{
+                                                padding: 'dense'
+                                            }}
+                                            title={"Bộ môn đánh giá"}
+                                            columns={columns}
+                                            data={rows}
+                                            isLoading={loadingTable}
                                         />
-                                    }}
-                                    options={{
-                                        padding: 'dense'
-                                    }}
-                                    title={"Bộ môn đánh giá"}
-                                    columns={columns}
-                                    data={rows}
-                                    isLoading={loading}
-                                />
-                            </TableContainer>
-                        </>
-                        :
-                        <Paper variant="outlined" className={classes.paper}>
-                            <Grid marginBottom={2}>
-                                <Typography style={{ textTransform: 'uppercase' }}>Đánh giá Đảng viên cuối năm</Typography>
-                                <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
-                                <Typography variant="body1">Chưa đến thời gian đánh giá</Typography>
-                            </Grid>
-                        </Paper>
+                                    </TableContainer>
+                                </>
+                                :
+                                <Paper variant="outlined" className={classes.paper}>
+                                    <Grid marginBottom={2}>
+                                        <Typography style={{ textTransform: 'uppercase' }}>Đánh giá Đảng viên cuối năm</Typography>
+                                        <Typography style={{ marginRight: 40 }} variant="body1">Năm: <b>{year}</b></Typography>
+                                        <Typography variant="body1">Chưa đến thời gian đánh giá</Typography>
+                                    </Grid>
+                                </Paper>
+                        }
+                    </>
                 }
             </Layout>
         </>

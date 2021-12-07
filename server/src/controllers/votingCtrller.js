@@ -6,9 +6,9 @@ exports.createPoll = async (req, res) => {
         const sqlPromise = sql.promise();
         const {
             TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau,
-            ThoiGianKetThuc, UngCuVien, NguoiThamGia
+            ThoiGianKetThuc, UngCuVien, NguoiThamGia, PhamVi, ThoiGianNhacNho
         } = req.body
-        const data = { TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau, ThoiGianKetThuc }
+        const data = { TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau, ThoiGianKetThuc, PhamVi, ThoiGianNhacNho }
         console.log(data);
         const [result, f] = await sqlPromise.query(`INSERT INTO bieuquyet SET ?`, data);
         if (result) {
@@ -36,10 +36,10 @@ exports.updatePoll = async (req, res) => {
         const sqlPromise = sql.promise();
         const {
             TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau,
-            ThoiGianKetThuc, UngCuVien, NguoiThamGia
+            ThoiGianKetThuc, UngCuVien, NguoiThamGia, PhamVi, ThoiGianNhacNho
         } = req.body
         const { id } = req.params;
-        const data = { TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau, ThoiGianKetThuc }
+        const data = { TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau, ThoiGianKetThuc, PhamVi, ThoiGianNhacNho }
         console.log(data);
         const [result, f] = await sqlPromise.query(`
         UPDATE bieuquyet SET ?
@@ -99,6 +99,24 @@ exports.getPoll = async (req, res) => {
         const sqlPromise = sql.promise();
         const { id } = req.params
         const [result, f] = await sqlPromise.query(`SELECT * FROM bieuquyet WHERE TrangThai = 1 AND MaBieuQuyet = ${id}`);
+        if (result) {
+            res.status(200).json(result);
+        }
+    } catch (error) {
+        res.status(500).json({ msg: error.message })
+    }
+}
+
+exports.getPollByTime = async (req, res) => {
+    try {
+        const sqlPromise = sql.promise();
+        const { TuNgay, DenNgay } = req.body
+        const [result, f] = await sqlPromise.query(`
+        SELECT * FROM bieuquyet 
+        WHERE TrangThai = 1 
+        AND ThoiGianBatDau > "${TuNgay}"
+        AND ThoiGianKetThuc < "${DenNgay}"
+        `);
         if (result) {
             res.status(200).json(result);
         }

@@ -50,7 +50,6 @@ const AddGradeForm = (props) => {
                         setValue(`Loai${index + 1}`, data.TenLoai);
                         arr.push({ name: `Loai${index + 1}`, value: data.TenLoai, id: data.MaLoai });
                     })
-                    console.log(arr);
                     setValueArray(arr);
                 }
         })
@@ -72,7 +71,6 @@ const AddGradeForm = (props) => {
         setOpen(true)
     }
     const handleChangeInput = (e, id) => {
-        console.log(e.target.name, e.target.value)
         setValue(e.target.name, e.target.value);
         let index = -1;
         update.forEach((el, i) => index = el["MaLoai"] == id ? i : -1)

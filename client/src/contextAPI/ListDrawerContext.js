@@ -19,7 +19,7 @@ const ListDrawerContextProvider = (props) => {
             case 'OPEN_LIST2':
                 return {
                     ...state,
-                    list2: false
+                    list2: true
                 }
             case 'TOGGLE_LIST2':
                 return {

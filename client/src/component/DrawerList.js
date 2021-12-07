@@ -64,6 +64,14 @@ const DrawerList = () => {
         listOpenDispatch({ type: 'OPEN_LIST2' })
     }
 
+    const list1 = ['/grade', '/openevaluate', '/evaluate', '/evaluatesubject', '/evaluatedepartment',]
+    const list2 = ["/createvoting", "/votingmanage", "/voting"];
+    useEffect(() => {
+        list1.includes(location.pathname) &&
+            listOpenDispatch({ type: 'OPEN_LIST1' })
+        list2.includes(location.pathname) &&
+            listOpenDispatch({ type: 'OPEN_LIST2' })
+    }, [location])
 
     return (
         <div className="drawer-list" style={{ overflow: 'hidden' }}>
@@ -231,7 +239,7 @@ const DrawerList = () => {
                     <List component="div" disablePadding>
                         {
                             info.info.Quyen["9"] == 1 &&
-                            <NavLink handleStayOpen2 to={"/createvoting"}>
+                            <NavLink onClick={handleStayOpen2} to={"/createvoting"}>
                                 <ListItemButton >
                                     <ListItemIcon>
                                         <GradeIcon />
@@ -242,7 +250,7 @@ const DrawerList = () => {
                         }
                         {
                             info.info.Quyen["9"] == 1 &&
-                            <NavLink handleStayOpen2 to={"/votingmanage"}>
+                            <NavLink onClick={handleStayOpen2} to={"/votingmanage"}>
                                 <ListItemButton >
                                     <ListItemIcon>
                                         <GradeIcon />
@@ -253,7 +261,7 @@ const DrawerList = () => {
                         }
                         {
                             info.info.Quyen["10"] == 1 &&
-                            <NavLink handleStayOpen2 to={"/voting"}>
+                            <NavLink onClick={handleStayOpen2} to={"/voting"}>
                                 <ListItemButton >
                                     <ListItemIcon>
                                         <GradeIcon />

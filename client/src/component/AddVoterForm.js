@@ -74,7 +74,6 @@ const AddVoterForm = (props) => {
                 }
             })
         } else {
-            console.log(right);
             setOpen(false);
             setVoter(right.map(el => ({ HoTen: el.HoTen, MaNguoiThamGia: el.MaSoDangVien })))
         }

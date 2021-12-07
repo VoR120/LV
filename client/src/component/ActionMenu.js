@@ -32,7 +32,6 @@ const ActionMenu = (props) => {
     const [open, setOpen] = useState(null);
     const { info } = useContext(InfoContext)
     const { data, rows, setRows } = props;
-    console.log(data);
 
     const handleClose = () => {
         setOpen(null)

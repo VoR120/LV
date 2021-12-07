@@ -14,7 +14,13 @@ import {
     TextField,
     Typography,
     MenuItem,
-    Chip
+    Chip,
+    TableContainer,
+    Table,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableBody
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useRef, useState } from 'react';
@@ -34,6 +40,8 @@ import { getAllPoll, getResult, updatePoll } from '../action/votingAction';
 import { LoadingContext } from '../contextAPI/LoadingContext';
 import { getDateStatus, getDateTime, getLocaleDateTime, getStatus } from '../utils/utils';
 import { getAllCategory } from '../action/categoryAction';
+import MaterialTable from '@material-table/core';
+import SaveResult from '../component/SaveResult';
 
 
 const useStyles = makeStyles(theme => ({
@@ -58,12 +66,17 @@ const useStyles = makeStyles(theme => ({
         margin: '0 auto'
     },
     title: {
-        marginBottom: '20px'
+        marginBottom: '14px'
     },
     flex: {
         display: 'flex',
         justifyContent: 'space-between',
         marginBottom: '40px'
+    },
+    table: {
+        width: '100%',
+        backgroundColor: 'white',
+        marginTop: '18px',
     },
 }))
 
@@ -76,6 +89,17 @@ const Voting = () => {
     const { loadingDispatch } = useContext(LoadingContext)
     const { category, categoryDispatch } = useContext(CategoryContext);
     const { openSnackbarDispatch } = useContext(SnackbarContext);
+    const [open, setOpen] = useState([]);
+    const [editOpen, setEditOpen] = useState([]);
+    const [editState, setEditState] = useState(null);
+    const [resultState, setResultState] = useState(null);
+    const [label, setLabel] = useState([])
+    const [quantity, setQuantity] = useState([]);
+    const [quantityPer, setQuantityPer] = useState("")
+    const [resultVoting, setResultVoting] = useState([])
+    const [indexForm, setIndexForm] = useState("")
+
+    console.log(resultState);
 
     const {
         handleSubmit,
@@ -90,15 +114,6 @@ const Voting = () => {
 
     const ThoiGianBatDau = useRef({});
     ThoiGianBatDau.current = watch("ThoiGianBatDau", "");
-
-    const [open, setOpen] = useState([]);
-    const [editOpen, setEditOpen] = useState([]);
-    const [editState, setEditState] = useState(null);
-    const [resultState, setResultState] = useState(null);
-    const [label, setLabel] = useState([])
-    const [quantity, setQuantity] = useState([]);
-    const [quantityPer, setQuantityPer] = useState("")
-    const [indexForm, setIndexForm] = useState("")
 
     const handleToggle = (data, index) => {
         setEditOpen([]);
@@ -129,6 +144,8 @@ const Voting = () => {
     useEffect(() => {
         const getResultAPI = async () => {
             const res = await getResult({ id: resultState.MaBieuQuyet })
+            console.log(res);
+            setResultVoting(res.Data)
             setLabel(res.Data.map(el => `${el.MaSoDangVien} - ${el.HoTen}`));
             setQuantity(res.Data.map(el => el.SoPhieu));
             setQuantityPer(res.SoLuongBieuQuyet + "/" + res.SoLuong)
@@ -173,6 +190,8 @@ const Voting = () => {
             setValue("MaBieuQuyet", editState.MaBieuQuyet);
             setValue("TenBieuQuyet", editState.TenBieuQuyet);
             setValue("NoiDung", editState.NoiDung);
+            setValue("ThoiGianNhacNho", editState.ThoiGianNhacNho);
+            setValue("PhamVi", editState.PhamVi);
             setValue("SoPhieuToiDa", editState.SoPhieuToiDa);
             setValue("ThoiGianBatDau", getDateTime(editState.ThoiGianBatDau))
             setValue("ThoiGianKetThuc", getDateTime(editState.ThoiGianKetThuc))
@@ -189,6 +208,23 @@ const Voting = () => {
     }, [])
 
     const VotingResultForm = () => {
+
+        const [openResult, setOpenResult] = useState(false);
+        const [data, setData] = useState([]);
+
+        const columns = [
+            { title: "Mã số Đảng viên", field: "MaSoDangVien", },
+            { title: "Họ tên", field: "HoTen", },
+            { title: "Số phiếu", field: "SoPhieu", },
+        ];
+
+        const rows = resultVoting.map((el, index) => ({
+            id: index,
+            HoTen: el.HoTen,
+            MaSoDangVien: el.MaSoDangVien,
+            SoPhieu: el.SoPhieu
+        }));
+
         return (
             <Paper className={classes.paper} variant="outlined">
                 <Typography textAlign="center" style={{ marginBottom: '40px' }} variant="h5">
@@ -224,6 +260,48 @@ const Voting = () => {
                             text: "Predicted world population (millions) in 2050"
                         },
                     }}
+                />
+
+                <TableContainer sx={{ width: '800px', margin: '0 auto', marginTop: '40px' }} variant="outlined">
+                    <MaterialTable
+                        components={{
+                            Container: (props) =>
+                                <Paper
+                                    {...props}
+                                    className={classes.table}
+                                    variant="outlined"
+                                />
+                        }}
+                        title={"Bảng kết quả"}
+                        columns={columns}
+                        data={rows}
+
+                        actions={[
+                            {
+                                // isFreeAction: true,
+                                icon: 'save',
+                                tooltip: 'Lưu',
+                                onClick: (event, rowData) => {
+                                    setData(rowData);
+                                    setOpenResult(true)
+                                },
+                            },
+                        ]}
+
+                        options={{
+                            sorting: false,
+                            search: false,
+                            paging: false,
+                            padding: 'dense',
+                            selection: true
+                        }}
+                    />
+                </TableContainer>
+                <SaveResult
+                    open={openResult}
+                    setOpen={setOpenResult}
+                    data={data}
+                    name={resultState.TenBieuQuyet}
                 />
             </Paper>
         )
@@ -262,6 +340,9 @@ const Voting = () => {
                                             {el.NoiDung}
                                         </Typography>
                                         <Typography textAlign="center" className={classes.title}>
+                                            Phạm vi: <b>{el.PhamVi}</b>
+                                        </Typography>
+                                        <Typography textAlign="center" className={classes.title}>
                                             Số phiếu tối đa: <b>{el.SoPhieuToiDa}</b>
                                         </Typography>
                                         <Grid container justifyContent="center">
@@ -273,6 +354,9 @@ const Voting = () => {
                                             {/* {getStatus(el.ThoiGianBatDau, el.ThoiGianKetThuc) == 0 && */}
                                             <MyButton onClick={() => handleEditToggle(el, index)} primary style={{ marginBottom: '20px', marginLeft: "8px" }}>
                                                 {editOpen[index] ? 'Hủy' : 'Chỉnh sửa'}
+                                            </MyButton>
+                                            <MyButton primary style={{ marginBottom: '20px', marginLeft: "8px" }}>
+                                                Gửi mail
                                             </MyButton>
                                             {/* } */}
                                             <DeleteVotingForm data={el} />
@@ -362,6 +446,41 @@ const Voting = () => {
                                             </Grid>
                                             <Grid container className={classes.inputItem} alignItems="center" >
                                                 <Grid item xs={4}>
+                                                    <Typography>Phạm vi</Typography>
+                                                </Grid>
+                                                <Grid item xs={8}>
+                                                    <InputGrid
+                                                        noTitle
+                                                        name="PhamVi"
+                                                        control={control}
+                                                        errors={errors}
+                                                        rules={{
+                                                            required: "Vui lòng nhập trường này!",
+                                                        }}
+                                                    />
+                                                </Grid>
+                                            </Grid>
+                                            <Grid container className={classes.inputItem} alignItems="center" >
+                                                <Grid item xs={4}>
+                                                    <Typography>Thời gian nhắc nhở (phút)</Typography>
+                                                </Grid>
+                                                <Grid item xs={8}>
+                                                    <InputGrid
+                                                        noTitle
+                                                        type="number"
+                                                        InputProps={{ inputProps: { min: 10 } }}
+                                                        defaultValue="10"
+                                                        name="ThoiGianNhacNho"
+                                                        control={control}
+                                                        errors={errors}
+                                                        rules={{
+                                                            required: "Vui lòng nhập trường này!",
+                                                        }}
+                                                    />
+                                                </Grid>
+                                            </Grid>
+                                            <Grid container className={classes.inputItem} alignItems="center" >
+                                                <Grid item xs={4}>
                                                     <Typography>Nội dung biểu quyết</Typography>
                                                 </Grid>
                                                 <Grid item xs={8}>
@@ -438,8 +557,6 @@ const Voting = () => {
                         :
                         <Typography>Không có cuộc biểu quyết nào đang diễn ra</Typography>
                     }
-
-
                 </Grid>
             </Layout>
         </>

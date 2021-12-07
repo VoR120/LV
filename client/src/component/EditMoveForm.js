@@ -78,7 +78,6 @@ const EditMoveForm = (props) => {
 
     useEffect(() => {
         if (data) {
-            console.log(data);
             getAllCategory(categoryDispatch, "partycell");
             Object.keys(data).map(el => {
                 (dateArr.includes(el) && data[el])

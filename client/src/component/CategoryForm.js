@@ -55,7 +55,6 @@ const CategoryForm = (props) => {
 
     useEffect(() => {
         if (edit) {
-            console.log(dataArr);
             Object.keys(dataArr).forEach(key => setValue(key, dataArr[key]));
         }
     }, [])

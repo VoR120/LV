@@ -40,7 +40,7 @@ const useStyles = makeStyles(theme => ({
         // width: 'fit-content'
     },
     title: {
-        marginBottom: '20px'
+        marginBottom: '14px'
     },
     flex: {
         display: 'flex',
@@ -52,6 +52,9 @@ const useStyles = makeStyles(theme => ({
         '&:hover': {
             backgroundColor: theme.palette.success.main,
         }
+    },
+    checkbox: {
+        color: 'green !important',
     }
 }))
 
@@ -108,6 +111,9 @@ const Voting = () => {
                                     </Typography>
                                     <Typography textAlign="center" className={classes.title}>
                                         {el.NoiDung}
+                                    </Typography>
+                                    <Typography textAlign="center" className={classes.title}>
+                                        Phạm vi: <b>{el.PhamVi}</b>
                                     </Typography>
                                     <Typography textAlign="center" className={classes.title}>
                                         Số phiếu tối đa: <b>{el.SoPhieuToiDa}</b>
@@ -215,6 +221,10 @@ const VotingForm = ({ data }) => {
         if (res) {
             console.log(res);
             setIsVoted(res.isVoted);
+            setCheckedValues(Object.keys(res.Phieu).map(el => {
+                if (res.Phieu[el] == 1)
+                    return el
+            }))
         }
     }
 
@@ -257,6 +267,8 @@ const VotingForm = ({ data }) => {
                                         render={({ props }) => {
                                             return (
                                                 <Checkbox
+                                                    className={classes.checkbox}
+                                                    disabled={isVoted}
                                                     checked={checkedValues.includes(el.MaUngCuVien)}
                                                     onChange={(e) => handleSelect(e, el.MaUngCuVien)}
                                                 />

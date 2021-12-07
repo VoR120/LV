@@ -220,6 +220,41 @@ const CreateVoting = () => {
                     </Grid>
                     <Grid container className={classes.inputItem} alignItems="center" >
                         <Grid item xs={4}>
+                            <Typography>Phạm vi</Typography>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <InputGrid
+                                noTitle
+                                name="PhamVi"
+                                control={control}
+                                errors={errors}
+                                rules={{
+                                    required: "Vui lòng nhập trường này!",
+                                }}
+                            />
+                        </Grid>
+                    </Grid>
+                    <Grid container className={classes.inputItem} alignItems="center" >
+                        <Grid item xs={4}>
+                            <Typography>Thời gian nhắc nhở (phút)</Typography>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <InputGrid
+                                noTitle
+                                type="number"
+                                InputProps={{ inputProps: { min: 10 } }}
+                                defaultValue="10"
+                                name="ThoiGianNhacNho"
+                                control={control}
+                                errors={errors}
+                                rules={{
+                                    required: "Vui lòng nhập trường này!",
+                                }}
+                            />
+                        </Grid>
+                    </Grid>
+                    <Grid container className={classes.inputItem} alignItems="center" >
+                        <Grid item xs={4}>
                             <Typography>Nội dung biểu quyết</Typography>
                         </Grid>
                         <Grid item xs={8}>
