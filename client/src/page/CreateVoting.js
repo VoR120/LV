@@ -70,6 +70,9 @@ const CreateVoting = () => {
     ThoiGianBatDau.current = watch("ThoiGianBatDau", "");
 
     const handleChangeSelect = (e) => {
+        if (e.target.value != 0) {
+            clearErrors(e.target.name)
+        }
         setValue(e.target.name, e.target.value)
     }
 
@@ -146,24 +149,31 @@ const CreateVoting = () => {
                                     required: "Vui lòng nhập trường này!",
                                 }}
                             />
-
-                            {/* <InputGrid
+                        </Grid>
+                    </Grid>
+                    <Grid container className={classes.inputItem} alignItems="center">
+                        <Grid item xs={4}>
+                            <Typography>Mục đích</Typography>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <InputGrid
                                 select
                                 noTitle
+                                onChange={handleChangeSelect}
+                                name="MucDich"
                                 defaultValue="0"
-                                name="TenBieuQuyet"
                                 control={control}
                                 errors={errors}
-                                rules={{ required: "Vui lòng nhập trường này!" }}
-                                onChange={(e) => setValue(e.target.name, e.target.value)}
+                                rules={{
+                                    validate: value =>
+                                        value != 0 || "Vui lòng nhập trường này!"
+                                }}
                             >
                                 <MenuItem value="0">Chọn</MenuItem>
-                                {
-                                    category.categories.achievement.map(el =>
-                                        <MenuItem key={el.MaThanhTich} value={"Biểu quyết " + el.TenThanhTich}>Biểu quyết {el.TenThanhTich}</MenuItem>
-                                    )
-                                }
-                            </InputGrid> */}
+                                <MenuItem value="Khen thưởng">Khen thưởng</MenuItem>
+                                <MenuItem value="Kỷ luật">Kỷ luật</MenuItem>
+                                <MenuItem value="Khác">Khác</MenuItem>
+                            </InputGrid>
                         </Grid>
                     </Grid>
                     <Grid container className={classes.inputItem} alignItems="center">
@@ -184,10 +194,10 @@ const CreateVoting = () => {
                         </Grid>
                     </Grid>
                     <Grid container className={classes.inputItem} alignItems="center">
-                        <Grid xs={4}>
+                        <Grid item xs={4}>
                             <Typography>Thời gian kết thúc</Typography>
                         </Grid>
-                        <Grid xs={8}>
+                        <Grid item xs={8}>
                             <InputGrid
                                 noTitle
                                 type="datetime-local"

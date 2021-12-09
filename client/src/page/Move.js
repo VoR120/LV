@@ -6,7 +6,7 @@ import Layout from '../component/Layout';
 import ActionMenu from '../component/ActionMenu';
 import MaterialTable from '@material-table/core';
 import DownloadIcon from '@mui/icons-material/Download';
-import SaveAltIcon from '@mui/icons-material/SaveAlt';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { downloadExcel, getExportData } from '../utils/utils';
 import MySelect from '../component/UI/MySelect';
 import { getMoveByPMId, getMoveByType, updateMove } from '../action/moveAction';
@@ -287,10 +287,10 @@ const Move = () => {
 
                 </Paper>
                 <MyButton onClick={handleView} primary>Xem</MyButton>
-                {data.length > 0 &&
-                    <CSVLink data={data} filename={"export.csv"}>
-                        <MyButton style={{ marginLeft: 8 }} success>
-                            <SaveAltIcon style={{ marginRight: 4 }} />Excel
+                {data.data.length > 0 &&
+                    <CSVLink data={data.data} headers={data.headers} filename={"export.csv"}>
+                        <MyButton sx={{ ml: 1 }} success>
+                            <FileDownloadIcon sx={{ mr: 0.5 }} />Excel
                         </MyButton>
                     </CSVLink>
                 }

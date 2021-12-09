@@ -15,6 +15,8 @@ import { allInfoColumn, downloadExcel, getExportData } from '../utils/utils';
 import MyButton from '../component/UI/MyButton';
 import { CSVLink } from 'react-csv'
 import SaveAltIcon from '@mui/icons-material/SaveAlt';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -117,7 +119,7 @@ const File = () => {
                         {data.data.length > 0 &&
                             <CSVLink data={data.data} headers={data.headers} filename={"export.csv"}>
                                 <MyButton style={{ marginLeft: 8 }} success>
-                                    <SaveAltIcon style={{ marginRight: 4 }} />Excel
+                                    <FileDownloadIcon style={{ marginRight: 4 }} />Excel
                                 </MyButton>
                             </CSVLink>
                         }

@@ -152,7 +152,7 @@ export const getStatus = (startDate, finishDate) => {
     }
 }
 
-export const dateArr = ["NgaySinh", "NgayChinhThuc", "NgayVaoDang", "NgayVaoDoan", "NgayChuyenDi", "NgayChuyenDen"]
+export const dateArr = ["NgaySinh", "NgayChinhThuc", "NgayVaoDang", "NgayVaoDoan", "NgayChuyenDi", "NgayChuyenDen", "NgayKhenThuong", "NgayKyLuat"]
 
 export const pdfmakedownload = (documentDefination) => {
     pdfMake.vfs = pdfFonts.pdfMake.vfs;

@@ -15,6 +15,7 @@ import { useForm } from 'react-hook-form';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import InputGrid from './InputGrid';
 import MyButton from './UI/MyButton';
+import { createRewardDisciplines } from '../action/rewardDisciplineAction';
 
 const useStyles = makeStyles(theme => ({
     icon: {
@@ -34,7 +35,10 @@ const useStyles = makeStyles(theme => ({
 
 const SaveResult = (props) => {
     const classes = useStyles();
-    const { open, setOpen, data, name } = props
+    const { open, setOpen, data, resultState, setResultState } = props
+    const id = resultState.MaBieuQuyet;
+    const name = resultState.TenBieuQuyet;
+    const voteFor = resultState.MucDich;
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
 
     const {
@@ -54,16 +58,32 @@ const SaveResult = (props) => {
         setOpen(true)
     }
     const handleChangeSelect = (e) => {
+        if (e.target.value != 0)
+            clearErrors(e.target.name)
         setValue(e.target.name, e.target.value)
     }
-    const onSubmit = (data) => {
-        console.log(data);
+    const onSubmit = async (d) => {
+        d.DanhSach = data.map(el => el.MaSoDangVien)
+        d.type = voteFor == "Khen thưởng" ? "reward" : "discipline"
+        console.log(d);
+        const res = await createRewardDisciplines(d, id)
+        if (res) {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Đã lưu!",
+                    type: "success"
+                }
+            })
+            setResultState({ ...resultState, LuuKetQua: 1 })
+        }
+        setOpen(false);
     }
 
     return (
         <>
             <Dialog PaperProps={{ style: { minWidth: '1000px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-                <DialogTitle id="form-dialog-title">Khen thưởng</DialogTitle>
+                <DialogTitle id="form-dialog-title">{voteFor}</DialogTitle>
                 <DialogContent>
                     <FormControl margin="dense" fullWidth>
                         <Grid container spacing={1}>
@@ -80,72 +100,101 @@ const SaveResult = (props) => {
                                 </Grid>
                                 <Grid item flex={1} />
                             </Grid>
-                            <Grid item xs={12}>
-                                <InputGrid
-                                    nameTitle={"Tên khen thưởng"}
-                                    name={"TenKhenThuong"}
-                                    defaultValue={name}
-                                    multiline
-                                    minRows={3}
-                                    control={control}
-                                    errors={errors}
-                                />
-                            </Grid>
-                            <Grid item xs={6}>
-                                <InputGrid
-                                    center
-                                    select
-                                    onChange={handleChangeSelect}
-                                    nameTitle={"Hình thức"}
-                                    name={"MaHinhThuc"}
-                                    defaultValue={"0"}
-                                    rules={{
-                                        validate: value =>
-                                            value != "0" || "Vui lòng nhập trường này!"
-                                    }}
-                                    control={control}
-                                    errors={errors}
-                                >
-                                    <MenuItem value="0">Chọn hình thức</MenuItem>
-                                    <MenuItem value="0005">Biểu dương</MenuItem>
-                                    <MenuItem value="0006">Tặng giấy khen</MenuItem>
-                                </InputGrid>
-                            </Grid>
+                            {
+                                voteFor == "Khen thưởng" ?
+                                    <>
+                                        <Grid item xs={12}>
+                                            <InputGrid
+                                                nameTitle={"Tên khen thưởng"}
+                                                name={"TenKhenThuong"}
+                                                defaultValue={name}
+                                                multiline
+                                                minRows={3}
+                                                control={control}
+                                                errors={errors}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <InputGrid
+                                                center
+                                                select
+                                                onChange={handleChangeSelect}
+                                                nameTitle={"Hình thức"}
+                                                name={"HinhThuc"}
+                                                defaultValue={"0"}
+                                                rules={{
+                                                    validate: value =>
+                                                        value != "0" || "Vui lòng nhập trường này!"
+                                                }}
+                                                control={control}
+                                                errors={errors}
+                                            >
+                                                <MenuItem value="0">Chọn hình thức</MenuItem>
+                                                <MenuItem value="Biểu dương">Biểu dương</MenuItem>
+                                                <MenuItem value="Tặng giấy khen">Tặng giấy khen</MenuItem>
+                                            </InputGrid>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <InputGrid
+                                                center
+                                                type="date"
+                                                nameTitle={"Ngày khen thưởng"}
+                                                defaultValue={getDate(new Date)}
+                                                name={"NgayKhenThuong"}
+                                                control={control}
+                                                errors={errors}
+                                            />
+                                        </Grid>
+                                    </>
+                                    :
+                                    <>
+                                        <Grid item xs={12}>
+                                            <InputGrid
+                                                nameTitle={"Tên kỷ luật"}
+                                                name={"TenKyLuat"}
+                                                defaultValue={name}
+                                                multiline
+                                                minRows={3}
+                                                control={control}
+                                                errors={errors}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <InputGrid
+                                                center
+                                                select
+                                                onChange={handleChangeSelect}
+                                                nameTitle={"Hình thức"}
+                                                name={"HinhThuc"}
+                                                defaultValue={"0"}
+                                                rules={{
+                                                    validate: value =>
+                                                        value != "0" || "Vui lòng nhập trường này!"
+                                                }}
+                                                control={control}
+                                                errors={errors}
+                                            >
+                                                <MenuItem value="0">Chọn hình thức</MenuItem>
+                                                <MenuItem value="Khiển trách">Khiển trách</MenuItem>
+                                                <MenuItem value="Cảnh cáo">Cảnh cáo</MenuItem>
+                                                <MenuItem value="Cách chức">Cách chức</MenuItem>
+                                                <MenuItem value="Khai trừ">Khai trừ</MenuItem>
+                                            </InputGrid>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <InputGrid
+                                                center
+                                                type="date"
+                                                nameTitle={"Ngày kỷ luật"}
+                                                defaultValue={getDate(new Date)}
+                                                name={"NgayKyLuat"}
+                                                control={control}
+                                                errors={errors}
+                                            />
+                                        </Grid>
+                                    </>
+                            }
 
-                            {/* <Grid item xs={6}>
-                                    <InputGrid
-                                    center
-                                        select
-                                        onChange={handleChangeSelect}
-                                        nameTitle={"Hình thức"}
-                                        name={"MaHinhThuc"}
-                                        defaultValue={"0"}
-                                        rules={{
-                                            validate: value =>
-                                                value != "0" || "Vui lòng nhập trường này!"
-                                        }}
-                                        control={control}
-                                        errors={errors}
-                                    >
-                                        <MenuItem value="0">Chọn hình thức</MenuItem>
-                                        <MenuItem value="0007">Khiển trách</MenuItem>
-                                        <MenuItem value="0008">Cảnh cáo</MenuItem>
-                                        <MenuItem value="0009">Cách chức</MenuItem>
-                                        <MenuItem value="0010">Khai trừ</MenuItem>
-                                    </InputGrid>
-                                </Grid> */}
-
-                            <Grid item xs={6}>
-                                <InputGrid
-                                    center
-                                    type="date"
-                                    nameTitle={"Ngày khen thưởng"}
-                                    defaultValue={getDate(new Date)}
-                                    name={"NgayKhenThuong"}
-                                    control={control}
-                                    errors={errors}
-                                />
-                            </Grid>
                         </Grid>
                     </FormControl>
                 </DialogContent>

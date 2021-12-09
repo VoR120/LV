@@ -26,7 +26,7 @@ import InputGrid from '../component/InputGrid';
 import { useForm } from 'react-hook-form';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import { CSVLink } from 'react-csv'
-import SaveAltIcon from '@mui/icons-material/SaveAlt';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { getEvaluated } from '../action/evaluateAction';
 import { InfoContext } from '../contextAPI/InfoContext';
 
@@ -189,7 +189,7 @@ const Grade = () => {
                 {data.length > 0 &&
                     <CSVLink data={data} filename={"export.csv"}>
                         <MyButton style={{ marginLeft: 8 }} success>
-                            <SaveAltIcon style={{ marginRight: 4 }} />Excel
+                            <FileDownloadIcon style={{ marginRight: 4 }} />Excel
                         </MyButton>
                     </CSVLink>
                 }

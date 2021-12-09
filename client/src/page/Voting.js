@@ -23,6 +23,8 @@ import { checkIsVoted, getAllPoll, vote } from '../action/votingAction'
 import { LoadingContext } from '../contextAPI/LoadingContext';
 import { getDateStatus, getLocaleDateTime, getStatus } from '../utils/utils';
 import { InfoContext } from '../contextAPI/InfoContext';
+import { CategoryContext } from '../contextAPI/CategoryContext';
+import { getAllCategory } from '../action/categoryAction';
 
 
 const useStyles = makeStyles(theme => ({
@@ -61,7 +63,10 @@ const useStyles = makeStyles(theme => ({
 const Voting = () => {
     const classes = useStyles();
     const { loadingDispatch } = useContext(LoadingContext)
+    const { info } = useContext(InfoContext);
+    console.log(info);
     const [pollArr, setPollArr] = useState([]);
+    const DePer = info.info.Quyen["12"];
 
     const getStatus = (startDate, finishDate) => {
         if (new Date() < new Date(startDate)) {
@@ -77,7 +82,9 @@ const Voting = () => {
 
     useEffect(() => {
         const fetchAllPoll = async () => {
-            const res = await getAllPoll();
+            const res = DePer
+                ? await getAllPoll()
+                : await getAllPoll({ MaSoDangVien: info.info.MaSoDangVien });
             if (res) {
                 setPollArr(res);
                 loadingDispatch({ type: 'CLOSE_LOADING' })
@@ -221,10 +228,11 @@ const VotingForm = ({ data }) => {
         if (res) {
             console.log(res);
             setIsVoted(res.isVoted);
-            setCheckedValues(Object.keys(res.Phieu).map(el => {
-                if (res.Phieu[el] == 1)
-                    return el
-            }))
+            res.isVoted &&
+                setCheckedValues(Object.keys(res.Phieu).map(el => {
+                    if (res.Phieu[el] == 1)
+                        return el
+                }))
         }
     }
 

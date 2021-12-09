@@ -10,13 +10,15 @@ import {
     ListItem, ListItemIcon, ListItemText, MenuItem, Paper, Typography
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { filterPartyMember } from '../action/partyMemberAction';
 import { getPollByTime, getResult } from '../action/votingAction';
 import { CategoryContext } from '../contextAPI/CategoryContext';
+import { InfoContext } from '../contextAPI/InfoContext';
 import { LoadingContext } from '../contextAPI/LoadingContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import { getDate } from '../utils/utils';
 import InputGrid from './InputGrid';
 import MyButton from './UI/MyButton';
 import MySelect from './UI/MySelect';
@@ -43,9 +45,11 @@ const AddCandidateForm = (props) => {
     const [open, setOpen] = useState(false);
 
     const { category, categoryDispatch } = useContext(CategoryContext);
+    const { info } = useContext(InfoContext);
     const { openSnackbarDispatch } = useContext(SnackbarContext);
     const { loadingDispatch } = useContext(LoadingContext);
 
+    const DePer = info.info.Quyen["12"]
     const [gradeArr, setGradeArr] = useState([])
     const [checked, setChecked] = useState([]);
     const [left, setLeft] = useState([]);
@@ -63,6 +67,9 @@ const AddCandidateForm = (props) => {
         setValue,
         getValues,
         watch,
+        setError,
+        reset,
+        clearErrors,
         formState: { errors }
     } = useForm();
 
@@ -90,6 +97,8 @@ const AddCandidateForm = (props) => {
     }
     const onSubmit = async (data) => {
         data.grade = fieldValue;
+        if (DePer != 1)
+            data.partycell = info.info.MaChiBo
         // setRight([]);
         loadingDispatch({ type: 'OPEN_LOADING' })
         const res = await filterPartyMember(data);
@@ -98,6 +107,7 @@ const AddCandidateForm = (props) => {
     }
 
     const onSubmitByPoll = async (data) => {
+        console.log(data);
         loadingDispatch({ type: 'OPEN_LOADING' })
         const res = await getResult({ id: data.poll })
         if (res) {
@@ -157,7 +167,7 @@ const AddCandidateForm = (props) => {
         setRight([]);
     };
 
-    const handleReset = () => {
+    const handleResetAll = () => {
         setLeft([]);
         setRight([]);
     }
@@ -182,81 +192,312 @@ const AddCandidateForm = (props) => {
     }
 
     const handleSubmitDate = async () => {
-        const TuNgay = getValues("TuNgay");
-        const DenNgay = getValues("DenNgay");
+        let TuNgay = getValues("TuNgay");
+        let DenNgay = getValues("DenNgay");
+        console.log(TuNgay, DenNgay);
+        if (!TuNgay && DenNgay) {
+            setError("TuNgay", {
+                type: "manual",
+                message: "Vui lòng nhập trường này!"
+            })
+            return;
+        }
+        if (TuNgay && !DenNgay) {
+            setValue("DenNgay", getDate(new Date()))
+            DenNgay = getDate(new Date());
+        }
         console.log(TuNgay, DenNgay)
         const res = await getPollByTime({ TuNgay, DenNgay });
         console.log(res);
-        if (res) {
+        if (res.length) {
             setPollArr(res);
+            setValue("poll", res[0].MaBieuQuyet)
         }
     }
+
+    const handleReset = () => {
+        setValue("partycell", "0")
+        setFieldValue("0");
+        setFieldArr([]);
+        setYearGrade("0");
+    }
+
+    const handleResetPoll = () => {
+        setValue("TuNgay", "")
+        setValue("DenNgay", "")
+        setPollArr([]);
+        setValue("poll", "0");
+        clearErrors()
+    }
+
+    const TuNgay = useRef({});
+    TuNgay.current = watch("TuNgay", "");
 
     useEffect(() => {
         setYearGradeArr(category.categories.grade)
     }, [category])
 
     const customList = (items) => (
-        <Paper variant="outlined" sx={{ width: 330, height: 300, overflow: 'auto' }}>
-            <List dense component="div" role="list">
-                {items.map((value, index) => {
-                    const labelId = `transfer-list-item-${index}-label`;
+        <>
+            {DePer ?
+                <Typography variant="subtitle2">* Họ tên - Mã Số ( - Số phiếu )</Typography>
+                :
+                <Typography variant="subtitle2">* Họ tên - Mã Số</Typography>
+            }
+            <Paper variant="outlined" sx={{ width: DePer ? 330 : 250, height: 260, overflow: 'auto' }}>
+                <List dense component="div" role="list">
+                    {items.map((value, index) => {
+                        const labelId = `transfer-list-item-${index}-label`;
 
-                    return (
-                        <ListItem
-                            key={index}
-                            role="listitem"
-                            button
-                            onClick={handleToggle(value)}
-                        >
-                            <ListItemIcon>
-                                <Checkbox
-                                    checked={checked.indexOf(value) !== -1}
-                                    tabIndex={-1}
-                                    disableRipple
-                                    inputProps={{
-                                        'aria-labelledby': labelId,
-                                    }}
-                                />
-                            </ListItemIcon>
-                            {value.SoPhieu ?
-                                <ListItemText id={labelId} primary={value.HoTen + " - " + value.MaSoDangVien + " - " + value.SoPhieu} />
-                                :
-                                <ListItemText id={labelId} primary={value.HoTen + " - " + value.MaSoDangVien} />
-                            }
-                        </ListItem>
-                    );
-                })}
-                <ListItem />
-            </List>
-        </Paper>
+                        return (
+                            <ListItem
+                                key={index}
+                                role="listitem"
+                                button
+                                onClick={handleToggle(value)}
+                            >
+                                <ListItemIcon>
+                                    <Checkbox
+                                        checked={checked.indexOf(value) !== -1}
+                                        tabIndex={-1}
+                                        disableRipple
+                                        inputProps={{
+                                            'aria-labelledby': labelId,
+                                        }}
+                                    />
+                                </ListItemIcon>
+                                {value.SoPhieu ?
+                                    <ListItemText id={labelId} primary={value.HoTen + " - " + value.MaSoDangVien + " - " + value.SoPhieu} />
+                                    :
+                                    <ListItemText id={labelId} primary={value.HoTen + " - " + value.MaSoDangVien} />
+                                }
+                            </ListItem>
+                        );
+                    })}
+                    <ListItem />
+                </List>
+            </Paper>
+        </>
     )
 
     return (
         <>
             <MyButton onClick={handleOpen} success><AddIcon />Thêm</MyButton>
-            <Dialog PaperProps={{ style: { minWidth: '1200px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-                <DialogTitle id="form-dialog-title">Thêm ứng cử viên</DialogTitle>
-                <DialogContent>
-                    <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                            <Typography>* Tra cứu theo thông tin</Typography>
-                            <InputGrid
-                                select
-                                onChange={handleChangeSelect}
-                                nameTitle={"Chi bộ"}
-                                name="partycell"
-                                defaultValue="0"
-                                control={control}
-                                errors={errors}
-                            >
-                                <MenuItem value="0">Tất cả</MenuItem>
-                                {
-                                    category.categories["partycell"].map(el =>
-                                        <MenuItem key={el.MaChiBo} value={el.MaChiBo} >{el.TenChiBo}</MenuItem>
-                                    )
-                                }
-                            </InputGrid>
+            {
+                DePer ?
+                    <Dialog PaperProps={{ style: { minWidth: '1200px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+                        <DialogTitle id="form-dialog-title">Thêm ứng cử viên</DialogTitle>
+                        <DialogContent>
+                            <Grid container spacing={2}>
+                                <Grid item xs={6}>
+                                    <Typography>* Tra cứu theo thông tin</Typography>
+                                    <InputGrid
+                                        select
+                                        onChange={handleChangeSelect}
+                                        nameTitle={"Chi bộ"}
+                                        name="partycell"
+                                        defaultValue="0"
+                                        control={control}
+                                        errors={errors}
+                                    >
+                                        <MenuItem value="0">Tất cả</MenuItem>
+                                        {
+                                            category.categories["partycell"].map(el =>
+                                                <MenuItem key={el.MaChiBo} value={el.MaChiBo} >{el.TenChiBo}</MenuItem>
+                                            )
+                                        }
+                                    </InputGrid>
+                                    <Grid container sx={{ marginTop: 2 }}>
+                                        <Grid item style={{ width: '150px' }}>
+                                            <Typography>Loại</Typography>
+                                        </Grid>
+                                        <Grid item container flex={1} spacing={2}>
+                                            <Grid container item>
+                                                <Grid item>
+                                                    <Typography sx={{ width: '50px' }}>Năm</Typography>
+                                                </Grid>
+                                                <Grid item flex={1}>
+                                                    <MySelect
+                                                        value={yearGrade}
+                                                        onChange={handleChangeYear}
+                                                    >
+                                                        <MenuItem value="0">Không</MenuItem>
+                                                        {yearGradeArr.map(el =>
+                                                            <MenuItem key={el.Nam} value={el.Nam}>{el.Nam}</MenuItem>
+                                                        )}
+                                                    </MySelect>
+                                                </Grid>
+                                            </Grid>
+                                            <Grid container item>
+                                                <Grid item >
+                                                    <Typography sx={{ width: '50px' }}>Loại</Typography>
+                                                </Grid>
+                                                <Grid item flex={1}>
+                                                    <MySelect
+                                                        value={fieldValue}
+                                                        onChange={handleChangeFieldValue}
+                                                    >
+                                                        <MenuItem value="0">Tất cả</MenuItem>
+                                                        {
+                                                            fieldArr.map(el =>
+                                                                <MenuItem key={el["MaLoai"]} value={el["MaLoai"]}>{el["TenLoai"]}</MenuItem>
+                                                            )
+                                                        }
+                                                    </MySelect>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                    <Grid style={{ width: '100%', textAlign: 'center', marginTop: 16 }}>
+                                        <MyButton onClick={handleSubmit(onSubmit)} style={{ margin: '0 auto', marginRight: '8px' }} info >Liệt kê</MyButton>
+                                        <Button variant="outlined" onClick={handleReset} style={{ margin: '0 auto', }} variant="outlined" >Reset</Button>
+                                    </Grid>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Typography>* Tra cứu theo kết quả biểu quyết</Typography>
+
+                                    <Grid container spacing={2}>
+                                        <Grid item style={{ width: '150px', marginTop: '16px' }}>
+                                            <Typography>Thời gian</Typography>
+                                        </Grid>
+                                        <Grid item container flex={1} alignItems="center" spacing={2}>
+                                            <Grid item>
+                                                <InputGrid
+                                                    noTitle
+                                                    type="date"
+                                                    name="TuNgay"
+                                                    // defaultValue=""
+                                                    control={control}
+                                                    errors={errors}
+                                                />
+                                            </Grid>
+                                            <Grid item>
+
+                                                <InputGrid
+                                                    noTitle
+                                                    type="date"
+                                                    name="DenNgay"
+                                                    // defaultValue=""
+                                                    control={control}
+                                                    errors={errors}
+                                                    rules={{
+                                                        validate: value => {
+                                                            if (!value && !getValues("TuNgay")) return true
+                                                            if (new Date(value) >= new Date(TuNgay.current))
+                                                                return true
+                                                            else
+                                                                return "Ngày kết thúc phải lớn hơn ngày bắt đầu"
+                                                        }
+                                                    }}
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                    <Grid container sx={{ marginTop: 2 }} alignItems="center">
+                                        <Grid item style={{ width: '150px' }}>
+                                        </Grid>
+                                        <MyButton onClick={handleSubmit(handleSubmitDate)} sx={{ margin: '2px 8px 2px 0px' }} info>Tra cứu</MyButton>
+                                        {`Tìm thấy ${pollArr.length} cuộc biểu quyết`}
+                                    </Grid>
+                                    <Grid item>
+                                        <InputGrid
+                                            select
+                                            onChange={handleChangeSelect}
+                                            nameTitle={"Cuộc biểu quyết"}
+                                            name="poll"
+                                            defaultValue="0"
+                                            control={control}
+                                            errors={errors}
+                                        >
+                                            <MenuItem value="0">Không</MenuItem>
+                                            {pollArr.length &&
+                                                pollArr.map((el, index) =>
+                                                    <MenuItem key={index} value={el.MaBieuQuyet}>{el.TenBieuQuyet + " - " + el.PhamVi}</MenuItem>
+                                                )
+                                            }
+                                        </InputGrid>
+                                    </Grid>
+                                    <Grid style={{ width: '100%', textAlign: 'center', marginTop: 16 }}>
+                                        <MyButton onClick={handleSubmit(onSubmitByPoll)} style={{ margin: '0 auto', marginRight: '8px' }} info >Liệt kê</MyButton>
+                                        <Button variant="outlined" onClick={handleResetPoll} style={{ margin: '0 auto' }} >Reset</Button>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                            <Grid sx={{ marginTop: '2px' }} container spacing={2} justifyContent="center" alignItems="center">
+                                <Grid item>
+                                    {customList(left)}
+                                </Grid>
+                                <Grid item>
+                                    <Grid container direction="column" alignItems="center">
+                                        <Button
+                                            sx={{ my: 0.5 }}
+                                            variant="outlined"
+                                            size="small"
+                                            onClick={handleAllRight}
+                                            disabled={left.length === 0}
+                                            aria-label="move all right"
+                                        >
+                                            ≫
+                                        </Button>
+                                        <Button
+                                            sx={{ my: 0.5 }}
+                                            variant="outlined"
+                                            size="small"
+                                            onClick={handleCheckedRight}
+                                            disabled={leftChecked.length === 0}
+                                            aria-label="move selected right"
+                                        >
+                                            &gt;
+                                        </Button>
+                                        <Button
+                                            sx={{ my: 0.5 }}
+                                            variant="outlined"
+                                            size="small"
+                                            onClick={handleCheckedLeft}
+                                            disabled={rightChecked.length === 0}
+                                            aria-label="move selected left"
+                                        >
+                                            &lt;
+                                        </Button>
+                                        <Button
+                                            sx={{ my: 0.5 }}
+                                            variant="outlined"
+                                            size="small"
+                                            onClick={handleAllLeft}
+                                            disabled={right.length === 0}
+                                            aria-label="move all left"
+                                        >
+                                            ≪
+                                        </Button>
+                                        <Button
+                                            sx={{ my: 0.5 }}
+                                            variant="outlined"
+                                            size="small"
+                                            onClick={handleResetAll}
+                                            disabled={false}
+                                            aria-label="move all left"
+                                        >
+                                            Reset
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                                <Grid item>{customList(right)}</Grid>
+                            </Grid>
+
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={handleClose} >
+                                Hủy
+                            </Button>
+                            <MyButton onClick={handleAdd} success>
+                                Thêm
+                            </MyButton>
+                        </DialogActions>
+                    </Dialog>
+                    :
+                    <Dialog PaperProps={{ style: { minWidth: '700px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+                        <DialogTitle id="form-dialog-title">Thêm ứng cử viên</DialogTitle>
+                        <DialogContent>
                             <Grid container sx={{ marginTop: 2 }}>
                                 <Grid item style={{ width: '150px' }}>
                                     <Typography>Loại</Typography>
@@ -299,138 +540,80 @@ const AddCandidateForm = (props) => {
                                 </Grid>
                             </Grid>
                             <Grid style={{ width: '100%', textAlign: 'center', marginTop: 16 }}>
-                                <MyButton onClick={handleSubmit(onSubmit)} style={{ margin: '0 auto' }} info >Liệt kê</MyButton>
+                                <MyButton onClick={handleSubmit(onSubmit)} style={{ margin: '0 auto', marginRight: '8px' }} info >Liệt kê</MyButton>
+                                <Button variant="outlined" onClick={handleReset} style={{ margin: '0 auto', }} info >Reset</Button>
                             </Grid>
-                        </Grid>
-                        <Grid item xs={6}>
-                            <Typography>* Tra cứu theo kết quả biểu quyết</Typography>
-
-                            <Grid container spacing={2}>
-                                <Grid item style={{ width: '150px', marginTop: '16px' }}>
-                                    <Typography>Thời gian</Typography>
+                            <Grid sx={{ marginTop: '2px' }} container spacing={2} justifyContent="center" alignItems="center">
+                                <Grid item>
+                                    {customList(left)}
                                 </Grid>
-                                <Grid item container flex={1} alignItems="center" spacing={2}>
-                                    <Grid item>
-                                        <InputGrid
-                                            noTitle
-                                            type="date"
-                                            name="TuNgay"
-                                            defaultValue=""
-                                            control={control}
-                                            errors={errors}
-                                        />
+                                <Grid item>
+                                    <Grid container direction="column" alignItems="center">
+                                        <Button
+                                            sx={{ my: 0.5 }}
+                                            variant="outlined"
+                                            size="small"
+                                            onClick={handleAllRight}
+                                            disabled={left.length === 0}
+                                            aria-label="move all right"
+                                        >
+                                            ≫
+                                        </Button>
+                                        <Button
+                                            sx={{ my: 0.5 }}
+                                            variant="outlined"
+                                            size="small"
+                                            onClick={handleCheckedRight}
+                                            disabled={leftChecked.length === 0}
+                                            aria-label="move selected right"
+                                        >
+                                            &gt;
+                                        </Button>
+                                        <Button
+                                            sx={{ my: 0.5 }}
+                                            variant="outlined"
+                                            size="small"
+                                            onClick={handleCheckedLeft}
+                                            disabled={rightChecked.length === 0}
+                                            aria-label="move selected left"
+                                        >
+                                            &lt;
+                                        </Button>
+                                        <Button
+                                            sx={{ my: 0.5 }}
+                                            variant="outlined"
+                                            size="small"
+                                            onClick={handleAllLeft}
+                                            disabled={right.length === 0}
+                                            aria-label="move all left"
+                                        >
+                                            ≪
+                                        </Button>
+                                        <Button
+                                            sx={{ my: 0.5 }}
+                                            variant="outlined"
+                                            size="small"
+                                            onClick={handleResetAll}
+                                            disabled={false}
+                                            aria-label="move all left"
+                                        >
+                                            Reset
+                                        </Button>
                                     </Grid>
-                                    <Grid item>
-
-                                        <InputGrid
-                                            noTitle
-                                            type="date"
-                                            name="DenNgay"
-                                            defaultValue=""
-                                            control={control}
-                                            errors={errors}
-                                        />
-                                    </Grid>
                                 </Grid>
+                                <Grid item>{customList(right)}</Grid>
                             </Grid>
-                            <Grid container sx={{ marginTop: 2 }}>
-                                <Grid item style={{ width: '150px' }}>
-                                </Grid>
-                                <MyButton onClick={handleSubmitDate} sx={{ margin: '2px 0px' }} info>Tra cứu</MyButton>
-                            </Grid>
-                            <Grid item>
-                                <InputGrid
-                                    select
-                                    onChange={handleChangeSelect}
-                                    nameTitle={"Cuộc biểu quyết"}
-                                    name="poll"
-                                    defaultValue="0"
-                                    control={control}
-                                    errors={errors}
-                                >
-                                    <MenuItem value="0">Không</MenuItem>
-                                    {pollArr.length &&
-                                        pollArr.map((el, index) =>
-                                            <MenuItem key={index} value={el.MaBieuQuyet}>{el.TenBieuQuyet + " - " + el.PhamVi}</MenuItem>
-                                        )
-                                    }
-                                </InputGrid>
-                            </Grid>
-                            <Grid style={{ width: '100%', textAlign: 'center', marginTop: 16 }}>
-                                <MyButton onClick={handleSubmit(onSubmitByPoll)} style={{ margin: '0 auto' }} info >Liệt kê</MyButton>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-
-                    <Grid sx={{ marginTop: '2px' }} container spacing={2} justifyContent="center" alignItems="center">
-                        <Grid item>{customList(left)}</Grid>
-                        <Grid item>
-                            <Grid container direction="column" alignItems="center">
-                                <Button
-                                    sx={{ my: 0.5 }}
-                                    variant="outlined"
-                                    size="small"
-                                    onClick={handleAllRight}
-                                    disabled={left.length === 0}
-                                    aria-label="move all right"
-                                >
-                                    ≫
-                                </Button>
-                                <Button
-                                    sx={{ my: 0.5 }}
-                                    variant="outlined"
-                                    size="small"
-                                    onClick={handleCheckedRight}
-                                    disabled={leftChecked.length === 0}
-                                    aria-label="move selected right"
-                                >
-                                    &gt;
-                                </Button>
-                                <Button
-                                    sx={{ my: 0.5 }}
-                                    variant="outlined"
-                                    size="small"
-                                    onClick={handleCheckedLeft}
-                                    disabled={rightChecked.length === 0}
-                                    aria-label="move selected left"
-                                >
-                                    &lt;
-                                </Button>
-                                <Button
-                                    sx={{ my: 0.5 }}
-                                    variant="outlined"
-                                    size="small"
-                                    onClick={handleAllLeft}
-                                    disabled={right.length === 0}
-                                    aria-label="move all left"
-                                >
-                                    ≪
-                                </Button>
-                                <Button
-                                    sx={{ my: 0.5 }}
-                                    variant="outlined"
-                                    size="small"
-                                    onClick={handleReset}
-                                    disabled={false}
-                                    aria-label="move all left"
-                                >
-                                    Reset
-                                </Button>
-                            </Grid>
-                        </Grid>
-                        <Grid item>{customList(right)}</Grid>
-                    </Grid>
-
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose} >
-                        Hủy
-                    </Button>
-                    <MyButton onClick={handleAdd} success>
-                        Thêm
-                    </MyButton>
-                </DialogActions>
-            </Dialog >
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={handleClose} >
+                                Hủy
+                            </Button>
+                            <MyButton onClick={handleAdd} success>
+                                Thêm
+                            </MyButton>
+                        </DialogActions>
+                    </Dialog >
+            }
         </>
     );
 };

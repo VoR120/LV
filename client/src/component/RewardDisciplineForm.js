@@ -116,7 +116,7 @@ const RewardDisciplineForm = (props) => {
                                         select
                                         onChange={handleChangeSelect}
                                         nameTitle={"Hình thức"}
-                                        name={"MaHinhThuc"}
+                                        name={"HinhThuc"}
                                         defaultValue={"0"}
                                         rules={{
                                             validate: value =>
@@ -126,8 +126,8 @@ const RewardDisciplineForm = (props) => {
                                         errors={errors}
                                     >
                                         <MenuItem value="0">Chọn hình thức</MenuItem>
-                                        <MenuItem value="0005">Biểu dương</MenuItem>
-                                        <MenuItem value="0006">Tặng giấy khen</MenuItem>
+                                        <MenuItem value="Biểu dương">Biểu dương</MenuItem>
+                                        <MenuItem value="Tặng giấy khen">Tặng giấy khen</MenuItem>
                                     </InputGrid>
                                 </Grid>
                                 :
@@ -136,7 +136,7 @@ const RewardDisciplineForm = (props) => {
                                         select
                                         onChange={handleChangeSelect}
                                         nameTitle={"Hình thức"}
-                                        name={"MaHinhThuc"}
+                                        name={"HinhThuc"}
                                         defaultValue={"0"}
                                         rules={{
                                             validate: value =>
@@ -146,10 +146,10 @@ const RewardDisciplineForm = (props) => {
                                         errors={errors}
                                     >
                                         <MenuItem value="0">Chọn hình thức</MenuItem>
-                                        <MenuItem value="0007">Khiển trách</MenuItem>
-                                        <MenuItem value="0008">Cảnh cáo</MenuItem>
-                                        <MenuItem value="0009">Cách chức</MenuItem>
-                                        <MenuItem value="0010">Khai trừ</MenuItem>
+                                        <MenuItem value="Khiển trách">Khiển trách</MenuItem>
+                                        <MenuItem value="Cảnh cáo">Cảnh cáo</MenuItem>
+                                        <MenuItem value="Cách chức">Cách chức</MenuItem>
+                                        <MenuItem value="Khai trừ">Khai trừ</MenuItem>
                                     </InputGrid>
                                 </Grid>
                             }

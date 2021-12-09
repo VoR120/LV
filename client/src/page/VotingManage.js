@@ -36,12 +36,14 @@ import { CategoryContext } from '../contextAPI/CategoryContext';
 import AddCandidateForm from '../component/AddCandidateForm';
 import AddVoterForm from '../component/AddVoterForm';
 import DeleteVotingForm from '../component/DeleteVotingForm';
-import { getAllPoll, getResult, updatePoll } from '../action/votingAction';
+import { getAllPoll, getNoVoting, getResult, getVotes, mailing, updatePoll } from '../action/votingAction';
 import { LoadingContext } from '../contextAPI/LoadingContext';
 import { getDateStatus, getDateTime, getLocaleDateTime, getStatus } from '../utils/utils';
 import { getAllCategory } from '../action/categoryAction';
 import MaterialTable from '@material-table/core';
 import SaveResult from '../component/SaveResult';
+import HowToVoteIcon from '@mui/icons-material/HowToVote';
+import DoneIcon from '@mui/icons-material/Done';
 
 
 const useStyles = makeStyles(theme => ({
@@ -97,9 +99,10 @@ const Voting = () => {
     const [quantity, setQuantity] = useState([]);
     const [quantityPer, setQuantityPer] = useState("")
     const [resultVoting, setResultVoting] = useState([])
+    const [votesList, setVotesList] = useState([]);
+    const [noVotingList, setNoVotingList] = useState([]);
     const [indexForm, setIndexForm] = useState("")
-
-    console.log(resultState);
+    const myRef = useRef();
 
     const {
         handleSubmit,
@@ -114,6 +117,10 @@ const Voting = () => {
 
     const ThoiGianBatDau = useRef({});
     ThoiGianBatDau.current = watch("ThoiGianBatDau", "");
+
+    const handleChangeSelect = (e) => {
+        setValue(e.target.name, e.target.value)
+    }
 
     const handleToggle = (data, index) => {
         setEditOpen([]);
@@ -150,8 +157,21 @@ const Voting = () => {
             setQuantity(res.Data.map(el => el.SoPhieu));
             setQuantityPer(res.SoLuongBieuQuyet + "/" + res.SoLuong)
         }
-        resultState &&
+        const getVotesAPI = async () => {
+            const res = await getVotes({ id: resultState.MaBieuQuyet })
+            console.log(res);
+            setVotesList(res);
+        }
+        const getNoVotingAPI = async () => {
+            const res = await getNoVoting({ id: resultState.MaBieuQuyet })
+            console.log(res);
+            setNoVotingList(res)
+        }
+        if (resultState) {
             getResultAPI()
+            getVotesAPI()
+            getNoVotingAPI()
+        }
     }, [resultState])
 
     const onSubmit = async (data) => {
@@ -180,6 +200,21 @@ const Voting = () => {
         setEditOpen([]);
     }
 
+    const handleSendEmail = async (id) => {
+        loadingDispatch({ type: 'OPEN_LOADING' })
+        const res = await mailing({ id });
+        if (res) {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: res.msg,
+                    type: "success"
+                }
+            })
+        }
+        loadingDispatch({ type: 'CLOSE_LOADING' })
+    }
+
     useEffect(() => {
         loadingDispatch({ type: 'OPEN_LOADING' })
         fetchAllPoll();
@@ -188,6 +223,7 @@ const Voting = () => {
     useEffect(() => {
         if (editState != null) {
             setValue("MaBieuQuyet", editState.MaBieuQuyet);
+            setValue("MucDich", editState.MucDich);
             setValue("TenBieuQuyet", editState.TenBieuQuyet);
             setValue("NoiDung", editState.NoiDung);
             setValue("ThoiGianNhacNho", editState.ThoiGianNhacNho);
@@ -224,6 +260,50 @@ const Voting = () => {
             MaSoDangVien: el.MaSoDangVien,
             SoPhieu: el.SoPhieu
         }));
+
+        const [columnsVote, setColumnsVote] = useState([])
+
+        const [rowsVote, setRowsVote] = useState([])
+
+        const [columnsNoVote, setColumnsNoVote] = useState([
+            { title: "STT", field: "id", width: 50 },
+            { title: "Mã số Đảng viên", field: "MaSoDangVien" },
+            { title: "Họ tên", field: "HoTen" },
+            { title: "Email", field: "Email" },
+            { title: "Số điện thoại", field: "SoDienThoai" },
+        ])
+
+        const [rowsNoVote, setRowsNoVote] = useState([])
+
+        useEffect(() => {
+            let column = [{ title: "STT", field: "id", width: 50 }];
+            resultVoting.map((el, index) => {
+                column.push({
+                    title: el.MaSoDangVien + " - " + el.HoTen,
+                    field: el.MaSoDangVien,
+                    align: 'center',
+                    render: (params) => params[el.MaSoDangVien]
+                        ? <HowToVoteIcon sx={{ width: '100%' }} color="success" />
+                        : ""
+                })
+            })
+            setColumnsVote(column)
+            setRowsVote(votesList.map((el, index) => {
+                let item = { id: index + 1 };
+                Object.keys(el).map((i, index) => { item[i] = el[i] });
+                return item
+            }))
+        }, [votesList])
+
+        useEffect(() => {
+            setRowsNoVote(noVotingList.map((el, index) => ({
+                id: index + 1,
+                MaSoDangVien: el.MaNguoiThamGia,
+                HoTen: el.HoTen,
+                Email: el.Email,
+                SoDienThoai: el.SoDienThoai
+            })));
+        }, [noVotingList])
 
         return (
             <Paper className={classes.paper} variant="outlined">
@@ -262,7 +342,7 @@ const Voting = () => {
                     }}
                 />
 
-                <TableContainer sx={{ width: '800px', margin: '0 auto', marginTop: '40px' }} variant="outlined">
+                <TableContainer sx={{ width: '1000px', margin: '0 auto', mt: 5, mb: 5 }} variant="outlined">
                     <MaterialTable
                         components={{
                             Container: (props) =>
@@ -272,11 +352,27 @@ const Voting = () => {
                                     variant="outlined"
                                 />
                         }}
-                        title={"Bảng kết quả"}
+                        title={
+                            <Grid container alignItems="center">
+                                <Typography variant="button">Bảng kết quả</Typography>
+                                {
+                                    resultState.LuuKetQua == 1 &&
+                                    <Chip
+                                        sx={{ marginLeft: 3 }}
+                                        size="small"
+                                        varian="outlined"
+                                        color="success"
+                                        label={"Đã lưu"}
+                                        icon={<DoneIcon />}
+                                    />
+                                }
+                            </Grid>
+                        }
                         columns={columns}
                         data={rows}
 
                         actions={[
+                            (resultState.LuuKetQua == 0 && resultState.MucDich != "Khác") &&
                             {
                                 // isFreeAction: true,
                                 icon: 'save',
@@ -293,7 +389,7 @@ const Voting = () => {
                             search: false,
                             paging: false,
                             padding: 'dense',
-                            selection: true
+                            selection: resultState.LuuKetQua == 0 && resultState.MucDich != "Khác"
                         }}
                     />
                 </TableContainer>
@@ -301,9 +397,54 @@ const Voting = () => {
                     open={openResult}
                     setOpen={setOpenResult}
                     data={data}
-                    name={resultState.TenBieuQuyet}
+                    resultState={resultState}
+                    setResultState={setResultState}
                 />
-            </Paper>
+                <TableContainer sx={{ width: '1000px', margin: '0 auto', mb: 5 }} variant="outlined">
+                    <MaterialTable
+                        components={{
+                            Container: (props) =>
+                                <Paper
+                                    {...props}
+                                    className={classes.table}
+                                    variant="outlined"
+                                />
+                        }}
+                        title={<Typography variant="button">Bảng thống kê phiếu</Typography>}
+                        columns={columnsVote}
+                        data={rowsVote}
+
+                        options={{
+                            sorting: false,
+                            search: false,
+                            paging: false,
+                            padding: 'dense',
+                        }}
+                    />
+                </TableContainer>
+                <TableContainer sx={{ width: '1000px', margin: '0 auto', mb: 5 }} variant="outlined">
+                    <MaterialTable
+                        components={{
+                            Container: (props) =>
+                                <Paper
+                                    {...props}
+                                    className={classes.table}
+                                    variant="outlined"
+                                />
+                        }}
+                        title={"Bảng liệt kê Đảng viên không biểu quyết"}
+                        columns={columnsNoVote}
+                        data={rowsNoVote}
+
+                        options={{
+                            sorting: false,
+                            search: false,
+                            paging: false,
+                            padding: 'dense',
+                        }}
+                    />
+                </TableContainer>
+            </Paper >
         )
     }
 
@@ -351,13 +492,15 @@ const Voting = () => {
                                                     {open[index] ? 'Ẩn' : 'Xem kết quả'}
                                                 </MyButton>
                                             }
-                                            {/* {getStatus(el.ThoiGianBatDau, el.ThoiGianKetThuc) == 0 && */}
-                                            <MyButton onClick={() => handleEditToggle(el, index)} primary style={{ marginBottom: '20px', marginLeft: "8px" }}>
-                                                {editOpen[index] ? 'Hủy' : 'Chỉnh sửa'}
-                                            </MyButton>
-                                            <MyButton primary style={{ marginBottom: '20px', marginLeft: "8px" }}>
-                                                Gửi mail
-                                            </MyButton>
+                                            {/* {getStatus(el.ThoiGianBatDau, el.ThoiGianKetThuc) == 1 && */}
+                                            <>
+                                                <MyButton onClick={() => handleEditToggle(el, index)} primary style={{ marginBottom: '20px', marginLeft: "8px" }}>
+                                                    {editOpen[index] ? 'Hủy' : 'Chỉnh sửa'}
+                                                </MyButton>
+                                                <MyButton onClick={() => handleSendEmail(el.MaBieuQuyet)} primary style={{ marginBottom: '20px', marginLeft: "8px" }}>
+                                                    Gửi mail
+                                                </MyButton>
+                                            </>
                                             {/* } */}
                                             <DeleteVotingForm data={el} />
                                         </Grid>
@@ -392,6 +535,27 @@ const Voting = () => {
                                             </Grid>
                                             <Grid container className={classes.inputItem} alignItems="center">
                                                 <Grid item xs={4}>
+                                                    <Typography>Mục đích</Typography>
+                                                </Grid>
+                                                <Grid item xs={8}>
+                                                    <InputGrid
+                                                        select
+                                                        noTitle
+                                                        onChange={handleChangeSelect}
+                                                        name="MucDich"
+                                                        defaultValue="0"
+                                                        control={control}
+                                                        errors={errors}
+                                                    >
+                                                        <MenuItem value="0">Chọn</MenuItem>
+                                                        <MenuItem value="Khen thưởng">Khen thưởng</MenuItem>
+                                                        <MenuItem value="Kỷ luật">Kỷ luật</MenuItem>
+                                                        <MenuItem value="Khác">Khác</MenuItem>
+                                                    </InputGrid>
+                                                </Grid>
+                                            </Grid>
+                                            <Grid container className={classes.inputItem} alignItems="center">
+                                                <Grid item xs={4}>
                                                     <Typography>Thời gian bắt đầu</Typography>
                                                 </Grid>
                                                 <Grid item xs={8}>
@@ -399,7 +563,7 @@ const Voting = () => {
                                                         noTitle
                                                         type="datetime-local"
                                                         name="ThoiGianBatDau"
-                                                        defaultValue="0"
+                                                        defaultValue=""
                                                         control={control}
                                                         errors={errors}
                                                         rules={{
@@ -417,7 +581,7 @@ const Voting = () => {
                                                         noTitle
                                                         type="datetime-local"
                                                         name="ThoiGianKetThuc"
-                                                        defaultValue="0"
+                                                        defaultValue=""
                                                         control={control}
                                                         errors={errors}
                                                         rules={{
@@ -452,6 +616,7 @@ const Voting = () => {
                                                     <InputGrid
                                                         noTitle
                                                         name="PhamVi"
+                                                        defaultValue=""
                                                         control={control}
                                                         errors={errors}
                                                         rules={{

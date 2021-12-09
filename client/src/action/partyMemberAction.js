@@ -347,11 +347,10 @@ export const removePartyMember = async (dispatch, payload, open) => {
 }
 
 export const filterPartyMember = async (payload) => {
-    console.log(payload);
     try {
         Object.keys(payload).map(el => {
             if (el != "age") {
-                if (payload[el] == "" || payload[el] == "0")
+                if (!payload[el] || payload[el] == "" || payload[el] == "0")
                     delete payload[el];
                 else {
                     payload[getIdField(el)] = payload[el]

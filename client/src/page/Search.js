@@ -17,7 +17,7 @@ import axios from '../helper/axios';
 import { InfoContext } from '../contextAPI/InfoContext';
 import { getAllCategory } from '../action/categoryAction';
 import { CSVLink } from 'react-csv'
-import SaveAltIcon from '@mui/icons-material/SaveAlt';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -231,7 +231,7 @@ const Search = () => {
                 {data.data.length > 0 &&
                     <CSVLink data={data.data} headers={data.headers} filename={"export.csv"}>
                         <MyButton style={{ marginLeft: 8 }} success>
-                            <SaveAltIcon style={{ marginRight: 4 }} />Excel
+                            <FileDownloadIcon style={{ marginRight: 4 }} />Excel
                         </MyButton>
                     </CSVLink>
                 }

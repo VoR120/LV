@@ -206,6 +206,9 @@ const PartyForm = (props) => {
                         name={"NgayVaoDang"}
                         control={control}
                         errors={errors}
+                        rules={{
+                            required: "Vui lòng nhập trường này!",
+                        }}
                     />
                 </Grid>
                 <Grid item xs={6}>
@@ -224,6 +227,7 @@ const PartyForm = (props) => {
                         control={control}
                         errors={errors}
                         rules={{
+                            required: "Vui lòng nhập trường này!",
                             validate: value => {
                                 const isTrue = new Date(value).getMonth() == new Date(NgayVaoDang.current).getMonth()
                                     && new Date(value).getDate() == new Date(NgayVaoDang.current).getDate()

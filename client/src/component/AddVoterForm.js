@@ -225,22 +225,6 @@ const AddVoterForm = (props) => {
                             )
                         }
                     </InputGrid>
-                    <InputGrid
-                        select
-                        onChange={handleChangeSelect}
-                        nameTitle={"Loại"}
-                        name="grade"
-                        defaultValue="0"
-                        control={control}
-                        errors={errors}
-                    >
-                        <MenuItem value="0">Tất cả</MenuItem>
-                        {
-                            gradeArr.map(el =>
-                                <MenuItem key={el.MaLoai} value={el.MaLoai} >{el.TenLoai}</MenuItem>
-                            )
-                        }
-                    </InputGrid>
                     <Grid container>
                         <Grid item style={{ width: '150px' }}>
 
