@@ -1,15 +1,9 @@
 import SettingsIcon from '@mui/icons-material/Settings';
-import EditIcon from '@mui/icons-material/Edit';
 import { Button, Menu, MenuItem } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useState } from 'react';
 import { InfoContext } from '../contextAPI/InfoContext';
-import AddForm from './AddForm';
-import DeleteForm from './DeleteForm';
 import EditMoveForm from './EditMoveForm';
-import GradeForm from './GradeForm';
-import MoveForm from './MoveForm';
-import RewardDisciplineForm from './RewardDisciplineForm';
 
 const useStyles = makeStyles(theme => ({
     icon: {

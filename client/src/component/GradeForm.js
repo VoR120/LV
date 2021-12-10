@@ -1,30 +1,20 @@
+import GradeIcon from '@mui/icons-material/Grade';
 import {
     Button,
     Dialog,
     DialogActions,
     DialogContent,
-    DialogTitle,
-    Divider,
-    FormControl,
-    Grid,
-    Menu,
-    MenuItem,
-    TextField,
-    Typography,
+    DialogTitle, FormControl,
+    Grid, MenuItem
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
-import RedoIcon from '@mui/icons-material/Redo';
-import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
-import GradeIcon from '@mui/icons-material/Grade';
 import { useForm } from 'react-hook-form';
-import MySelect from './UI/MySelect';
-import MyButton from './UI/MyButton';
-import InputGrid from './InputGrid';
-import { createRewardDiscipline } from '../action/rewardDisciplineAction';
 import { createGrade, getGrade, getYearGrade } from '../action/gradeAction';
 import { CategoryContext } from '../contextAPI/CategoryContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import InputGrid from './InputGrid';
+import MyButton from './UI/MyButton';
 
 const useStyles = makeStyles(theme => ({
     icon: {

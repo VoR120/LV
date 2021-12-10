@@ -3,18 +3,12 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogTitle,
-    FormControlLabel,
-    Paper,
-    Radio,
-    RadioGroup,
-    Typography
+    DialogTitle
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
+import { getDate } from '../utils/utils';
 import InputGrid from './InputGrid';
 
 
@@ -69,7 +63,7 @@ const MoveReturnForm = (props) => {
                         type="date"
                         rules={{ require: "Vui lòng nhập trường này!" }}
                         nameTitle={`Ngày chuyền về`}
-                        defaultValue={""}
+                        defaultValue={getDate(new Date())}
                         name={"NgayChuyenDen"}
                         control={control}
                         errors={errors}

@@ -1,21 +1,17 @@
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 import {
-    CircularProgress,
     Divider,
     FormControl,
     Grid,
     IconButton,
-    MenuItem,
-    TextField,
-    Typography,
+    MenuItem
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import DeleteIcon from '@mui/icons-material/Delete';
 import React, { useContext, useState } from 'react';
-import InputGrid from './InputGrid';
-import AddIcon from '@mui/icons-material/Add'
-import RemoveIcon from '@mui/icons-material/Remove'
 import { CategoryContext } from '../contextAPI/CategoryContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import InputGrid from './InputGrid';
 
 const useStyles = makeStyles(theme => ({
     addBtn: {

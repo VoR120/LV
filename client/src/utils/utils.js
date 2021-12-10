@@ -92,7 +92,7 @@ export const getExportData = (rows, columns) => {
         let newEl = {};
         Object.keys(el).map(key => {
             if (headerArr.includes(key))
-                newEl[key] = dateArr.includes(key) ? getDate(el[key]) : el[key]
+                newEl[key] = (dateArr.includes(key) && el[key]) ? getDate(el[key]) : el[key]
         })
         return newEl;
     })

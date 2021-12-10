@@ -1,15 +1,15 @@
-import React, { useState, useContext } from 'react';
-import makeStyles from '@mui/styles/makeStyles';
+import DeleteIcon from '@mui/icons-material/Delete';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import DeleteIcon from '@mui/icons-material/Delete';
-import MyButton from './UI/MyButton';
+import makeStyles from '@mui/styles/makeStyles';
+import React, { useContext, useState } from 'react';
 import { removePartyMember } from '../action/partyMemberAction';
 import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import MyButton from './UI/MyButton';
 const useStyles = makeStyles(theme => ({
     dialogContent: {
         marginBottom: theme.spacing(2),

@@ -5,9 +5,9 @@ import {
     Dialog, DialogActions, DialogTitle, Tab, Tabs
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { getAllCategory, getFlanguageLevel } from '../action/categoryAction';
+import { getFlanguageLevel } from '../action/categoryAction';
 import { addPartyMember, updatePartyMember } from '../action/partyMemberAction';
 import { CategoryContext } from '../contextAPI/CategoryContext';
 import { LoadingContext } from '../contextAPI/LoadingContext';
@@ -15,8 +15,7 @@ import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import axios from '../helper/axios';
 import '../public/css/Form.scss';
-import { dateArr, getDate, getLocaleDate } from '../utils/utils';
-import Loading from './CustomLoadingOverlay';
+import { dateArr, getDate } from '../utils/utils';
 import InfoForm from './InfoForm';
 import LevelForm from './LevelForm';
 import PartyForm from './PartyForm';

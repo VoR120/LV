@@ -1,8 +1,7 @@
 import { Grid, TextField, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import React, { Children } from 'react';
+import React from 'react';
 import { Controller } from 'react-hook-form';
-import MySelect from './UI/MySelect';
 import MySelectReactHookForm from './UI/MySelectReactHookForm';
 
 const useStyles = makeStyles(theme => ({
@@ -34,7 +33,12 @@ const InputGrid = (props) => {
                             </Grid>
                         )
                         }
-                        <Grid item flex={1}>
+                        <Grid item flex={1}
+                            sx={{
+                                // textOverflow: 'ellipsis',
+                                // whiteSpace: 'nowrap',
+                                // overflow: 'hidden',
+                            }}>
                             <MySelectReactHookForm
                                 onChange={onChange}
                                 disabled={disabled}
@@ -77,7 +81,7 @@ const InputGrid = (props) => {
                                                 InputProps={InputProps}
                                                 multiline={multiline}
                                                 minRows={minRows || 1}
-                                                // autoFocus
+                                            // autoFocus
                                             />
                                             :
                                             <TextField
@@ -94,7 +98,7 @@ const InputGrid = (props) => {
                                                 InputProps={InputProps}
                                                 multiline={multiline}
                                                 minRows={minRows || 1}
-                                                // autoFocus
+                                            // autoFocus
                                             />
 
                                     }

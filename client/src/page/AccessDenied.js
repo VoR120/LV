@@ -1,8 +1,8 @@
-import React from 'react';
-import makeStyles from '@mui/styles/makeStyles';
 import { Typography } from '@mui/material';
-import warningImage from '../public/image/warning.png'
-import { NavLink, useHistory } from 'react-router-dom';
+import makeStyles from '@mui/styles/makeStyles';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
+import warningImage from '../public/image/warning.png';
 
 const useStyles = makeStyles(theme => ({
     wrapper: {

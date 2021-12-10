@@ -1,23 +1,20 @@
-import { Grid, MenuItem, Paper, TextField, Typography, Button, TableContainer } from '@mui/material';
+import MaterialTable from '@material-table/core';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import { Grid, MenuItem, Paper, TableContainer, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
-import ActionMenu from '../component/ActionMenu';
-import Layout from '../component/Layout';
-import MySelect from '../component/UI/MySelect';
-import MyButton from '../component/UI/MyButton';
-import MaterialTable from '@material-table/core';
-import DownloadIcon from '@mui/icons-material/Download';
-import xlsx from 'xlsx'
-import { allInfoColumn, downloadExcel, getExportData } from '../utils/utils';
-import InputGrid from '../component/InputGrid';
+import { CSVLink } from 'react-csv';
 import { useForm } from 'react-hook-form';
-import { filterPartyMember } from '../action/partyMemberAction';
-import { CategoryContext } from '../contextAPI/CategoryContext';
-import axios from '../helper/axios';
-import { InfoContext } from '../contextAPI/InfoContext';
 import { getAllCategory } from '../action/categoryAction';
-import { CSVLink } from 'react-csv'
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import { filterPartyMember } from '../action/partyMemberAction';
+import InputGrid from '../component/InputGrid';
+import Layout from '../component/Layout';
+import MyButton from '../component/UI/MyButton';
+import { CategoryContext } from '../contextAPI/CategoryContext';
+import { InfoContext } from '../contextAPI/InfoContext';
+import axios from '../helper/axios';
+import { partyMemberPDF } from '../utils/pdf';
+import { allInfoColumn, getExportData, pdfmakedownload } from '../utils/utils';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -85,6 +82,11 @@ const Search = () => {
         const res = await filterPartyMember(data)
         setRows(res);
         setLoadingTable(false)
+    }
+
+    const handleExportPDF = () => {
+        const dd = partyMemberPDF(rows);
+        pdfmakedownload(dd);
     }
 
     useEffect(() => {
@@ -229,11 +231,16 @@ const Search = () => {
 
                 <MyButton primary onClick={handleSubmit(onSubmit)} >Xem</MyButton>
                 {data.data.length > 0 &&
-                    <CSVLink data={data.data} headers={data.headers} filename={"export.csv"}>
-                        <MyButton style={{ marginLeft: 8 }} success>
-                            <FileDownloadIcon style={{ marginRight: 4 }} />Excel
+                    <>
+                        <CSVLink data={data.data} headers={data.headers} filename={"export.csv"}>
+                            <MyButton style={{ marginLeft: 8 }} success>
+                                <FileDownloadIcon style={{ marginRight: 4 }} />Excel
+                            </MyButton>
+                        </CSVLink>
+                        <MyButton onClick={handleExportPDF} sx={{ ml: 1, backgroundColor: "#e95340", '&:hover': { backgroundColor: '#e95340' } }}>
+                            <FileDownloadIcon sx={{ mr: 0.5 }} />pdf
                         </MyButton>
-                    </CSVLink>
+                    </>
                 }
                 <TableContainer className="search-table" style={{ maxWidth: "1170px", }} >
                     <MaterialTable

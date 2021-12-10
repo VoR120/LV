@@ -1,21 +1,19 @@
-import { Button, Typography, Paper, TableContainer, MenuItem, TextField } from '@mui/material';
+import MaterialTable from '@material-table/core';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import { MenuItem, Paper, TableContainer, TextField, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
-import AddForm from '../component/AddForm';
-import Layout from '../component/Layout';
-import ActionMenu from '../component/ActionMenu';
-import MaterialTable from '@material-table/core';
-import DownloadIcon from '@mui/icons-material/Download';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import { downloadExcel, getExportData } from '../utils/utils';
-import MySelect from '../component/UI/MySelect';
-import { getMoveByPMId, getMoveByType, updateMove } from '../action/moveAction';
-import MyButton from '../component/UI/MyButton';
-import MoveReturnForm from '../component/MoveReturnForm';
+import { CSVLink } from 'react-csv';
 import { useForm } from 'react-hook-form';
-import { SnackbarContext } from '../contextAPI/SnackbarContext';
-import { CSVLink } from 'react-csv'
+import { getMoveByPMId, getMoveByType, updateMove } from '../action/moveAction';
 import ActionMoveMenu from '../component/ActionMoveMenu';
+import Layout from '../component/Layout';
+import MoveReturnForm from '../component/MoveReturnForm';
+import MyButton from '../component/UI/MyButton';
+import MySelect from '../component/UI/MySelect';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import { moveInPDF, moveInternalPDF, moveOutPDF, movePDF } from '../utils/pdf';
+import { getExportData, pdfmakedownload } from '../utils/utils';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -68,13 +66,14 @@ const Move = () => {
         "Chuyển sinh hoạt đi": [
             { title: "Mã số Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
             { title: "Họ tên", field: "HoTen", },
+            { title: "Loại", field: "LoaiHinhThuc", },
+            { title: "Hình thức", field: "TenHinhThuc", },
             { title: "Chuyển từ Đảng bộ", field: "ChuyenTuDangBo", },
             { title: "Chuyển từ chi bộ", field: "TenChiBoTu", },
             { title: "Chuyển đến Đảng bộ", field: "ChuyenDenDangBo", },
             { title: "Chuyển đến Chi bộ", field: "TenChiBoDen", },
             { title: "Ngày chuyển đi", field: "NgayChuyenDi", type: "date" },
             { title: "Ngày chuyển về", field: "NgayChuyenDen", type: "date" },
-            { title: "Hình thức", field: "TenHinhThuc", },
             { title: "Ghi chú", field: "GhiChu", sorting: false },
             {
                 title: "Chuyển về", field: "NgayChuyenDi",
@@ -111,12 +110,13 @@ const Move = () => {
         "Chuyển sinh hoạt đến": [
             { title: "Mã số Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
             { title: "Họ tên", field: "HoTen", },
+            { title: "Loại", field: "LoaiHinhThuc", },
+            { title: "Hình thức", field: "TenHinhThuc", },
             { title: "Chuyển từ Đảng bộ", field: "ChuyenTuDangBo", },
             { title: "Chuyển từ chi bộ", field: "TenChiBoTu", },
             { title: "Chuyển đến Đảng bộ", field: "ChuyenDenDangBo", },
             { title: "Chuyển đến Chi bộ", field: "TenChiBoDen", },
             { title: "Ngày chuyển đến", field: "NgayChuyenDen", type: "date" },
-            { title: "Hình thức", field: "TenHinhThuc", },
             { title: "Ghi chú", field: "GhiChu", sorting: false },
             {
                 title: "Chức năng", field: "action", sorting: false,
@@ -129,13 +129,14 @@ const Move = () => {
         "Chuyển sinh hoạt theo Mã": [
             { title: "Mã số Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
             { title: "Họ tên", field: "HoTen", },
+            { title: "Loại", field: "LoaiHinhThuc", },
+            { title: "Hình thức", field: "TenHinhThuc", },
             { title: "Chuyển từ Đảng bộ", field: "ChuyenTuDangBo", },
             { title: "Chuyển từ chi bộ", field: "TenChiBoTu", },
             { title: "Chuyển đến Đảng bộ", field: "ChuyenDenDangBo", },
             { title: "Chuyển đến Chi bộ", field: "TenChiBoDen", },
             { title: "Ngày chuyển đi", field: "NgayChuyenDi", type: "date" },
             { title: "Ngày chuyển đến/về", field: "NgayChuyenDen", type: "date" },
-            { title: "Hình thức", field: "TenHinhThuc", },
             { title: "Ghi chú", field: "GhiChu", sorting: false },
             {
                 title: "Chức năng", field: "action", sorting: false,
@@ -148,12 +149,13 @@ const Move = () => {
         "Chuyển sinh hoạt nội bộ": [
             { title: "Mã số Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
             { title: "Họ tên", field: "HoTen", },
+            { title: "Loại", field: "LoaiHinhThuc", },
+            { title: "Hình thức", field: "TenHinhThuc", },
             { title: "Chuyển từ Đảng bộ", field: "ChuyenTuDangBo", },
             { title: "Chuyển từ chi bộ", field: "TenChiBoTu", },
             { title: "Chuyển đến Đảng bộ", field: "ChuyenDenDangBo", },
             { title: "Chuyển đến chi bộ", field: "TenChiBoDen", },
             { title: "Ngày chuyển", field: "NgayChuyenDi", type: "date" },
-            { title: "Hình thức", field: "TenHinhThuc", },
             { title: "Ghi chú", field: "GhiChu", sorting: false },
             {
                 title: "Chức năng", field: "action", sorting: false,
@@ -215,14 +217,22 @@ const Move = () => {
             setLoading(true)
             fetchApi();
         }
-        // console.log(res);
-        // console.log(rows);
-        // const newRow = [...rows];
-        // rows.map((el, index) => {
-        //     if (el.MaChuyenSinhHoat == res.MaChuyenSinhHoat)
-        //         newRow[index] = { ...rows[index], NgayChuyenDen: res.NgayChuyenDen }
-        // })
-        // console.log(newRow);
+    }
+
+    const handleExportPDF = () => {
+        let dd;
+        let title = `DANH SÁCH ĐẢNG VIÊN ${typeChoose.toUpperCase()}`
+        if (typeFirst == "type") {
+            if (typeChoose == "Chuyển sinh hoạt đi")
+                dd = moveOutPDF(rows, title);
+            if (typeChoose == "Chuyển sinh hoạt đến") 
+                dd = moveInPDF(rows, title);
+            if (typeChoose == "Chuyển sinh hoạt nội bộ")
+                dd = moveInternalPDF(rows, title);
+        } else {
+            dd = movePDF(rows, "DANH SÁCH ĐẢNG VIÊN CHUYỂN SINH HOẠT")
+        }
+        pdfmakedownload(dd);
     }
 
     useEffect(() => {
@@ -288,11 +298,16 @@ const Move = () => {
                 </Paper>
                 <MyButton onClick={handleView} primary>Xem</MyButton>
                 {data.data.length > 0 &&
-                    <CSVLink data={data.data} headers={data.headers} filename={"export.csv"}>
-                        <MyButton sx={{ ml: 1 }} success>
-                            <FileDownloadIcon sx={{ mr: 0.5 }} />Excel
+                    <>
+                        <CSVLink data={data.data} headers={data.headers} filename={"export.csv"}>
+                            <MyButton sx={{ ml: 1 }} success>
+                                <FileDownloadIcon sx={{ mr: 0.5 }} />Excel
+                            </MyButton>
+                        </CSVLink>
+                        <MyButton onClick={handleExportPDF} sx={{ ml: 1, backgroundColor: "#e95340", '&:hover': { backgroundColor: '#e95340' } }}>
+                            <FileDownloadIcon sx={{ mr: 0.5 }} />pdf
                         </MyButton>
-                    </CSVLink>
+                    </>
                 }
                 <TableContainer className="move-table" style={{ maxWidth: "1170px", }} >
                     <MaterialTable

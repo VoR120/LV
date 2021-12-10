@@ -1,21 +1,19 @@
 import MaterialTable from '@material-table/core';
-import DownloadIcon from '@mui/icons-material/Download';
-import { Checkbox, FormControlLabel, FormGroup, Grid, Paper, TableContainer, Typography } from '@mui/material';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import { Checkbox, FormControlLabel, Grid, Paper, TableContainer, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
-import { getAllCategory, getAllCategoryPM } from '../action/categoryAction';
+import { CSVLink } from 'react-csv';
+import { getAllCategoryPM } from '../action/categoryAction';
 import { filterPartyMember, getAllPartyMember } from '../action/partyMemberAction';
 import AddForm from '../component/AddForm';
-import CustomizedSnackbars from '../component/CustomizedSnackbars';
 import Layout from '../component/Layout';
+import MyButton from '../component/UI/MyButton';
 import { CategoryContext } from '../contextAPI/CategoryContext';
 import { InfoContext } from '../contextAPI/InfoContext';
 import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
-import { allInfoColumn, downloadExcel, getExportData } from '../utils/utils';
-import MyButton from '../component/UI/MyButton';
-import { CSVLink } from 'react-csv'
-import SaveAltIcon from '@mui/icons-material/SaveAlt';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import { partyMemberPDF } from '../utils/pdf';
+import { allInfoColumn, getExportData, pdfmakedownload } from '../utils/utils';
 
 
 const useStyles = makeStyles(theme => ({
@@ -63,6 +61,11 @@ const File = () => {
 
     const data = getExportData(rows, columns)
     console.log(data);
+
+    const handleExportPDF = () => {
+        const dd = partyMemberPDF(rows);
+        pdfmakedownload(dd);
+    }
 
     useEffect(() => {
         setColumns(allInfoColumn(rows, setRows));
@@ -117,11 +120,16 @@ const File = () => {
                     <Grid item>
                         <AddForm rows={rows} setRows={setRows} />
                         {data.data.length > 0 &&
-                            <CSVLink data={data.data} headers={data.headers} filename={"export.csv"}>
-                                <MyButton style={{ marginLeft: 8 }} success>
-                                    <FileDownloadIcon style={{ marginRight: 4 }} />Excel
+                            <>
+                                <CSVLink data={data.data} headers={data.headers} filename={"export.csv"}>
+                                    <MyButton style={{ marginLeft: 8 }} success>
+                                        <FileDownloadIcon style={{ marginRight: 4 }} />Excel
+                                    </MyButton>
+                                </CSVLink>
+                                <MyButton onClick={handleExportPDF} sx={{ ml: 1, backgroundColor: "#e95340", '&:hover': { backgroundColor: '#e95340' } }}>
+                                    <FileDownloadIcon sx={{ mr: 0.5 }} />pdf
                                 </MyButton>
-                            </CSVLink>
+                            </>
                         }
                     </Grid>
                     <Grid item>

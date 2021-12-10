@@ -1,28 +1,20 @@
+import ThumbDownAltIcon from '@mui/icons-material/ThumbDownAlt';
+import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import {
     Button,
     Dialog,
     DialogActions,
     DialogContent,
-    DialogTitle,
-    Divider,
-    FormControl,
-    Grid,
-    Menu,
-    MenuItem,
-    TextField,
-    Typography,
+    DialogTitle, FormControl,
+    Grid, MenuItem
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
-import RedoIcon from '@mui/icons-material/Redo';
-import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
-import ThumbDownAltIcon from '@mui/icons-material/ThumbDownAlt';
 import { useForm } from 'react-hook-form';
-import MySelect from './UI/MySelect';
-import MyButton from './UI/MyButton';
-import InputGrid from './InputGrid';
 import { createRewardDiscipline } from '../action/rewardDisciplineAction';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import InputGrid from './InputGrid';
+import MyButton from './UI/MyButton';
 
 const useStyles = makeStyles(theme => ({
     icon: {

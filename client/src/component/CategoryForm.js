@@ -8,7 +8,7 @@ import {
 import makeStyles from '@mui/styles/makeStyles';
 import { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { createCategory, getfLanguageId, updateCategory } from '../action/categoryAction';
+import { createCategory, updateCategory } from '../action/categoryAction';
 import { CategoryContext } from '../contextAPI/CategoryContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import InputGrid from './InputGrid';

@@ -1,10 +1,10 @@
-import React from 'react';
-import AppBar from '@mui/material/AppBar'
-import Toolbar from '@mui/material/Toolbar'
-import Typography from '@mui/material/Typography'
-import MenuIcon from '@mui/icons-material/MenuIcon'
-
+import MenuIcon from '@mui/icons-material/MenuIcon';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
 import makeStyles from '@mui/styles/makeStyles';
+import React from 'react';
+
 
 const useStyles = makeStyles(theme => ({
     toolbar: {

@@ -1,34 +1,25 @@
 import MaterialTable from '@material-table/core';
-import DownloadIcon from '@mui/icons-material/Download';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary, MenuItem,
+    MenuItem,
     Paper,
     TableContainer, TextField, Typography
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useEffect, useState, useContext } from 'react';
-import ActionMenu from '../component/ActionMenu';
+import React, { useContext, useEffect, useState } from 'react';
+import { CSVLink } from 'react-csv';
+import { useForm } from 'react-hook-form';
+import { getAllCategory } from '../action/categoryAction';
+import { getEvaluated } from '../action/evaluateAction';
 import Layout from '../component/Layout';
-import PaperStatistic from '../component/PaperStatistic';
 import MyButton from '../component/UI/MyButton';
 import MySelect from '../component/UI/MySelect';
-import { allInfoColumn, downloadExcel, getExportData, getKeyField } from '../utils/utils';
-import { filterPartyMember, getAllPartyMember } from '../action/partyMemberAction';
-import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
-import { getAllCategory } from '../action/categoryAction';
 import { CategoryContext } from '../contextAPI/CategoryContext';
-import Loading from '../component/CustomLoadingOverlay'
-import { getGrade, getGradeByYear } from '../action/gradeAction';
-import InputGrid from '../component/InputGrid';
-import { useForm } from 'react-hook-form';
-import { SnackbarContext } from '../contextAPI/SnackbarContext';
-import { CSVLink } from 'react-csv'
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import { getEvaluated } from '../action/evaluateAction';
 import { InfoContext } from '../contextAPI/InfoContext';
+import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import { gradePDF } from '../utils/pdf';
+import { getExportData, pdfmakedownload } from '../utils/utils';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -129,6 +120,11 @@ const Grade = () => {
         fetchAPI();
     }
 
+    const handleExportPDF = () => {
+        const dd = gradePDF(rows, "DANH SÁCH XẾP LOẠI ĐẢNG VIÊN");
+        pdfmakedownload(dd);
+    }
+
     // UseEffect
 
     useEffect(() => {
@@ -186,12 +182,17 @@ const Grade = () => {
                     }
                 </Paper>
                 <MyButton onClick={handleSubmit(onSubmit)} primary>Xem</MyButton>
-                {data.length > 0 &&
-                    <CSVLink data={data} filename={"export.csv"}>
-                        <MyButton style={{ marginLeft: 8 }} success>
-                            <FileDownloadIcon style={{ marginRight: 4 }} />Excel
+                {data.data.length > 0 &&
+                    <>
+                        <CSVLink data={data.data} headers={data.headers} filename={"export.csv"}>
+                            <MyButton style={{ marginLeft: 8 }} success>
+                                <FileDownloadIcon style={{ marginRight: 4 }} />Excel
+                            </MyButton>
+                        </CSVLink>
+                        <MyButton onClick={handleExportPDF} sx={{ ml: 1, backgroundColor: "#e95340", '&:hover': { backgroundColor: '#e95340' } }}>
+                            <FileDownloadIcon sx={{ mr: 0.5 }} />pdf
                         </MyButton>
-                    </CSVLink>
+                    </>
                 }
                 <TableContainer style={{ maxWidth: "1170px", }} >
                     <MaterialTable

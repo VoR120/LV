@@ -1,18 +1,19 @@
 import MaterialTable from '@material-table/core';
-import DownloadIcon from '@mui/icons-material/Download';
-import { Button, MenuItem, Paper, TableContainer, TextField, Typography } from '@mui/material';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
+import { Chip, MenuItem, Paper, TableContainer, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useEffect, useRef, useState, useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { CSVLink } from 'react-csv';
 import { getRewardDiscipline, importRewardDiscipline } from '../action/rewardDisciplineAction';
-import Loading from '../component/CustomLoadingOverlay';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
 import MySelect from '../component/UI/MySelect';
-import { downloadExcel, getExportData } from '../utils/utils';
-import { CSVLink } from 'react-csv'
-import FileUploadIcon from '@mui/icons-material/FileUpload';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import exampleRewardFile from '../public/excel/KhenThuong.xlsx';
+import exampleDisciplineFile from '../public/excel/KyLuat.xlsx';
+import { disciplinePDF, rewardPDF } from '../utils/pdf';
+import { getExportData, pdfmakedownload } from '../utils/utils';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -138,6 +139,13 @@ const RewardDiscipline = () => {
             setFile(e.target.files[0])
     }
 
+    const handleExportPDF = () => {
+        const dd = typeChoose == "Khen thưởng"
+            ? rewardPDF(rows, "DANH SÁCH KHEN THƯỞNG ĐẢNG VIÊN")
+            : disciplinePDF(rows, "DANH SÁCH KỶ LUẬT ĐẢNG VIÊN")
+        pdfmakedownload(dd);
+    }
+
     useEffect(() => {
         setLoadingTable(true)
         fetchApi();
@@ -164,11 +172,16 @@ const RewardDiscipline = () => {
                 </Paper>
                 <MyButton onClick={handleSubmit} primary>Xem</MyButton>
                 {data.data.length > 0 &&
-                    <CSVLink data={data.data} headers={data.headers} filename={"export.csv"}>
-                        <MyButton sx={{ ml: 1 }} success>
-                            <FileDownloadIcon sx={{ mr: 0.5 }} />Excel
+                    <>
+                        <CSVLink data={data.data} headers={data.headers} filename={"export.csv"}>
+                            <MyButton sx={{ ml: 1 }} success>
+                                <FileDownloadIcon sx={{ mr: 0.5 }} />Excel
+                            </MyButton>
+                        </CSVLink>
+                        <MyButton onClick={handleExportPDF} sx={{ ml: 1, backgroundColor: "#e95340", '&:hover': { backgroundColor: '#e95340' } }}>
+                            <FileDownloadIcon sx={{ mr: 0.5 }} />pdf
                         </MyButton>
-                    </CSVLink>
+                    </>
                 }
                 <input
                     onChange={handleUpload}
@@ -177,9 +190,17 @@ const RewardDiscipline = () => {
                     name="upload-photo"
                     type="file"
                 />
+                <Chip
+                    sx={{ ml: 2 }}
+                    icon={<FileDownloadIcon />}
+                    download
+                    component={"a"}
+                    href={typeChoose == "Khen thưởng" ? exampleRewardFile : exampleDisciplineFile}
+                    clickable
+                    label={"File mẫu"} />
                 <label htmlFor="upload-photo">
                     <MyButton sx={{ ml: 1 }} success component="span">
-                        <FileUploadIcon sx={{ mr: 0.5 }} />Excel
+                        <FileUploadIcon sx={{ mr: 0.5 }} />Import
                     </MyButton>
                     {file &&
                         <>
@@ -188,7 +209,7 @@ const RewardDiscipline = () => {
                         </>
                     }
                 </label>
-                <TableContainer style={{ maxWidth: "1170px", }} >
+                <TableContainer className='reward-discipline-table' style={{ maxWidth: "1170px", }} >
                     <MaterialTable
                         components={{
                             Container: (props) =>

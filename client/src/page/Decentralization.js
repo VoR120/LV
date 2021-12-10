@@ -4,12 +4,11 @@ import ClearIcon from '@mui/icons-material/Clear';
 import { Paper, TableContainer, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
+import { getAllCategory } from '../action/categoryAction';
+import { getPermissionPosition } from '../action/permissionAction';
 import DecentralizationForm from '../component/DecentralizationForm';
 import Layout from '../component/Layout';
-import { getAllCategory } from '../action/categoryAction'
-import MyButton from '../component/UI/MyButton';
 import { CategoryContext } from '../contextAPI/CategoryContext';
-import { getPermissionPosition } from '../action/permissionAction';
 
 const useStyles = makeStyles(theme => ({
     header: {

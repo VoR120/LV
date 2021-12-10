@@ -1,20 +1,20 @@
 import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
+import EditIcon from '@mui/icons-material/Edit';
 import {
     Button,
     Dialog, DialogActions,
     DialogContent, DialogTitle
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
+import { nanoid } from 'nanoid';
 import { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { actionGrade } from '../action/categoryAction';
 import { CategoryContext } from '../contextAPI/CategoryContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import InputGrid from './InputGrid';
 import MyButton from './UI/MyButton';
-import { nanoid } from 'nanoid'
-import { actionGrade } from '../action/categoryAction';
-import { SnackbarContext } from '../contextAPI/SnackbarContext';
 
 const useStyles = makeStyles(theme => ({
     inputWrapper: {

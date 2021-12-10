@@ -1,6 +1,6 @@
 import MaterialTable from '@material-table/core';
-import DownloadIcon from '@mui/icons-material/Download';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import {
     Accordion,
     AccordionDetails,
@@ -9,23 +9,21 @@ import {
     TableContainer, Typography
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useEffect, useState, useContext } from 'react';
-import ActionMenu from '../component/ActionMenu';
+import React, { useContext, useEffect, useState } from 'react';
+import { CSVLink } from 'react-csv';
+import { getAllCategory } from '../action/categoryAction';
+import { filterPartyMember } from '../action/partyMemberAction';
+import { getStatistic } from '../action/statisticAction';
+import Loading from '../component/CustomLoadingOverlay';
 import Layout from '../component/Layout';
 import PaperStatistic from '../component/PaperStatistic';
 import MyButton from '../component/UI/MyButton';
 import MySelect from '../component/UI/MySelect';
-import { allInfoColumn, downloadExcel, getDate, getExportData, getKeyField, getLocaleDate, pdfmakedownload } from '../utils/utils';
-import { filterPartyMember, getAllPartyMember } from '../action/partyMemberAction';
-import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
-import { getAllCategory } from '../action/categoryAction';
 import { CategoryContext } from '../contextAPI/CategoryContext';
-import Loading from '../component/CustomLoadingOverlay'
 import { InfoContext } from '../contextAPI/InfoContext';
-import { CSVLink } from 'react-csv'
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import axios from '../helper/axios';
-import { getStatistic } from '../action/statisticAction';
+import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
+import { partyMemberPDF } from '../utils/pdf';
+import { allInfoColumn, getExportData, getKeyField, pdfmakedownload } from '../utils/utils';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -139,101 +137,8 @@ const Statistic = () => {
         return info.info.Quyen["12"] == 1 ? "all" : info.info.MaChiBo
     }
 
-    // playground requires you to assign document definition to a variable called dd
-
-    let body = [
-        [
-            { text: 'STT', style: 'tableHeader', alignment: 'center', rowSpan: 2 },
-            { text: 'Họ tên', style: 'tableHeader', alignment: 'center', rowSpan: 2 },
-            { text: 'Mã số Đảng viên', style: 'tableHeader', alignment: 'center', rowSpan: 2 },
-            { text: 'Giới tính', style: 'tableHeader', alignment: 'center', rowSpan: 2 },
-            { text: 'Ngày sinh', style: 'tableHeader', alignment: 'center', rowSpan: 2 },
-            { text: 'Nơi sinh', style: 'tableHeader', alignment: 'center', rowSpan: 2 },
-            { text: 'Ngày vào Đảng', style: 'tableHeader', alignment: 'center', colSpan: 2 },
-            { text: "" },
-            { text: 'Nơi vào Đảng', style: 'tableHeader', alignment: 'center', colSpan: 2 },
-            { text: "" },
-            { text: 'Số thẻ', style: 'tableHeader', alignment: 'center', rowSpan: 2 },
-            { text: 'Chức vụ', style: 'tableHeader', alignment: 'center', rowSpan: 2 },
-            { text: 'Dân tộc', style: 'tableHeader', alignment: 'center', rowSpan: 2 },
-            { text: 'Tôn giáo', style: 'tableHeader', alignment: 'center', rowSpan: 2 },
-        ],
-        ['', '', '', "", "", "", { text: "Lần đầu", style: 'tableHeader' }, { text: "Chính thức", style: 'tableHeader' }, { text: "Lần đầu", style: 'tableHeader' }, { text: "Chính thức", style: 'tableHeader' }, "", "", "", ""],
-    ]
-
-    rows.map((el, index) => {
-        body.push([
-            index, el.HoTen, el.MaSoDangVien, el.TenGioiTinh,
-            getLocaleDate(el.NgaySinh), el.NoiSinh, getLocaleDate(el.NgayVaoDang), getLocaleDate(el.NgayChinhThuc), el.NoiVaoDangLanDau, el.NoiVaoDangChinhThuc, el.SoThe, el.TenChucVu, el.TenDanToc, el.TenTonGiao])
-    })
-
-    var dd = {
-        pageOrientation: 'landscape',
-        content: [
-            {
-                columns: [
-                    {
-                        text: [
-                            'ĐẢNG BỘ ĐẠI HỌC CẦN THƠ \n',
-                            'CHI BỘ KHOA CNTT&TT'
-                        ],
-                        alignment: 'center'
-                    },
-                    {
-                        text: [
-                        ],
-                    },
-                    [
-                        {
-                            text: 'ĐẢNG CỘNG SẢN VIỆT NAM \n',
-                            alignment: 'center'
-                        },
-                        {
-                            text: 'Ninh Kiều, ngày 5 tháng 12 năm 2021 \n',
-                            alignment: 'center'
-                        }
-                    ]
-                ],
-            },
-            {
-                text: 'DANH SÁCH ĐẢNG VIÊN \n',
-                alignment: 'center',
-                style: 'header',
-                bold: true,
-                margin: [0, 24, 0, 24]
-            },
-            {
-                style: 'tableExample',
-                color: '#222',
-                table: {
-                    // widths: ['auto', 'auto', 'auto'],
-                    headerRows: 2,
-                    // keepWithHeaderRows: 1,
-                    body: body
-                }
-            },
-        ],
-        styles: {
-            header: {
-                fontSize: 14,
-                alignment: 'justify'
-            },
-            tableExample: {
-                margin: [0, 5, 0, 15]
-            },
-            content: {
-                margin: [0, 30, 0, 0],
-            },
-            tableHeader: {
-                bold: true,
-                fontSize: 13,
-                color: 'black'
-            }
-        }
-
-    }
-
     const handleExportPDF = () => {
+        const dd = partyMemberPDF(rows);
         pdfmakedownload(dd);
     }
 

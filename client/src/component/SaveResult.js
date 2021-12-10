@@ -1,6 +1,4 @@
-import LabelOutlinedIcon from '@mui/icons-material/LabelOutlined';
 import LabelImportantRoundedIcon from '@mui/icons-material/LabelImportantRounded';
-import { getDate } from '../utils/utils'
 import {
     Button,
     Dialog,
@@ -10,12 +8,13 @@ import {
     Grid, MenuItem, Typography
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { useForm } from 'react-hook-form';
+import { createRewardDisciplines } from '../action/rewardDisciplineAction';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import { getDate } from '../utils/utils';
 import InputGrid from './InputGrid';
 import MyButton from './UI/MyButton';
-import { createRewardDisciplines } from '../action/rewardDisciplineAction';
 
 const useStyles = makeStyles(theme => ({
     icon: {

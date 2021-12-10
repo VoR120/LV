@@ -1,3 +1,4 @@
+import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
 import {
     Button,
     Checkbox,
@@ -6,17 +7,15 @@ import {
     DialogContent,
     DialogTitle,
     FormControlLabel,
-    FormGroup,
+    FormGroup
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
 import React, { useContext, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { updatePermissionPM, updatePermissionPosition } from '../action/permissionAction';
+import { CategoryContext } from '../contextAPI/CategoryContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import '../public/css/Form.scss';
 import MyButton from './UI/MyButton';
-import { SnackbarContext } from '../contextAPI/SnackbarContext';
-import { getPermissionPositionById, updatePermissionPM, updatePermissionPosition } from '../action/permissionAction';
-import { CategoryContext } from '../contextAPI/CategoryContext';
 
 
 const useStyles = makeStyles(theme => ({

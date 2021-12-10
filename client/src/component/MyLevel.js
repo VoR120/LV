@@ -2,10 +2,8 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { Divider, Grid, IconButton, MenuItem } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { getFlanguageLevel } from '../action/categoryAction';
+import React, { Fragment, useContext } from 'react';
 import { CategoryContext } from '../contextAPI/CategoryContext';
-import { InfoContext } from '../contextAPI/InfoContext';
 import InputGrid from './InputGrid';
 
 const useStyles = makeStyles(theme => ({

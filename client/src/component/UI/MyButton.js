@@ -10,9 +10,12 @@ const useStyles = makeStyles(theme => ({
             (props.info ?
                 theme.palette.info.main :
                 (props.error ?
-                    theme.palette.error.main : (props.primary ?
+                    theme.palette.error.main :
+                    (props.primary ?
                         theme.palette.primary.main :
-                        ''))),
+                        (props.pdf ?
+                            '#e95340' :
+                            '')))),
         '&:hover': {
             backgroundColor: props.success ?
                 theme.palette.success.dark :
@@ -22,13 +25,15 @@ const useStyles = makeStyles(theme => ({
                         theme.palette.error.dark :
                         (props.primary ?
                             theme.palette.primary.main :
-                            '')))
+                            (props.pdf ?
+                                '#e95340' :
+                                ''))))
         }
     }),
 }))
 
 const MyButton = (props) => {
-    const { children, small, success, primary, info, error, ...other } = props
+    const { children, small, success, primary, info, error, pdf,  ...other } = props
     const classes = useStyles(props);
     return (
         <Button {...other} size={small ? "small" : "medium"} variant="contained" className={classes.btn}>

@@ -8,7 +8,7 @@ import {
     DialogTitle,
     FormControlLabel,
     Grid, List,
-    ListItem, ListItemIcon, ListItemText, MenuItem, Paper, Typography
+    ListItem, ListItemIcon, ListItemText, MenuItem, Paper
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';

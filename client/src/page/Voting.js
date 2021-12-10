@@ -8,23 +8,18 @@ import {
     FormControlLabel,
     FormGroup,
     Grid,
-    Paper,
-    Radio,
-    RadioGroup,
-    Typography
+    Paper, Typography
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { checkIsVoted, getAllPoll, vote } from '../action/votingAction';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
-import { SnackbarContext } from '../contextAPI/SnackbarContext';
-import { checkIsVoted, getAllPoll, vote } from '../action/votingAction'
-import { LoadingContext } from '../contextAPI/LoadingContext';
-import { getDateStatus, getLocaleDateTime, getStatus } from '../utils/utils';
 import { InfoContext } from '../contextAPI/InfoContext';
-import { CategoryContext } from '../contextAPI/CategoryContext';
-import { getAllCategory } from '../action/categoryAction';
+import { LoadingContext } from '../contextAPI/LoadingContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import { getDateStatus, getLocaleDateTime, getStatus } from '../utils/utils';
 
 
 const useStyles = makeStyles(theme => ({

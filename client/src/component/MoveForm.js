@@ -1,3 +1,4 @@
+import RedoIcon from '@mui/icons-material/Redo';
 import {
     Button,
     Dialog,
@@ -6,22 +7,16 @@ import {
     DialogTitle,
     Divider,
     FormControl,
-    Grid,
-    Menu,
-    MenuItem,
-    TextField,
-    Typography,
+    Grid, MenuItem
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
-import RedoIcon from '@mui/icons-material/Redo';
 import { useForm } from 'react-hook-form';
-import MySelect from './UI/MySelect';
-import MyButton from './UI/MyButton';
-import InputGrid from './InputGrid';
 import { createMove } from '../action/moveAction';
-import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import { CategoryContext } from '../contextAPI/CategoryContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import InputGrid from './InputGrid';
+import MyButton from './UI/MyButton';
 
 const useStyles = makeStyles(theme => ({
     icon: {

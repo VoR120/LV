@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@mui/material';
+import { Grid } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React from 'react';
 import InputGrid from './InputGrid';

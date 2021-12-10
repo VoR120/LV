@@ -23,7 +23,7 @@ import {
     TableBody
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
@@ -38,13 +38,15 @@ import AddVoterForm from '../component/AddVoterForm';
 import DeleteVotingForm from '../component/DeleteVotingForm';
 import { getAllPoll, getNoVoting, getResult, getVotes, mailing, updatePoll } from '../action/votingAction';
 import { LoadingContext } from '../contextAPI/LoadingContext';
-import { getDateStatus, getDateTime, getLocaleDateTime, getStatus } from '../utils/utils';
+import { getDateStatus, getDateTime, getLocaleDateTime, getStatus, getExportData, pdfmakedownload } from '../utils/utils';
 import { getAllCategory } from '../action/categoryAction';
 import MaterialTable from '@material-table/core';
 import SaveResult from '../component/SaveResult';
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import DoneIcon from '@mui/icons-material/Done';
-
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import { CSVLink } from 'react-csv';
+import { votingResultPDF } from '../utils/pdf';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -248,18 +250,25 @@ const Voting = () => {
         const [openResult, setOpenResult] = useState(false);
         const [data, setData] = useState([]);
 
+        const getRate = (arr, quan) => {
+            const all = arr.reduce((a, b) => a + b.SoPhieu, 0)
+            return `${(quan / all * 100)}%`;
+        }
+
         const columns = [
             { title: "Mã số Đảng viên", field: "MaSoDangVien", },
             { title: "Họ tên", field: "HoTen", },
             { title: "Số phiếu", field: "SoPhieu", },
+            { title: "Tỉ lệ phiếu", field: "TiLe", },
         ];
 
-        const rows = resultVoting.map((el, index) => ({
+        const [rows, setRows] = useState(resultVoting.map((el, index) => ({
             id: index,
             HoTen: el.HoTen,
             MaSoDangVien: el.MaSoDangVien,
-            SoPhieu: el.SoPhieu
-        }));
+            SoPhieu: el.SoPhieu,
+            TiLe: getRate(resultVoting, el.SoPhieu)
+        })));
 
         const [columnsVote, setColumnsVote] = useState([])
 
@@ -274,6 +283,13 @@ const Voting = () => {
         ])
 
         const [rowsNoVote, setRowsNoVote] = useState([])
+
+        const dataResult = useMemo(() => getExportData(rows, columns))
+
+        const handleExportPDF = () => {
+            const dd = votingResultPDF(rows, resultState, rowsNoVote.length);
+            pdfmakedownload(dd);
+        }
 
         useEffect(() => {
             let column = [{ title: "STT", field: "id", width: 50 }];
@@ -343,6 +359,18 @@ const Voting = () => {
                 />
 
                 <TableContainer sx={{ width: '1000px', margin: '0 auto', mt: 5, mb: 5 }} variant="outlined">
+                    {dataResult.data.length > 0 &&
+                        <>
+                            <CSVLink data={dataResult.data} headers={dataResult.headers} filename={"export.csv"}>
+                                <MyButton style={{ marginLeft: 8 }} success>
+                                    <FileDownloadIcon style={{ marginRight: 4 }} />Excel
+                                </MyButton>
+                            </CSVLink>
+                            <MyButton onClick={handleExportPDF} sx={{ ml: 1, backgroundColor: "#e95340", '&:hover': { backgroundColor: '#e95340' } }}>
+                                <FileDownloadIcon sx={{ mr: 0.5 }} />pdf
+                            </MyButton>
+                        </>
+                    }
                     <MaterialTable
                         components={{
                             Container: (props) =>

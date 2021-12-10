@@ -1,13 +1,13 @@
-import makeStyles from '@mui/styles/makeStyles';
-import React, { useState, useContext } from 'react';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Menu, MenuItem } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import React, { useContext, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { changePassword, logout } from '../action/infoAction';
+import InputGrid from '../component/InputGrid';
+import MyButton from '../component/UI/MyButton';
 import { InfoContext } from '../contextAPI/InfoContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
-import { useForm } from 'react-hook-form';
-import MyButton from '../component/UI/MyButton';
-import InputGrid from '../component/InputGrid'
 
 const useStyles = makeStyles(theme => ({
     profileChip: {

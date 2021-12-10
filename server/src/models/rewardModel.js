@@ -3,14 +3,10 @@ const sql = require('../configs/db');
 
 const Reward = {
     getAll: (callback) => {
-        const sqlQuery = `SELECT kt.MaSoDangVien, dv.HoTen, kt.TenKhenThuong, kt.NgayKhenThuong, ht.TenHinhThuc,
-            kt.MaKhenThuong, kt.MaHinhThuc
-            FROM khenthuong kt, dangvien dv, hinhthuc ht
-            WHERE kt.MaHinhThuc IN (
-            SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "Khen thưởng"
-            )
-            AND kt.MaHinhThuc = ht.MaHinhThuc
-            AND kt.MaSoDangVien = dv.MaSoDangVien
+        const sqlQuery = `SELECT kt.MaSoDangVien, dv.HoTen, dv.Email, dv.SoDienThoai, kt.TenKhenThuong, kt.NgayKhenThuong, kt.HinhThuc,
+            kt.MaKhenThuong
+            FROM khenthuong kt, dangvien dv
+            WHERE kt.MaSoDangVien = dv.MaSoDangVien
             AND dv.DaXoa = 0`;
         sql.query(sqlQuery, (err, res) => {
             if (err) {
@@ -24,25 +20,6 @@ const Reward = {
         })
     },
     findById: findById("khenthuong", "MaKhenThuong"),
-    findByTypeId: (id, callback) => {
-        const sqlQuery = `SELECT khenthuong.*, dangvien.HoTen, hinhthuc.TenHinhThuc
-            FROM khenthuong, dangvien, hinhthuc
-            WHERE khenthuong.MaHinhThuc = "${id}"
-            AND khenthuong.MaHinhThuc = hinhthuc.MaHinhThuc
-            AND khenthuong.MaSoDangVien = dangvien.MaSoDangVien
-            AND dangvien.DaXoa = 0
-        `;
-        sql.query(sqlQuery, (err, res) => {
-            if (err) {
-                console.log("error: ", err);
-                callback(err, null);
-                return;
-            }
-            console.log("Found: ", res);
-            callback(null, res);
-            return;
-        })
-    },
     create: create("khenthuong", "MaKhenThuong"),
     updateById: updateById("khenthuong", "MaKhenThuong"),
     remove: remove("khenthuong", "MaKhenThuong"),

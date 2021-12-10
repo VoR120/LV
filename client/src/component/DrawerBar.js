@@ -1,3 +1,4 @@
+import MenuIcon from '@mui/icons-material/Menu';
 import AppBar from '@mui/material/AppBar';
 import CssBaseline from '@mui/material/CssBaseline';
 import Divider from '@mui/material/Divider';
@@ -5,16 +6,12 @@ import Drawer from '@mui/material/Drawer';
 import Hidden from '@mui/material/Hidden';
 import IconButton from '@mui/material/IconButton';
 import { useTheme } from '@mui/material/styles';
-import makeStyles from '@mui/styles/makeStyles';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import MenuIcon from '@mui/icons-material/Menu';
+import makeStyles from '@mui/styles/makeStyles';
 import PropTypes from 'prop-types';
 import React from 'react';
 import DrawerList from './DrawerList';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { Chip } from '@mui/material';
-import BgImage from '../public/image/bg.jpg';
 import RightHeaderBar from './RightHeaderBar';
 
 const drawerWidth = 256;

@@ -23,19 +23,21 @@ Router.get('/', (req, res) => {
     console.log("_basedir" + path.join(path.dirname(__dirname)));
     res.sendFile(__dirname + "index.html");
 })
-Router.post('/file/upload', upload.single("file"), (req, res) => {
+Router.post('/file/reward', upload.single("file"), (req, res) => {
 
     readXlsxFile(path.join(path.dirname(__dirname)) + '/uploads/' + req.file.filename).then((rows) => {  
-        console.log(rows);
         rows.shift();
-        sql.query(`INSERT INTO dantoc (MaDanToc, TenDanToc) VALUES ?`, [rows],
+        sql.query(`INSERT INTO KhenThuong (MaSoDangVien, TenKhenThuong, NgayKhenThuong, HinhThuc) VALUES ?`, [rows],
             (err, result) => {
                 if (err) {
                     if(err.errno == 1062) {
                         res.status(400).json({ msg: "Có mã trùng lặp!" });
                         return;
                     }
-                    console.log(err);
+                    if(err.errno == 1452) {
+                        res.status(400).json({ msg: "Có mã số Đảng viên không hợp lệ!" });
+                        return;
+                    }
                     res.status(400).json({ err });
                     return;
                 }
@@ -43,10 +45,30 @@ Router.post('/file/upload', upload.single("file"), (req, res) => {
                 return;
             })
     })
-
-    console.log(res);
 });
 
-Router.get('/file')
+Router.post('/file/discipline', upload.single("file"), (req, res) => {
+
+    readXlsxFile(path.join(path.dirname(__dirname)) + '/uploads/' + req.file.filename).then((rows) => {  
+        rows.shift();
+        sql.query(`INSERT INTO KyLuat (MaSoDangVien, TenKyLuat, NgayKyLuat, HinhThuc) VALUES ?`, [rows],
+            (err, result) => {
+                if (err) {
+                    if(err.errno == 1062) {
+                        res.status(400).json({ msg: "Có mã trùng lặp!" });
+                        return;
+                    }
+                    if(err.errno == 1452) {
+                        res.status(400).json({ msg: "Có mã số Đảng viên không hợp lệ!" });
+                        return;
+                    }
+                    res.status(400).json({ err });
+                    return;
+                }
+                res.status(200).json({ msg: "Upload thành công!" })
+                return;
+            })
+    })
+});
 
 module.exports = Router;

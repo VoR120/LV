@@ -1,14 +1,15 @@
 const sql = require('../configs/db');
 const moment = require('moment');
+const nodemailer = require('nodemailer');
 
 exports.createPoll = async (req, res) => {
     try {
         const sqlPromise = sql.promise();
         const {
             TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau,
-            ThoiGianKetThuc, UngCuVien, NguoiThamGia, PhamVi, ThoiGianNhacNho
+            ThoiGianKetThuc, UngCuVien, NguoiThamGia, PhamVi, ThoiGianNhacNho, MucDich
         } = req.body
-        const data = { TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau, ThoiGianKetThuc, PhamVi, ThoiGianNhacNho }
+        const data = { TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau, ThoiGianKetThuc, PhamVi, ThoiGianNhacNho, MucDich }
         console.log(data);
         const [result, f] = await sqlPromise.query(`INSERT INTO bieuquyet SET ?`, data);
         if (result) {
@@ -36,10 +37,10 @@ exports.updatePoll = async (req, res) => {
         const sqlPromise = sql.promise();
         const {
             TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau,
-            ThoiGianKetThuc, UngCuVien, NguoiThamGia, PhamVi, ThoiGianNhacNho
+            ThoiGianKetThuc, UngCuVien, NguoiThamGia, PhamVi, ThoiGianNhacNho, MucDich
         } = req.body
         const { id } = req.params;
-        const data = { TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau, ThoiGianKetThuc, PhamVi, ThoiGianNhacNho }
+        const data = { TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau, ThoiGianKetThuc, PhamVi, ThoiGianNhacNho, MucDich }
         console.log(data);
         const [result, f] = await sqlPromise.query(`
         UPDATE bieuquyet SET ?
@@ -63,14 +64,40 @@ exports.updatePoll = async (req, res) => {
     }
 }
 
-exports.getAllPoll = async (req, res) => {
+exports.updateSaveResult = async (req, res) => {
     try {
         const sqlPromise = sql.promise();
-        const [result, f] = await sqlPromise.query(`SELECT * FROM bieuquyet WHERE TrangThai = 1 ORDER BY MaBieuQuyet DESC`);
+        const { id } = req.params;
+        const [result, f] = await sqlPromise.query(`
+        UPDATE bieuquyet SET LuuKetQua = 1
+        WHERE MaBieuQuyet = ${id}
+        `)
+        if (result.affectedRows > 0) {
+            res.status(200).json({ msg: "Đã cập nhật" })
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
+exports.getAllPoll = async (req, res) => {
+    try {
+        const { MaSoDangVien } = req.query;
+        let query = MaSoDangVien
+            ? `SELECT bieuquyet.* 
+                FROM bieuquyet, nguoithamgia 
+                WHERE TrangThai = 1
+                AND bieuquyet.MaBieuQuyet = nguoithamgia.MaBieuQuyet
+                AND nguoithamgia.MaNguoiThamGia = "${MaSoDangVien}"
+                ORDER BY MaBieuQuyet DESC`
+            : `SELECT * FROM bieuquyet WHERE TrangThai = 1 ORDER BY MaBieuQuyet DESC`
+        const sqlPromise = sql.promise();
+        const [result, f] = await sqlPromise.query(query);
+        console.log(result);
         if (result) {
             const newResult = [...result];
             await Promise.all(result.map(async (el, index) => {
-                const [result1, f] = await sqlPromise.query(
+                const [result1, f1] = await sqlPromise.query(
                     `SELECT ungcuvien.MaUngCuVien, dangvien.HoTen 
                     FROM ungcuvien, dangvien 
                     WHERE MaBieuQuyet = ${el.MaBieuQuyet}
@@ -79,7 +106,7 @@ exports.getAllPoll = async (req, res) => {
                 newResult[index].UngCuVien = result1;
             }))
             await Promise.all(result.map(async (el, index) => {
-                const [result2, f] = await sqlPromise.query(
+                const [result2, f2] = await sqlPromise.query(
                     `SELECT nguoithamgia.MaNguoiThamGia, dangvien.HoTen
                     FROM nguoithamgia, dangvien
                     WHERE MaBieuQuyet = ${el.MaBieuQuyet}
@@ -90,7 +117,7 @@ exports.getAllPoll = async (req, res) => {
             res.status(200).json(newResult);
         }
     } catch (error) {
-        res.status(500).json({ msg: error.message })
+        res.status(500).json({ message: error.message })
     }
 }
 
@@ -207,6 +234,7 @@ exports.getResult = async (req, res) => {
         GROUP BY MaUngCuVien
         ) AS chitietphieu1
         ON chitietphieu1.MaUngCuVien = chitietphieu.MaUngCuVien
+        ORDER BY SoPhieu DESC
         `)
         const [quantity, f1] = await sqlPromise.query(`
             SELECT COUNT(MaNguoiThamGia) AS SoLuong FROM nguoithamgia WHERE MaBieuQuyet = ${id}
@@ -236,6 +264,106 @@ exports.removePoll = async (req, res) => {
         `)
         if (result) {
             res.status(200).json({ msg: "Đã xóa!" });
+        }
+    } catch (error) {
+        res.status(500).json({ msg: error.message })
+    }
+}
+
+exports.getVotes = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const sqlPromise = sql.promise();
+        const [voteList, fVL] = await sqlPromise.query(`
+            SELECT MaPhieu FROM phieu WHERE MaBieuQuyet = ${id}
+        `)
+        console.log(voteList);
+        let result = [];
+        await Promise.all(voteList.map(async el => {
+            const [voteItem, vI] = await sqlPromise.query(`
+                SELECT * FROM chitietphieu WHERE MaPhieu = ${el.MaPhieu}
+            `)
+            let item = {}
+            voteItem.map(el => {
+                item[el.MaUngCuVien] = el.DongY
+            })
+            result.push(item)
+        }))
+        if (result) {
+            res.status(200).json(result);
+        }
+    } catch (error) {
+        res.status(500).json({ msg: error.message })
+    }
+}
+
+exports.getNoVoting = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const sqlPromise = sql.promise()
+        const [listNoVoting, fLNV] = await sqlPromise.query(`
+            SELECT MaNguoiThamGia, dangvien.HoTen, dangvien.Email, dangvien.SoDienThoai
+            FROM nguoithamgia, dangvien
+            WHERE MaBieuQuyet = ${id}
+            AND MaNguoiThamGia = dangvien.MaSoDangVien
+            AND MaNguoiThamGia NOT IN 
+            (SELECT MaNguoiThamGia FROM phieu WHERE MaBieuQuyet = ${id})
+        `)
+        if (listNoVoting) {
+            res.status(200).json(listNoVoting);
+        }
+    } catch (error) {
+        res.status(500).json({ msg: error.message })
+    }
+}
+
+exports.mailing = async (req, res) => {
+    try {
+        const { MaBieuQuyet } = req.query;
+        const sqlPromise = sql.promise();
+        const [updateStatus, fUS] = await sqlPromise.query(`
+            UPDATE bieuquyet SET KichHoat = 1 WHERE MaBieuQuyet = ${MaBieuQuyet}
+        `)
+        if (updateStatus.affectedRows > 0) {
+            const [mailList, fML] = await sqlPromise.query(`
+                SELECT Email FROM nguoithamgia, dangvien 
+                WHERE nguoithamgia.MaNguoiThamGia = dangvien.MaSoDangVien
+                AND nguoithamgia.MaBieuQuyet = ${MaBieuQuyet}
+            `)
+
+            const [poll, fP] = await sqlPromise.query(`
+                SELECT * FROM bieuquyet WHERE MaBieuQuyet = ${MaBieuQuyet}
+            `)
+
+            const mail = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'vob1706895@student.ctu.edu.vn',
+                    pass: `${process.env.PASSWORD}`
+                }
+            })
+
+            const mailOptions = {
+                from: 'vob1706895@student.ctu.edu.vn',
+                to: mailList.map(el => el.Email),
+                subject: `Bạn có một cuộc biểu quyết Đảng viên khoa CNTT&TT, Đại học Cần Thơ`,
+                html: `
+                Thời gian: <b> ${(new Date(poll[0].ThoiGianBatDau)).toLocaleString()} - ${(new Date(poll[0].ThoiGianKetThuc)).toLocaleString()} </b>.<br/>
+                Truy cập vào ${process.env.URL}voting để xem chi tiết.<br/>
+                Thân,<br/>
+                Nguyễn Văn Vỏ - B1706895
+                `,
+            }
+
+            mail.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                }
+            });
+
+            res.status(200).json({ msg: "Đã gửi!" })
         }
     } catch (error) {
         res.status(500).json({ msg: error.message })

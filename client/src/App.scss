@@ -44,7 +44,9 @@ table:first-child {
   // First + Second child
   .file-table,
   .statistic-table,
-  .search-table {
+  .search-table,
+  .move-table,
+  .reward-discipline-table {
     table:first-child {
       & tr {
         &:hover {

@@ -1,14 +1,17 @@
 import MaterialTable from '@material-table/core';
-import DownloadIcon from '@mui/icons-material/Download';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { Paper, TableContainer, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
+import { CSVLink } from 'react-csv';
 import { getAllCategory } from '../action/categoryAction';
-import DeleteFormCategory from '../component/DeleteFormCategory';
 import CategoryForm from '../component/CategoryForm';
+import DeleteFormCategory from '../component/DeleteFormCategory';
 import Layout from '../component/Layout';
-import { downloadExcel } from '../utils/utils';
+import MyButton from '../component/UI/MyButton';
 import { CategoryContext } from '../contextAPI/CategoryContext';
+import { partycellPDF } from '../utils/pdf';
+import { getExportData, pdfmakedownload } from '../utils/utils';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -81,6 +84,14 @@ const PartyCell = () => {
         }
     ])
 
+    const data = getExportData(rows, columns)
+    console.log(data);
+
+    const handleExportPDF = () => {
+        const dd = partycellPDF(rows, "DANH SÁCH THÔNG TIN CHI BỘ");
+        pdfmakedownload(dd);
+    }
+
     useEffect(() => {
         if (category.categories["partycell"].length > 0) {
             setRows(category.categories["partycell"]);
@@ -104,6 +115,16 @@ const PartyCell = () => {
                     categoryField={"partycell"}
                     keyField={["MaChiBo", "TenChiBo", "SoDangVien"]}
                 />
+                <>
+                    <CSVLink data={data.data} headers={data.headers} filename={"export.csv"}>
+                        <MyButton sx={{ ml: 1 }} success>
+                            <FileDownloadIcon sx={{ mr: 0.5 }} />Excel
+                        </MyButton>
+                    </CSVLink>
+                    <MyButton onClick={handleExportPDF} sx={{ ml: 1, backgroundColor: "#e95340", '&:hover': { backgroundColor: '#e95340' } }}>
+                        <FileDownloadIcon sx={{ mr: 0.5 }} />pdf
+                    </MyButton>
+                </>
                 <TableContainer style={{ maxWidth: "1170px", }} >
                     <MaterialTable
                         components={{

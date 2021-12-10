@@ -1,7 +1,7 @@
-import { MenuItem, TextField } from '@mui/material';
+import { TextField } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import React from 'react';
 import { Controller } from 'react-hook-form';
-import makeStyles from '@mui/styles/makeStyles';
 
 const useStyles = makeStyles(theme => ({
     menuList: {
@@ -14,6 +14,7 @@ const MySelectReactHookForm = (props) => {
     const { children, name, errors, disabled, id, onChange, value, ...other } = props
     return (
         <Controller
+            sx={{ '& .Mui-focused': { borderTop: "1px solid" } }}
             name={name}
             id={id}
             {...other}
@@ -37,6 +38,7 @@ const MySelectReactHookForm = (props) => {
                                 }
                             }
                         }}
+                        sx={{ '& .Mui-focused': { borderTop: "1px solid" } }}
                     >
                         {children}
                     </TextField>

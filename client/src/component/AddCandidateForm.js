@@ -101,7 +101,7 @@ const AddCandidateForm = (props) => {
             data.partycell = info.info.MaChiBo
         // setRight([]);
         loadingDispatch({ type: 'OPEN_LOADING' })
-        const res = await filterPartyMember(data);
+        const res = await filterPartyMember({ grade: data.grade, partycell: data.partycell || "" });
         setLeft(res)
         loadingDispatch({ type: 'CLOSE_LOADING' })
     }
@@ -399,7 +399,7 @@ const AddCandidateForm = (props) => {
                                         <MyButton onClick={handleSubmit(handleSubmitDate)} sx={{ margin: '2px 8px 2px 0px' }} info>Tra cứu</MyButton>
                                         {`Tìm thấy ${pollArr.length} cuộc biểu quyết`}
                                     </Grid>
-                                    <Grid item>
+                                    <Grid item >
                                         <InputGrid
                                             select
                                             onChange={handleChangeSelect}

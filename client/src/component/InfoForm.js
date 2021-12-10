@@ -1,37 +1,13 @@
-import React, { Fragment, useContext, useEffect } from 'react';
+import DeleteIcon from '@mui/icons-material/Delete';
 import {
-    Button,
-    Dialog,
-    DialogTitle,
-    DialogActions,
-    DialogContent,
-    Grid,
-    TextField,
-    FormHelperText,
-    FormControl,
-    InputLabel,
-    IconButton,
-    CircularProgress,
-    Typography,
-    AppBar,
-    Tabs,
-    Tab,
-    Box,
-    Radio,
-    FormControlLabel,
-    RadioGroup,
-    MenuItem,
-    Divider,
+    FormControl, Grid, IconButton, MenuItem, Typography
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import InputGrid from './InputGrid';
+import React, { useContext, useState } from 'react';
 import { CategoryContext } from '../contextAPI/CategoryContext';
-import { getAllCategory } from '../action/categoryAction';
-import MySelectReactHookForm from './UI/MySelectReactHookForm';
 import axios from '../helper/axios';
+import InputGrid from './InputGrid';
+import MySelectReactHookForm from './UI/MySelectReactHookForm';
 
 const useStyles = makeStyles(theme => ({
     addBtn: {

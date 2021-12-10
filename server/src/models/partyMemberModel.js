@@ -480,8 +480,7 @@ const PartyMember = {
                     dataStr = dataStr + ` INNER JOIN danhgiadangvien 
                     ON danhgiadangvien.MaSoDangVien = dangvien.MaSoDangVien
                     AND danhgiadangvien.${el} = ${data[el]}
-                    AND danhgiadangvien.MaDVDG = 3
-                    GROUP BY MaSoDangVien`
+                    AND danhgiadangvien.MaDVDG = 3`
                 } else if (el == "KhongDuBi") {
                     dataStr = dataStr + ` AND dangvien.MaChucVu != 4`
                 } else if (el == "Tuoigt") {

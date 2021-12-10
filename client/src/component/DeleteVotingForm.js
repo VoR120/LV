@@ -1,4 +1,3 @@
-import DeleteIcon from '@mui/icons-material/Delete';
 import {
     Button,
     Dialog, DialogActions,
@@ -6,11 +5,8 @@ import {
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { removeCategory } from '../action/categoryAction';
-import MyButton from './UI/MyButton';
-import { CategoryContext } from '../contextAPI/CategoryContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import MyButton from './UI/MyButton';
 
 const useStyles = makeStyles(theme => ({
     btn: {

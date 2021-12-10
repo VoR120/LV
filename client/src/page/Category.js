@@ -1,19 +1,15 @@
 import MaterialTable from '@material-table/core';
-import DownloadIcon from '@mui/icons-material/Download';
 import { MenuItem, Paper, TableContainer, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
 import { getAllCategory, getLanguage } from '../action/categoryAction';
+import AddGradeForm from '../component/AddGradeForm';
+import CategoryForm from '../component/CategoryForm';
 import DeleteFormCategory from '../component/DeleteFormCategory';
 import Layout from '../component/Layout';
 import MySelect from '../component/UI/MySelect';
 import { CategoryContext } from '../contextAPI/CategoryContext';
-import { downloadExcel, getKeyField } from '../utils/utils';
-import CategoryForm from '../component/CategoryForm';
-import AddGradeForm from '../component/AddGradeForm';
-import MyButton from '../component/UI/MyButton';
-import { CSVLink } from 'react-csv'
-import SaveAltIcon from '@mui/icons-material/SaveAlt';
+import { getKeyField } from '../utils/utils';
 
 const useStyles = makeStyles(theme => ({
     header: {

@@ -1,29 +1,12 @@
+import EditIcon from '@mui/icons-material/Edit';
 import {
-    Button,
-    Dialog,
-    IconButton,
-    CircularProgress,
-    DialogTitle,
-    DialogActions,
-    DialogContent,
-    Grid,
-    TextField,
-    FormHelperText,
-    FormControl,
-    InputLabel,
-    Box,
-    Typography,
-    AppBar,
-    Tabs,
-    Tab,
+    AppBar, Box, Button,
+    Dialog, DialogActions, DialogTitle, Tab, Tabs, Typography
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useState } from 'react';
-import AddIcon from '@mui/icons-material/Add';
 import { useForm } from 'react-hook-form';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import '../public/css/Form.scss'
+import '../public/css/Form.scss';
 import InfoForm from './InfoForm';
 import LevelForm from './LevelForm';
 import PartyForm from './PartyForm';

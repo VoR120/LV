@@ -1,8 +1,6 @@
-import { Grid, MenuItem, TextField, Typography } from '@mui/material';
+import { Grid, MenuItem, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useContext, useEffect, useState } from 'react';
-import { Controller } from 'react-hook-form';
-import { getAllCategory } from '../action/categoryAction';
+import React, { useContext } from 'react';
 import { CategoryContext } from '../contextAPI/CategoryContext';
 import axios from '../helper/axios';
 import InputGrid from './InputGrid';

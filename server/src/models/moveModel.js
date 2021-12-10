@@ -6,9 +6,9 @@ const Move = {
     getAll: (callback) => {
         const sqlPromise = sql.promise();
         const sqlQuery = `SELECT 
-        csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, 
-        csh.ChuyenDenDangBo, csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
-        ht.TenHinhThuc
+        csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, ht.LoaiHinhThuc,
+        ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, 
+        csh.ChuyenDenDangBo, csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu
         FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht
         WHERE csh.MaHinhThuc = ht.MaHinhThuc
         AND csh.MaSoDangVien = dv.MaSoDangVien
@@ -79,9 +79,9 @@ const Move = {
     findByTypeId: (id, callback) => {
         const sqlPromise = sql.promise();
         const sqlQuery = `SELECT 
-        csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, 
-        csh.ChuyenDenDangBo, csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
-        ht.TenHinhThuc
+        csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, ht.LoaiHinhThuc,
+        ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, 
+        csh.ChuyenDenDangBo, csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu
         FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht
         WHERE csh.MaHinhThuc = "${id}"
         AND csh.MaHinhThuc = ht.MaHinhThuc
@@ -160,9 +160,9 @@ const Move = {
                     return;
                 } else {
                     sql.query(`SELECT 
-                    csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo , 
-                    csh.ChuyenDenDangBo, csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
-                    ht.TenHinhThuc
+                    csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat,ht.LoaiHinhThuc,
+                    ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo , 
+                    csh.ChuyenDenDangBo, csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu
                     FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht
                     WHERE csh.MaHinhThuc = ht.MaHinhThuc
                     AND csh.MaSoDangVien = dv.MaSoDangVien
@@ -238,9 +238,9 @@ const Move = {
     },
     findByType: (type, callback) => {
         let sqlQuery = `SELECT 
-            csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo AS TenChiBoTu,
-            csh.ChuyenDenDangBo,csh.ChuyenDenChiBo AS TenChiBoDen, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
-            ht.TenHinhThuc
+            csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat,ht.LoaiHinhThuc,
+            ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo AS TenChiBoTu,
+            csh.ChuyenDenDangBo,csh.ChuyenDenChiBo AS TenChiBoDen, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu
             FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht
             WHERE csh.MaHinhThuc IN (
             SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "${type}"
@@ -250,7 +250,8 @@ const Move = {
             AND dv.DaXoa = 0`;
         if (type == "Chuyển sinh hoạt đi") {
             sqlQuery = `SELECT 
-            csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, cb.TenChiBo AS TenChiBoTu,
+            csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat,ht.LoaiHinhThuc,
+            ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, cb.TenChiBo AS TenChiBoTu,
             csh.ChuyenDenDangBo,csh.ChuyenDenChiBo AS TenChiBoDen, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
             ht.TenHinhThuc
             FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht, chibo cb
@@ -264,9 +265,9 @@ const Move = {
         }
         if (type == "Chuyển sinh hoạt đến") {
             sqlQuery = `SELECT 
-            csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo AS TenChiBoTu, cb.TenChiBo AS TenChiBoDen,
-            csh.ChuyenDenDangBo,csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
-            ht.TenHinhThuc
+            csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat,ht.LoaiHinhThuc,
+            ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo AS TenChiBoTu, cb.TenChiBo AS TenChiBoDen,
+            csh.ChuyenDenDangBo,csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu
             FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht, chibo cb
             WHERE csh.MaHinhThuc IN (
             SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "${type}"
@@ -278,9 +279,9 @@ const Move = {
         }
         if (type == "Chuyển sinh hoạt nội bộ") {
             sqlQuery = `SELECT 
-            csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, cb.TenChiBo AS TenChiBoTu, chiboden.TenChiBoDen,
-            csh.ChuyenDenDangBo,csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
-            ht.TenHinhThuc
+            csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat,ht.LoaiHinhThuc,
+            ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, cb.TenChiBo AS TenChiBoTu, chiboden.TenChiBoDen,
+            csh.ChuyenDenDangBo,csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu
             FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht, chibo cb,
             (SELECT 
                 cb.TenChiBo AS TenChiBoDen
