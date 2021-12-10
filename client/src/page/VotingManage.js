@@ -292,7 +292,7 @@ const Voting = () => {
         }
 
         useEffect(() => {
-            let column = [{ title: "STT", field: "id", width: 50 }];
+            let column = [{ title: "Số phiếu", field: "id", width: 50 }];
             resultVoting.map((el, index) => {
                 column.push({
                     title: el.MaSoDangVien + " - " + el.HoTen,

@@ -4,7 +4,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import {
     Accordion,
     AccordionDetails,
-    AccordionSummary, MenuItem,
+    AccordionSummary, Grid, MenuItem,
     Paper,
     TableContainer, Typography
 } from '@mui/material';
@@ -15,6 +15,7 @@ import { getAllCategory } from '../action/categoryAction';
 import { filterPartyMember } from '../action/partyMemberAction';
 import { getStatistic } from '../action/statisticAction';
 import Loading from '../component/CustomLoadingOverlay';
+import DoughnutChart from '../component/DoughnutChart';
 import Layout from '../component/Layout';
 import PaperStatistic from '../component/PaperStatistic';
 import MyButton from '../component/UI/MyButton';
@@ -229,16 +230,39 @@ const Statistic = () => {
                         <Typography className={classes.heading}>Thống kê</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <div className={classes.paperWrapper}>
-                            <PaperStatistic title={"Giới tính"} data={genderS} />
+                        {/* <div className={classes.paperWrapper}> */}
+                        <Grid container spacing={2}>
+                            <Grid item xs={3}>
+                                <DoughnutChart label={"Giới tính"} data={genderS} />
+                            </Grid>
+                            <Grid item xs={3}>
+                                <DoughnutChart label={"Chi bộ"} data={partyCellS} />
+                            </Grid>
+                            <Grid item xs={3}>
+                                <DoughnutChart label={"Dân tộc"} data={ethnicS} />
+                            </Grid>
+                            <Grid item xs={3}>
+                                <DoughnutChart label={"Tôn giáo"} data={religionS} />
+                            </Grid>
+                            <Grid item xs={3}>
+                                <DoughnutChart label={"Độ tuổi"} data={ageS} />
+                            </Grid>
+                            <Grid item xs={3}>
+                                <DoughnutChart label={"TĐ Tin học"} data={itS} />
+                            </Grid>
+                            <Grid item xs={3}>
+                                <DoughnutChart label={"TĐ Chính trị"} data={politicsS} />
+                            </Grid>
+                        </Grid>
+
+                        {/* <PaperStatistic title={"Giới tính"} data={genderS} />
                             <PaperStatistic title={"Chi bộ"} data={partyCellS} />
-                            <PaperStatistic title={"Chức vụ"} data={positionS} />
                             <PaperStatistic title={"Dân tộc"} data={ethnicS} />
                             <PaperStatistic title={"Tôn giáo"} data={religionS} />
                             <PaperStatistic title={"Tuổi"} data={ageS} />
                             <PaperStatistic title={"TĐ Tin học"} data={itS} />
-                            <PaperStatistic title={"TĐ Chính trị"} data={politicsS} />
-                        </div>
+                            <PaperStatistic title={"TĐ Chính trị"} data={politicsS} /> */}
+                        {/* </div> */}
                     </AccordionDetails>
                 </Accordion>
 

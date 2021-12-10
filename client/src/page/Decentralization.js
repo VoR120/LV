@@ -100,9 +100,9 @@ const Decentralization = () => {
                 title: "Toàn quyền",
                 field: "all",
                 render: (params) =>
-                    checkAllPermission(params) 
-                    ? <CheckIcon className={classes.checkIcon} /> 
-                    : <ClearIcon color="error" />
+                    checkAllPermission(params)
+                        ? <CheckIcon sx={{ width: '100%' }} color="success" />
+                        : <ClearIcon sx={{ width: '100%' }} color="error" />
             }
         ]
         category.categories["permission"].map(el => {
@@ -110,9 +110,9 @@ const Decentralization = () => {
                 title: el.TenQuyen,
                 field: el.MaQuyen + "",
                 render: (params) =>
-                    params[el.MaQuyen] == 1 
-                    ? <CheckIcon className={classes.checkIcon} /> 
-                    : <ClearIcon color="error" />
+                    params[el.MaQuyen] == 1
+                        ? <CheckIcon sx={{ width: '100%' }} color="success" />
+                        : <ClearIcon sx={{ width: '100%' }} color="error" />
             })
         })
         newColumn.push({
@@ -146,7 +146,8 @@ const Decentralization = () => {
                             />
                         }}
                         options={{
-                            padding: 'dense'
+                            padding: 'dense',
+                            sorting: false
                         }}
                         title={"Phân quyền"}
                         columns={columns}

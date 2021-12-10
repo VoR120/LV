@@ -7,7 +7,8 @@ const Reward = {
             kt.MaKhenThuong
             FROM khenthuong kt, dangvien dv
             WHERE kt.MaSoDangVien = dv.MaSoDangVien
-            AND dv.DaXoa = 0`;
+            AND dv.DaXoa = 0
+            ORDER BY NgayTao DESC`;
         sql.query(sqlQuery, (err, res) => {
             if (err) {
                 console.log("error: ", err);

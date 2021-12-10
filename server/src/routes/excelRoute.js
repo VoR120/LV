@@ -7,7 +7,7 @@ const path = require('path');
 const sql = require('../configs/db');
 
 function importExcelData2MySQL(filePath) {
-    readXlsxFile(filePath).then((rows) => {  
+    readXlsxFile(filePath).then((rows) => {
         console.log(rows);
         rows.shift();
         sql.query(`INSERT INTO dantoc (MaDanToc, TenDanToc) VALUES ?`, [rows],
@@ -25,16 +25,20 @@ Router.get('/', (req, res) => {
 })
 Router.post('/file/reward', upload.single("file"), (req, res) => {
 
-    readXlsxFile(path.join(path.dirname(__dirname)) + '/uploads/' + req.file.filename).then((rows) => {  
+    readXlsxFile(path.join(path.dirname(__dirname)) + '/uploads/' + req.file.filename).then((rows) => {
         rows.shift();
-        sql.query(`INSERT INTO KhenThuong (MaSoDangVien, TenKhenThuong, NgayKhenThuong, HinhThuc) VALUES ?`, [rows],
+        const newRows = rows.map(el => {
+            el.push(new Date().toISOString());
+            return el;
+        })
+        sql.query(`INSERT INTO KhenThuong (MaSoDangVien, TenKhenThuong, NgayKhenThuong, HinhThuc, NgayTao) VALUES ?`, [newRows],
             (err, result) => {
                 if (err) {
-                    if(err.errno == 1062) {
+                    if (err.errno == 1062) {
                         res.status(400).json({ msg: "Có mã trùng lặp!" });
                         return;
                     }
-                    if(err.errno == 1452) {
+                    if (err.errno == 1452) {
                         res.status(400).json({ msg: "Có mã số Đảng viên không hợp lệ!" });
                         return;
                     }
@@ -49,16 +53,20 @@ Router.post('/file/reward', upload.single("file"), (req, res) => {
 
 Router.post('/file/discipline', upload.single("file"), (req, res) => {
 
-    readXlsxFile(path.join(path.dirname(__dirname)) + '/uploads/' + req.file.filename).then((rows) => {  
+    readXlsxFile(path.join(path.dirname(__dirname)) + '/uploads/' + req.file.filename).then((rows) => {
         rows.shift();
-        sql.query(`INSERT INTO KyLuat (MaSoDangVien, TenKyLuat, NgayKyLuat, HinhThuc) VALUES ?`, [rows],
+        const newRows = rows.map(el => {
+            el.push(new Date().toISOString());
+            return el;
+        })
+        sql.query(`INSERT INTO KyLuat (MaSoDangVien, TenKyLuat, NgayKyLuat, HinhThuc, NgayTao) VALUES ?`, [newRows],
             (err, result) => {
                 if (err) {
-                    if(err.errno == 1062) {
+                    if (err.errno == 1062) {
                         res.status(400).json({ msg: "Có mã trùng lặp!" });
                         return;
                     }
-                    if(err.errno == 1452) {
+                    if (err.errno == 1452) {
                         res.status(400).json({ msg: "Có mã số Đảng viên không hợp lệ!" });
                         return;
                     }
