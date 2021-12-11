@@ -53,6 +53,7 @@ const CreateVoting = () => {
     const { openSnackbarDispatch } = useContext(SnackbarContext);
     const [candidate, setCandidate] = useState([]);
     const [voter, setVoter] = useState([]);
+    const [type, setType] = useState("Biểu quyết có số dư");
 
     const {
         handleSubmit,
@@ -76,7 +77,13 @@ const CreateVoting = () => {
         setValue(e.target.name, e.target.value)
     }
 
+    const handleChangeType = (e) => {
+        setValue(e.target.name, e.target.value)
+        setType(e.target.value);
+    }
+
     const onSubmit = async (data) => {
+        console.log(data);
         if (candidate.length == 0)
             openSnackbarDispatch({
                 type: 'SET_OPEN',
@@ -178,6 +185,45 @@ const CreateVoting = () => {
                     </Grid>
                     <Grid container className={classes.inputItem} alignItems="center">
                         <Grid item xs={4}>
+                            <Typography>Loại biểu quyết</Typography>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <InputGrid
+                                select
+                                noTitle
+                                onChange={handleChangeType}
+                                name="LoaiBieuQuyet"
+                                defaultValue="Biểu quyết có số dư"
+                                control={control}
+                                errors={errors}
+                            >
+                                <MenuItem value="Biểu quyết có số dư">Biểu quyết có số dư</MenuItem>
+                                <MenuItem value="Biểu quyết tín nhiệm">Biểu quyết tín nhiệm</MenuItem>
+                            </InputGrid>
+                        </Grid>
+                    </Grid>
+                    {
+                        type == "Biểu quyết có số dư" &&
+                        <Grid container className={classes.inputItem} alignItems="center" >
+                            <Grid item xs={4}>
+                                <Typography>Số phiếu tối đa</Typography>
+                            </Grid>
+                            <Grid item xs={8}>
+                                <InputGrid
+                                    noTitle
+                                    type="number"
+                                    defaultValue="1"
+                                    name="SoPhieuToiDa"
+                                    control={control}
+                                    errors={errors}
+                                    InputProps={{ inputProps: { min: 1 } }}
+                                />
+                            </Grid>
+                        </Grid>
+                    }
+
+                    <Grid container className={classes.inputItem} alignItems="center">
+                        <Grid item xs={4}>
                             <Typography>Thời gian bắt đầu</Typography>
                         </Grid>
                         <Grid item xs={8}>
@@ -209,22 +255,6 @@ const CreateVoting = () => {
                                     validate: value =>
                                         new Date(value) >= new Date(ThoiGianBatDau.current) || "Ngày kết thúc phải lớn hơn ngày bắt đầu"
                                 }}
-                            />
-                        </Grid>
-                    </Grid>
-                    <Grid container className={classes.inputItem} alignItems="center" >
-                        <Grid item xs={4}>
-                            <Typography>Số phiếu tối đa</Typography>
-                        </Grid>
-                        <Grid item xs={8}>
-                            <InputGrid
-                                noTitle
-                                type="number"
-                                defaultValue="1"
-                                name="SoPhieuToiDa"
-                                control={control}
-                                errors={errors}
-                                InputProps={{ inputProps: { min: 1 } }}
                             />
                         </Grid>
                     </Grid>

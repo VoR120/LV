@@ -91,3 +91,28 @@ table:first-child {
     }
   }
 }
+
+//2 Last child
+.file-table {
+  table:first-child {
+    & tr {
+      &:hover {
+        background-color: #fff !important
+      };
+      & td:last-child,
+      th:last-child {
+        background-color: #fff;
+        position: sticky;
+        right: 0;
+        z-index: 10;
+      }
+      & td:nth-child(25),
+      th:nth-child(25) {
+        background-color: #fff;
+        position: sticky;
+        right: 102.66px;
+        z-index: 10;
+      }
+    }
+  }
+}

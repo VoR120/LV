@@ -235,8 +235,8 @@ const PartyMember = {
     },
     create: async (newValue, callback) => {
 
-            const sqlPromise = sql.promise();
-            const newPassword = generator.generate({
+        const sqlPromise = sql.promise();
+        const newPassword = generator.generate({
             length: 8,
             numbers: true,
         })
@@ -604,6 +604,57 @@ const PartyMember = {
             callback(error, null);
         }
     },
+    mailing: async (data, callback) => {
+
+        const newPassword = generator.generate({
+            length: 8,
+            numbers: true,
+        })
+
+        const mail = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'vob1706895@student.ctu.edu.vn',
+                pass: `${process.env.PASSWORD}`
+            }
+        })
+
+        const mailOptions = {
+            from: 'vob1706895@student.ctu.edu.vn',
+            to: `${data.mailList}`,
+            subject: `Cấp tài khoản truy cập vào website quản lý Đảng viên khoa CNTT&TT Đại học Cần Thơ`,
+            html: `
+            Cấp tài khoản truy cập vào website ${process.env.URL} <br/>
+            Mật khẩu đăng nhập: ${newPassword} <br/>
+            Bạn có thể đổi mật khẩu sau khi đăng nhập. <br/>
+            ...<br/>
+            Thân,<br/>
+            Nguyễn Văn Vỏ - B1706895.
+            `
+        }
+
+        mail.sendMail(mailOptions, async function (error, info) {
+            if (error) {
+                console.log(error);
+                callback({ msg: "Đã có lỗi xảy ra!" }, null);
+                return;
+            } else {
+                console.log('Email sent: ' + info.response);
+                const sqlPromise = sql.promise()
+                await Promise.all(data.mailList.map(async el => {
+                    try {
+                        await sqlPromise.query(`UPDATE dangvien SET DaXacNhan = 1 WHERE Email = "${el}"`)
+                    } catch (error) {
+                        console.log(error);
+                        callback({ message: "Đã có lỗi xảy ra!" }, null)
+                        return;
+                    }
+                }))
+                callback(null, { msg: "Đã gửi!" })
+                return;
+            }
+        });
+    }
 };
 
 module.exports = PartyMember;

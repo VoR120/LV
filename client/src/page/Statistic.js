@@ -22,6 +22,7 @@ import MyButton from '../component/UI/MyButton';
 import MySelect from '../component/UI/MySelect';
 import { CategoryContext } from '../contextAPI/CategoryContext';
 import { InfoContext } from '../contextAPI/InfoContext';
+import { LoadingContext } from '../contextAPI/LoadingContext';
 import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
 import { partyMemberPDF } from '../utils/pdf';
 import { allInfoColumn, getExportData, getKeyField, pdfmakedownload } from '../utils/utils';
@@ -66,6 +67,7 @@ const Statistic = () => {
     // ContextAPI
     const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
     const { category, categoryDispatch } = useContext(CategoryContext);
+    const { loading, loadingDispatch } = useContext(LoadingContext);
     const { info } = useContext(InfoContext);
 
     // State
@@ -75,7 +77,6 @@ const Statistic = () => {
     const [fieldValue, setFieldValue] = useState("");
     const [yearGradeArr, setYearGradeArr] = useState([]);
     const [yearGrade, setYearGrade] = useState("");
-    const [loading, setLoading] = useState(true);
     const [loadingTable, setLoadingTable] = useState(false);
 
     const [rows, setRows] = useState([])
@@ -84,7 +85,6 @@ const Statistic = () => {
 
     const data = getExportData(rows, columns)
 
-    // Variable
     const [genderS, setGenderS] = useState([]);
     const [partyCellS, setPartyCellS] = useState([])
     const [positionS, setPositionS] = useState([])
@@ -174,14 +174,12 @@ const Statistic = () => {
             setPoliticsS(newres7);
         }
         fetchAPI();
-        // getAllPartyMember(partyMemberDispatch);
     }, [])
 
     useEffect(() => {
         if (field != "age") {
-            setLoading(true)
-            getAllCategory(categoryDispatch, field)
             setFieldValue("")
+            getAllCategory(categoryDispatch, field)
         }
     }, [field])
 
@@ -195,20 +193,23 @@ const Statistic = () => {
     }, [category])
 
     useEffect(() => {
+        loadingDispatch({ type: 'OPEN_LOADING' })
         if (yearGradeArr.length > 0) {
             setYearGrade(yearGradeArr[yearGradeArr.length - 1].Nam)
             setFieldArr(yearGradeArr[yearGradeArr.length - 1].Data)
+            loadingDispatch({ type: 'CLOSE_LOADING' })
         }
     }, [yearGradeArr])
 
     useEffect(() => {
+        loadingDispatch({ type: 'OPEN_LOADING' })
         if (fieldArr.length > 0) {
             if (field != "grade") {
                 setFieldValue(fieldArr.length > 0 ? fieldArr[0][fieldKey[0]] : "")
             } else
                 setFieldValue(fieldArr.length > 0 ? fieldArr[0]["MaLoai"] : "")
-            setLoading(false)
         }
+        loadingDispatch({ type: 'CLOSE_LOADING' })
     }, [fieldArr])
 
     return (
@@ -230,13 +231,15 @@ const Statistic = () => {
                         <Typography className={classes.heading}>Thống kê</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                        {/* <div className={classes.paperWrapper}> */}
                         <Grid container spacing={2}>
                             <Grid item xs={3}>
                                 <DoughnutChart label={"Giới tính"} data={genderS} />
                             </Grid>
                             <Grid item xs={3}>
                                 <DoughnutChart label={"Chi bộ"} data={partyCellS} />
+                            </Grid>
+                            <Grid item xs={3}>
+                                <DoughnutChart label={"Chức vụ"} data={positionS} />
                             </Grid>
                             <Grid item xs={3}>
                                 <DoughnutChart label={"Dân tộc"} data={ethnicS} />
@@ -254,15 +257,6 @@ const Statistic = () => {
                                 <DoughnutChart label={"TĐ Chính trị"} data={politicsS} />
                             </Grid>
                         </Grid>
-
-                        {/* <PaperStatistic title={"Giới tính"} data={genderS} />
-                            <PaperStatistic title={"Chi bộ"} data={partyCellS} />
-                            <PaperStatistic title={"Dân tộc"} data={ethnicS} />
-                            <PaperStatistic title={"Tôn giáo"} data={religionS} />
-                            <PaperStatistic title={"Tuổi"} data={ageS} />
-                            <PaperStatistic title={"TĐ Tin học"} data={itS} />
-                            <PaperStatistic title={"TĐ Chính trị"} data={politicsS} /> */}
-                        {/* </div> */}
                     </AccordionDetails>
                 </Accordion>
 
@@ -282,61 +276,62 @@ const Statistic = () => {
                         <MenuItem value="ethnic">Dân tộc</MenuItem>
                         <MenuItem value="religion">Tôn giáo</MenuItem>
                     </MySelect>
-                    {!loading &&
-                        (field == "grade" ?
-                            <>
-                                <Typography className={classes.inputSelect}>Năm</Typography>
-                                <MySelect
-                                    value={yearGrade}
-                                    autowidth
-                                    onChange={handleChangeYear}
-                                >
-                                    {yearGradeArr.map(el =>
-                                        <MenuItem key={el.Nam} value={el.Nam}>{el.Nam}</MenuItem>
-                                    )}
-                                </MySelect>
-                                <MySelect
-                                    style={{ marginLeft: '16px' }}
-                                    value={fieldValue}
-                                    autowidth
-                                    onChange={handleChangeFieldValue}
-                                >
-                                    {
-                                        fieldArr.map(el =>
-                                            <MenuItem key={el["MaLoai"]} value={el["MaLoai"]}>{el["TenLoai"]}</MenuItem>
-                                        )
-                                    }
-                                </MySelect>
-                            </>
-                            :
-                            field == "age"
-                                ?
-                                <MySelect
-                                    style={{ marginLeft: '16px' }}
-                                    value={fieldValue}
-                                    autowidth
-                                    onChange={handleChangeFieldValue}
-                                >
-                                    <MenuItem value="from18to30">Từ 18 đến 30 tuổi</MenuItem>
-                                    <MenuItem value="from31to40">Từ 31 đến 40 tuổi</MenuItem>
-                                    <MenuItem value="from41to50">Từ 41 đến 50 tuổi</MenuItem>
-                                    <MenuItem value="from51to60">Từ 51 đến 60 tuổi</MenuItem>
-                                    <MenuItem value="over60">Trên 61 tuổi</MenuItem>
-                                </MySelect>
-                                :
-                                <MySelect
-                                    style={{ marginLeft: '16px' }}
-                                    value={fieldValue}
-                                    autowidth
-                                    onChange={handleChangeFieldValue}
-                                >
-                                    {fieldArr.length > 0 &&
-                                        fieldArr.map(el =>
-                                            <MenuItem key={el[fieldKey[0]]} value={el[fieldKey[0]]}>{el[fieldKey[1]]}</MenuItem>
-                                        )
-                                    }
-                                </MySelect>
-                        )
+                    {
+                        field == "age" &&
+                        <MySelect
+                            style={{ marginLeft: '16px' }}
+                            value={fieldValue}
+                            autowidth
+                            onChange={handleChangeFieldValue}
+                        >
+                            <MenuItem value="from18to30">Từ 18 đến 30 tuổi</MenuItem>
+                            <MenuItem value="from31to40">Từ 31 đến 40 tuổi</MenuItem>
+                            <MenuItem value="from41to50">Từ 41 đến 50 tuổi</MenuItem>
+                            <MenuItem value="from51to60">Từ 51 đến 60 tuổi</MenuItem>
+                            <MenuItem value="over60">Trên 61 tuổi</MenuItem>
+                        </MySelect>
+                    }
+                    {
+                        field == "grade" &&
+                        <>
+                            <Typography className={classes.inputSelect}>Năm</Typography>
+                            <MySelect
+                                value={yearGrade}
+                                autowidth
+                                onChange={handleChangeYear}
+                            >
+                                {yearGradeArr.map(el =>
+                                    <MenuItem key={el.Nam} value={el.Nam}>{el.Nam}</MenuItem>
+                                )}
+                            </MySelect>
+                            <MySelect
+                                style={{ marginLeft: '16px' }}
+                                value={fieldValue}
+                                autowidth
+                                onChange={handleChangeFieldValue}
+                            >
+                                {
+                                    fieldArr.map(el =>
+                                        <MenuItem key={el["MaLoai"]} value={el["MaLoai"]}>{el["TenLoai"]}</MenuItem>
+                                    )
+                                }
+                            </MySelect>
+                        </>
+                    }
+                    {
+                        (field != "grade" && field != "age") &&
+                        <MySelect
+                            style={{ marginLeft: '16px' }}
+                            value={fieldValue}
+                            autowidth
+                            onChange={handleChangeFieldValue}
+                        >
+                            {fieldArr.length > 0 &&
+                                fieldArr.map(el =>
+                                    <MenuItem key={el[fieldKey[0]]} value={el[fieldKey[0]]}>{el[fieldKey[1]]}</MenuItem>
+                                )
+                            }
+                        </MySelect>
                     }
                 </Paper>
                 <MyButton onClick={handleSubmit} primary>Xem</MyButton>
@@ -373,7 +368,6 @@ const Statistic = () => {
                     />
                 </TableContainer>
             </Layout>
-            <Loading loading={loading} />
         </>
     );
 };

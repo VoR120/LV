@@ -5,15 +5,17 @@ import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
 import { CSVLink } from 'react-csv';
 import { getAllCategoryPM } from '../action/categoryAction';
-import { filterPartyMember, getAllPartyMember } from '../action/partyMemberAction';
+import { filterPartyMember, getAllPartyMember, mailing } from '../action/partyMemberAction';
 import AddForm from '../component/AddForm';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
 import { CategoryContext } from '../contextAPI/CategoryContext';
 import { InfoContext } from '../contextAPI/InfoContext';
+import { LoadingContext } from '../contextAPI/LoadingContext';
 import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import { partyMemberPDF } from '../utils/pdf';
-import { allInfoColumn, getExportData, pdfmakedownload } from '../utils/utils';
+import { allInfoColumn, fileColumn, getExportData, pdfmakedownload } from '../utils/utils';
 
 
 const useStyles = makeStyles(theme => ({
@@ -44,6 +46,8 @@ const File = () => {
 
     const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
     const { category, categoryDispatch } = useContext(CategoryContext);
+    const { openSnackbarDispatch } = useContext(SnackbarContext);
+    const { loadingDispatch } = useContext(LoadingContext);
     const { info } = useContext(InfoContext);
     const [status, setStatus] = useState({ all: false, living: true, moving: false });
     const [loading, setLoading] = useState(false)
@@ -57,10 +61,37 @@ const File = () => {
         setStatus({ ...newStatus, [name]: true })
     }
 
-    const [columns, setColumns] = useState(allInfoColumn(rows, setRows))
+    const handleMailing = (e, email) => {
+        const fetchMail = async () => {
+            loadingDispatch({ type: 'OPEN_LOADING' })
+            let mailList = new Array(email);
+            const res = await mailing(mailList)
+            if (res.error) {
+                openSnackbarDispatch({
+                    type: 'SET_OPEN',
+                    payload: {
+                        msg: res.error.message,
+                        type: "error"
+                    }
+                })
+            } else {
+                openSnackbarDispatch({
+                    type: 'SET_OPEN',
+                    payload: {
+                        msg: res.msg,
+                        type: "success"
+                    }
+                })
+                setRows(rows.map(el => el.Email == email ? { ...el, DaXacNhan: 1 } : el))
+            }
+            loadingDispatch({ type: 'CLOSE_LOADING' })
+        }
+        fetchMail();
+    }
+
+    const [columns, setColumns] = useState(fileColumn(rows, setRows, handleMailing))
 
     const data = getExportData(rows, columns)
-    console.log(data);
 
     const handleExportPDF = () => {
         const dd = partyMemberPDF(rows);
@@ -68,7 +99,7 @@ const File = () => {
     }
 
     useEffect(() => {
-        setColumns(allInfoColumn(rows, setRows));
+        setColumns(fileColumn(rows, setRows, handleMailing));
     }, [rows])
 
     const fetchAPI = async (data) => {

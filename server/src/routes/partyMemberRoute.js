@@ -5,13 +5,15 @@ const {
     createPartyMember,
     updateByIdPartyMember,
     removePartyMember,
-    removeAllPartyMember
+    removeAllPartyMember,
+    mailingPartyMember
 } = require('../controllers/partyMemberCtrller');
 const Router = express.Router();
 
 Router.get('/partymember', getAllPartyMember);
 Router.get('/partymember/:id', findByIdPartyMember);
 Router.post('/partymember/create', createPartyMember);
+Router.post('/partymember/mailing', mailingPartyMember);
 Router.put('/partymember/:id', updateByIdPartyMember);
 Router.delete('/partymember/:id', removePartyMember);
 Router.delete('/partymember/removeall', removeAllPartyMember);

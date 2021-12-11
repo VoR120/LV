@@ -5,6 +5,21 @@ import { ArcElement } from 'chart.js'
 import { Typography } from '@mui/material';
 
 const DoughnutChart = ({ label, data }) => {
+    const shuffled = [
+        "#EF5350",
+        "#EC407A",
+        "#AB47BC",
+        "#7E57C2",
+        "#5C6BC0",
+        "#42A5F5",
+        "#26A69A",
+        "#66BB6A",
+        "#9CCC65",
+        "#FFEE58",
+        "#FFA726",
+        "#8D6E63",
+        "#78909C",
+    ].sort(() => Math.random() - 0.5)
     return (
         <>
             <Typography component={"body"} textAlign={"center"} variant='button'>{label}</Typography>
@@ -14,13 +29,7 @@ const DoughnutChart = ({ label, data }) => {
                     datasets: [
                         {
                             label: "Population (millions)",
-                            backgroundColor: [
-                                "#3e95cd",
-                                "#8e5ea2",
-                                "#3cba9f",
-                                "#e8c3b9",
-                                "#c45850"
-                            ],
+                            backgroundColor: shuffled,
                             data: data.map(el => el.quantity)
                         }
                     ]

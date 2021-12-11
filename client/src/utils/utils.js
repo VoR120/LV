@@ -3,6 +3,9 @@ import xlsx from 'xlsx'
 import ActionMenu from '../component/ActionMenu';
 import pdfMake from 'pdfmake/build/pdfmake'
 import pdfFonts from 'pdfmake/build/vfs_fonts'
+import MailIcon from '@mui/icons-material/Mail';
+import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
+import { mailing } from '../action/partyMemberAction';
 export const downloadExcel = (rows) => {
     const workSheet = xlsx.utils.json_to_sheet(rows);
     const workBook = xlsx.utils.book_new();
@@ -50,10 +53,10 @@ export const getGender = (gender) => {
     return genderObj[gender];
 }
 
-export const allInfoColumn = (rows, setRows) => {
+const infoColumns = () => {
     return [
         { title: "Mã Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
-        { title: "Họ tên", field: "HoTen", minWidth: 200 },
+        { title: "Họ tên", field: "HoTen", minWidth: 160 },
         { title: "Chi bộ", field: "TenChiBo", },
         { title: "Chức vụ", field: "TenChucVu", },
         { title: "CMND", field: "CMND", },
@@ -76,17 +79,42 @@ export const allInfoColumn = (rows, setRows) => {
         { title: "Ngày vào Đảng lần đầu", field: "NgayVaoDang", type: 'date' },
         { title: "Ngày vào Đảng chính thức", field: "NgayChinhThuc", type: 'date' },
         { title: "Người giới thiệu", field: "NguoiGioiThieu", },
-        {
-            title: "Chức năng", field: "action", sorting: false,
-            render: (params) => {
-                return <ActionMenu data={params} rows={rows} setRows={setRows} />
-            }
-        },
     ]
 }
 
+export const allInfoColumn = (rows, setRows) => {
+    let col = infoColumns();
+    col.push({
+        title: "Chức năng", field: "action", sorting: false,
+        render: (params) => {
+            return <ActionMenu data={params} rows={rows} setRows={setRows} />
+        }
+    })
+    return col
+}
+
+export const fileColumn = (rows, setRows, handleMailing) => {
+    let col = infoColumns();
+    col.push(
+        {
+            title: "Kích hoạt", field: 'mailing', align: 'center',
+            render: (params) =>
+                params.DaXacNhan == 0 ?
+                    <MailIcon onClick={(e) => handleMailing(e, params.Email)} color="warning" sx={{ mr: 4, cursor: 'pointer' }} />
+                    :
+                    <MarkEmailReadIcon color="success" sx={{ mr: 4 }} />
+        },
+        {
+            title: "Chức năng", field: "action", sorting: false, maxWidth: 120,
+            render: (params) => {
+                return <ActionMenu data={params} rows={rows} setRows={setRows} />
+            }
+        })
+    return col
+}
+
 export const getExportData = (rows, columns) => {
-    const headers = columns.map(el => ({ label: el.title, key: el.field })).filter(el => el.key != "action");
+    const headers = columns.map(el => ({ label: el.title, key: el.field })).filter(el => el.key != "action" && el.key != "mailing");
     const headerArr = columns.map(el => el.field);
     const newRows = rows.map(el => {
         let newEl = {};

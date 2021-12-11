@@ -6,11 +6,17 @@ exports.createPoll = async (req, res) => {
     try {
         const sqlPromise = sql.promise();
         const {
-            TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau,
+            TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau, LoaiBieuQuyet,
             ThoiGianKetThuc, UngCuVien, NguoiThamGia, PhamVi, ThoiGianNhacNho, MucDich
         } = req.body
-        const data = { TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau, ThoiGianKetThuc, PhamVi, ThoiGianNhacNho, MucDich }
-        console.log(data);
+        const data = {
+            TenBieuQuyet,
+            NoiDung,
+            SoPhieuToiDa: LoaiBieuQuyet == "Biểu quyết có số dư" ? SoPhieuToiDa : "0",
+            ThoiGianBatDau, ThoiGianKetThuc,
+            PhamVi, ThoiGianNhacNho,
+            MucDich, LoaiBieuQuyet
+        }
         const [result, f] = await sqlPromise.query(`INSERT INTO bieuquyet SET ?`, data);
         if (result) {
             const MaBieuQuyet = result.insertId;
@@ -36,12 +42,18 @@ exports.updatePoll = async (req, res) => {
     try {
         const sqlPromise = sql.promise();
         const {
-            TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau,
+            TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau, LoaiBieuQuyet,
             ThoiGianKetThuc, UngCuVien, NguoiThamGia, PhamVi, ThoiGianNhacNho, MucDich
         } = req.body
         const { id } = req.params;
-        const data = { TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau, ThoiGianKetThuc, PhamVi, ThoiGianNhacNho, MucDich }
-        console.log(data);
+        const data = {
+            TenBieuQuyet,
+            NoiDung,
+            SoPhieuToiDa: LoaiBieuQuyet == "Biểu quyết có số dư" ? SoPhieuToiDa : "0",
+            ThoiGianBatDau, ThoiGianKetThuc,
+            PhamVi, ThoiGianNhacNho,
+            MucDich, LoaiBieuQuyet
+        }
         const [result, f] = await sqlPromise.query(`
         UPDATE bieuquyet SET ?
         WHERE MaBieuQuyet = ${id}
@@ -350,6 +362,7 @@ exports.mailing = async (req, res) => {
                 html: `
                 Thời gian: <b> ${(new Date(poll[0].ThoiGianBatDau)).toLocaleString()} - ${(new Date(poll[0].ThoiGianKetThuc)).toLocaleString()} </b>.<br/>
                 Truy cập vào ${process.env.URL}voting để xem chi tiết.<br/>
+                ...<br/>
                 Thân,<br/>
                 Nguyễn Văn Vỏ - B1706895
                 `,

@@ -372,3 +372,13 @@ export const filterPartyMember = async (payload) => {
         console.log(error);
     }
 }
+
+export const mailing = async (payload) => {
+    try {
+        const res = await axios.post('/api/partymember/mailing', { mailList: payload })
+        if (res.status == 200)
+            return res.data
+    } catch (error) {
+        return { error: error.response.data }
+    }
+}

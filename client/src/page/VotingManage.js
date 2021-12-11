@@ -104,7 +104,9 @@ const Voting = () => {
     const [votesList, setVotesList] = useState([]);
     const [noVotingList, setNoVotingList] = useState([]);
     const [indexForm, setIndexForm] = useState("")
-    const myRef = useRef();
+    const [type, setType] = useState("Biểu quyết có số dư");
+
+    console.log(editState);
 
     const {
         handleSubmit,
@@ -121,7 +123,15 @@ const Voting = () => {
     ThoiGianBatDau.current = watch("ThoiGianBatDau", "");
 
     const handleChangeSelect = (e) => {
+        if (e.target.value != 0) {
+            clearErrors(e.target.name)
+        }
         setValue(e.target.name, e.target.value)
+    }
+
+    const handleChangeType = (e) => {
+        setValue(e.target.name, e.target.value)
+        setType(e.target.value);
     }
 
     const handleToggle = (data, index) => {
@@ -230,6 +240,8 @@ const Voting = () => {
             setValue("NoiDung", editState.NoiDung);
             setValue("ThoiGianNhacNho", editState.ThoiGianNhacNho);
             setValue("PhamVi", editState.PhamVi);
+            setValue("LoaiBieuQuyet", editState.LoaiBieuQuyet);
+            setType(editState.LoaiBieuQuyet);
             setValue("SoPhieuToiDa", editState.SoPhieuToiDa);
             setValue("ThoiGianBatDau", getDateTime(editState.ThoiGianBatDau))
             setValue("ThoiGianKetThuc", getDateTime(editState.ThoiGianKetThuc))
@@ -339,11 +351,19 @@ const Voting = () => {
                             {
                                 label: "Số phiếu",
                                 backgroundColor: [
-                                    "#3e95cd",
-                                    "#8e5ea2",
-                                    "#3cba9f",
-                                    "#e8c3b9",
-                                    "#c45850"
+                                    "#EF5350",
+                                    "#42A5F5",
+                                    "#FFEE58",
+                                    "#EC407A",
+                                    "#7E57C2",
+                                    "#66BB6A",
+                                    "#26A69A",
+                                    "#78909C",
+                                    "#AB47BC",
+                                    "#9CCC65",
+                                    "#FFA726",
+                                    "#5C6BC0",
+                                    "#8D6E63",
                                 ],
                                 data: quantity
                             }
@@ -511,9 +531,16 @@ const Voting = () => {
                                         <Typography textAlign="center" className={classes.title}>
                                             Phạm vi: <b>{el.PhamVi}</b>
                                         </Typography>
-                                        <Typography textAlign="center" className={classes.title}>
-                                            Số phiếu tối đa: <b>{el.SoPhieuToiDa}</b>
-                                        </Typography>
+                                        {
+                                            el.LoaiBieuQuyet == "Biểu quyết có số dư" ?
+                                                <Typography textAlign="center" className={classes.title}>
+                                                    Số phiếu tối đa: <b>{el.SoPhieuToiDa}</b>
+                                                </Typography>
+                                                :
+                                                <Typography textAlign="center" className={classes.title}>
+                                                    {el.LoaiBieuQuyet}
+                                                </Typography>
+                                        }
                                         <Grid container justifyContent="center">
                                             {getStatus(el.ThoiGianBatDau, el.ThoiGianKetThuc) == 2 &&
                                                 <MyButton onClick={() => handleToggle(el, index)} primary style={{ marginBottom: '20px', marginLeft: "8px" }}>
@@ -543,7 +570,7 @@ const Voting = () => {
                                 {checkEditOpen(index) &&
                                     <Grid item xs={12}>
                                         <Paper className={classes.paperForm} variant="outlined">
-                                            <Typography style={{ textTransform: 'uppercase', marginBottom: 30 }}>Cập nhật biểu quyết</Typography>
+                                            <Typography style={{ textTransform: 'uppercase', marginBottom: 30 }}>Tạo biểu quyết</Typography>
                                             <Grid container className={classes.inputItem} alignItems="center">
                                                 <Grid item xs={4}>
                                                     <Typography>Tên biểu quyết</Typography>
@@ -552,7 +579,6 @@ const Voting = () => {
                                                     <InputGrid
                                                         noTitle
                                                         name="TenBieuQuyet"
-                                                        defaultValue="0"
                                                         control={control}
                                                         errors={errors}
                                                         rules={{
@@ -574,6 +600,10 @@ const Voting = () => {
                                                         defaultValue="0"
                                                         control={control}
                                                         errors={errors}
+                                                        rules={{
+                                                            validate: value =>
+                                                                value != 0 || "Vui lòng nhập trường này!"
+                                                        }}
                                                     >
                                                         <MenuItem value="0">Chọn</MenuItem>
                                                         <MenuItem value="Khen thưởng">Khen thưởng</MenuItem>
@@ -584,6 +614,44 @@ const Voting = () => {
                                             </Grid>
                                             <Grid container className={classes.inputItem} alignItems="center">
                                                 <Grid item xs={4}>
+                                                    <Typography>Loại biểu quyết</Typography>
+                                                </Grid>
+                                                <Grid item xs={8}>
+                                                    <InputGrid
+                                                        select
+                                                        noTitle
+                                                        onChange={handleChangeType}
+                                                        name="LoaiBieuQuyet"
+                                                        defaultValue="Biểu quyết có số dư"
+                                                        control={control}
+                                                        errors={errors}
+                                                    >
+                                                        <MenuItem value="Biểu quyết có số dư">Biểu quyết có số dư</MenuItem>
+                                                        <MenuItem value="Biểu quyết tín nhiệm">Biểu quyết tín nhiệm</MenuItem>
+                                                    </InputGrid>
+                                                </Grid>
+                                            </Grid>
+                                            {
+                                                type == "Biểu quyết có số dư" &&
+                                                <Grid container className={classes.inputItem} alignItems="center" >
+                                                    <Grid item xs={4}>
+                                                        <Typography>Số phiếu tối đa</Typography>
+                                                    </Grid>
+                                                    <Grid item xs={8}>
+                                                        <InputGrid
+                                                            noTitle
+                                                            type="number"
+                                                            defaultValue="1"
+                                                            name="SoPhieuToiDa"
+                                                            control={control}
+                                                            errors={errors}
+                                                            InputProps={{ inputProps: { min: 1 } }}
+                                                        />
+                                                    </Grid>
+                                                </Grid>
+                                            }
+                                            <Grid container className={classes.inputItem} alignItems="center">
+                                                <Grid item xs={4}>
                                                     <Typography>Thời gian bắt đầu</Typography>
                                                 </Grid>
                                                 <Grid item xs={8}>
@@ -591,7 +659,6 @@ const Voting = () => {
                                                         noTitle
                                                         type="datetime-local"
                                                         name="ThoiGianBatDau"
-                                                        defaultValue=""
                                                         control={control}
                                                         errors={errors}
                                                         rules={{
@@ -609,7 +676,6 @@ const Voting = () => {
                                                         noTitle
                                                         type="datetime-local"
                                                         name="ThoiGianKetThuc"
-                                                        defaultValue=""
                                                         control={control}
                                                         errors={errors}
                                                         rules={{
@@ -622,29 +688,12 @@ const Voting = () => {
                                             </Grid>
                                             <Grid container className={classes.inputItem} alignItems="center" >
                                                 <Grid item xs={4}>
-                                                    <Typography>Số phiếu tối đa</Typography>
-                                                </Grid>
-                                                <Grid item xs={8}>
-                                                    <InputGrid
-                                                        noTitle
-                                                        type="number"
-                                                        defaultValue="1"
-                                                        name="SoPhieuToiDa"
-                                                        control={control}
-                                                        errors={errors}
-                                                        InputProps={{ inputProps: { min: 1 } }}
-                                                    />
-                                                </Grid>
-                                            </Grid>
-                                            <Grid container className={classes.inputItem} alignItems="center" >
-                                                <Grid item xs={4}>
                                                     <Typography>Phạm vi</Typography>
                                                 </Grid>
                                                 <Grid item xs={8}>
                                                     <InputGrid
                                                         noTitle
                                                         name="PhamVi"
-                                                        defaultValue=""
                                                         control={control}
                                                         errors={errors}
                                                         rules={{
@@ -681,7 +730,6 @@ const Voting = () => {
                                                         noTitle
                                                         multiline
                                                         minRows={3}
-                                                        defaultValue=""
                                                         name="NoiDung"
                                                         control={control}
                                                         errors={errors}

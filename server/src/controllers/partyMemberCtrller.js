@@ -28,8 +28,16 @@ exports.getAllPartyMember = (req, res) => {
 
 exports.findByIdPartyMember = findById(PartyMember);
 
-exports.filterPartyMember = (req, res) => {
-    Model.findById(req.params, (err, data) => {
+exports.createPartyMember = create(PartyMember, "Mã số Đảng viên")
+
+exports.updateByIdPartyMember = updateById(PartyMember);
+
+exports.removePartyMember = remove(PartyMember);
+
+exports.removeAllPartyMember = removeAll(PartyMember);
+
+exports.mailingPartyMember = (req, res) => {
+    PartyMember.mailing(req.body, (err, data) => {
         if (err)
             res.status(500).send({
                 message:
@@ -38,11 +46,3 @@ exports.filterPartyMember = (req, res) => {
         else res.status(200).json(data);
     })
 }
-
-exports.createPartyMember = create(PartyMember, "Mã số Đảng viên")
-
-exports.updateByIdPartyMember = updateById(PartyMember);
-
-exports.removePartyMember = remove(PartyMember);
-
-exports.removeAllPartyMember = removeAll(PartyMember);

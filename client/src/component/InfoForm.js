@@ -451,6 +451,12 @@ const InfoForm = (props) => {
                             name={"Email"}
                             control={control}
                             errors={errors}
+                            rules={{
+                                pattern: {
+                                    value:  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                                    message: "Số điện thoại không hợp lệ!"
+                                }
+                            }}
                         />
                         <Grid item xs={12}>
                             <Typography>Số điện thoại</Typography>
