@@ -9,6 +9,9 @@ import DeleteForm from './DeleteForm';
 import ExportFile from './ExportFile';
 import MoveForm from './MoveForm';
 import RewardDisciplineForm from './RewardDisciplineForm';
+import { removePartyMember } from '../action/partyMemberAction';
+import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
 
 const useStyles = makeStyles(theme => ({
     icon: {
@@ -32,6 +35,8 @@ const ActionMenu = (props) => {
     const [open, setOpen] = useState(null);
     const { info } = useContext(InfoContext)
     const { data, rows, setRows } = props;
+    const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
+    const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
 
     const handleClose = () => {
         setOpen(null)
@@ -40,6 +45,11 @@ const ActionMenu = (props) => {
     const handleOpen = (event) => {
         setOpen(event.currentTarget);
     };
+
+    const handleSubmit = () => {
+        removePartyMember(partyMemberDispatch, { id: data.id }, openSnackbarDispatch)
+        setOpen(false);
+    }
 
     return (
         <div className={classes.root}>
@@ -67,7 +77,12 @@ const ActionMenu = (props) => {
                     <MenuItem onClick={handleClose}><AddForm edit data={data} rows={rows} setRows={setRows} /></MenuItem>
                 }
                 {info.info.Quyen["2"] == 1 &&
-                    <MenuItem onClick={handleClose}><DeleteForm name={data.HoTen} id={data.MaSoDangVien} /></MenuItem>
+                    <MenuItem onClick={handleClose}>
+                        <DeleteForm
+                            handleSubmit={handleSubmit}
+                            content={`Bạn có muốn xóa Đảng viên "${data.HoTen}" - "${data.MaSoDangVien}"?`}
+                        />
+                    </MenuItem>
                 }
                 {info.info.Quyen["3"] == 1 &&
                     <MenuItem onClick={handleClose}><MoveForm id={data.MaSoDangVien} partycell={data.MaChiBo} /></MenuItem>
@@ -82,7 +97,15 @@ const ActionMenu = (props) => {
                     <MenuItem onClick={handleClose}><RewardDisciplineForm name={data.HoTen} id={data.MaSoDangVien} /></MenuItem>
                 }
                 {info.info.Quyen["11"] == 1 &&
-                    <MenuItem onClick={handleClose}><DecentralizationForm pm partycell={data.MaChiBo} id={data.MaSoDangVien} permission={data.Quyen} />                </MenuItem>
+                    <MenuItem onClick={handleClose}>
+                        <DecentralizationForm
+                            pm partycell={data.MaChiBo}
+                            id={data.MaSoDangVien}
+                            permission={data.Quyen}
+                            rows={rows}
+                            setRows={setRows}
+                        />
+                    </MenuItem>
                 }
                 <MenuItem>
                     <ExportFile data={data} />

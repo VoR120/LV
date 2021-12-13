@@ -4,7 +4,7 @@ import Chart from 'chart.js/auto'
 import { ArcElement } from 'chart.js'
 import { Typography } from '@mui/material';
 
-const DoughnutChart = ({ label, data }) => {
+const DoughnutChart = ({ label, data, twoColor }) => {
     const shuffled = [
         "#EF5350",
         "#EC407A",
@@ -28,8 +28,7 @@ const DoughnutChart = ({ label, data }) => {
                     labels: data.map(el => el.label),
                     datasets: [
                         {
-                            label: "Population (millions)",
-                            backgroundColor: shuffled,
+                            backgroundColor: twoColor ? ["#66BB6A", "#FFEE58"] : shuffled,
                             data: data.map(el => el.quantity)
                         }
                     ]

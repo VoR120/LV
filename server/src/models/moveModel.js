@@ -324,8 +324,42 @@ const Move = {
             callback(null, { MaChuyenSinhHoat: res.insertId, ...newValue });
         })
     },
-    updateById: updateById("chuyensinhhoat", "MaChuyenSinhHoat"),
-    remove: remove("chuyensinhhoat", "MaSoDangVien"),
+    updateById: (id, newValue, callback) => {
+        const sqlQuery = `UPDATE chuyensinhhoat SET ? WHERE MaChuyenSinhHoat = ${id}`
+        sql.query(sqlQuery, newValue, ((err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                callback(err, null);
+                return;
+            }
+
+            if (res.affectedRows == 0) {
+                callback({ type: "not_found" }, null);
+                return;
+            }
+
+            console.log("Updated: ", id);
+            callback(null, newValue);
+        }))
+    },
+    remove: (id, callback) => {
+        const sqlQuery = `DELETE FROM chuyensinhhoat WHERE MaChuyenSinhHoat = ${id}`
+        sql.query(sqlQuery, id, ((err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                callback(err, null);
+                return;
+            }
+
+            if (res.affectedRows == 0) {
+                callback({ type: "not_found" }, null);
+                return;
+            }
+
+            console.log("Deleted: ", id);
+            callback(null, { msg: "Đã xóa!" });
+        }))
+    },
     removeAll: removeAll("chuyensinhhoat")
 }
 

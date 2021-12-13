@@ -23,7 +23,24 @@ const Discipline = {
     findById: findById("kyluat", "MaKyLuat"),
     create: create("kyluat", "MaKyLuat"),
     updateById: updateById("kyluat", "MaKyLuat"),
-    remove: remove("kyluat", "MaKyLuat"),
+    remove: (id, callback) => {
+        const sqlQuery = `DELETE FROM kyluat WHERE MaKyLuat = ${id}`
+        sql.query(sqlQuery, id, ((err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                callback(err, null);
+                return;
+            }
+
+            if (res.affectedRows == 0) {
+                callback({ type: "not_found" }, null);
+                return;
+            }
+
+            console.log("Deleted: ", id);
+            callback(null, { msg: "Đã xóa!" });
+        }))
+    },
     removeAll: removeAll("kyluat")
 }
 

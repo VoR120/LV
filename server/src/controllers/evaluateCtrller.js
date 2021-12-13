@@ -1,5 +1,6 @@
 const e = require('express');
 const sql = require('../configs/db');
+const nodemailer = require('nodemailer');
 
 exports.getByPartyMember = (req, res) => {
     try {
@@ -254,19 +255,47 @@ exports.checkOpen = (req, res) => {
     }
 }
 
-exports.setTimeEvaluate = (req, res) => {
+exports.setTimeEvaluate = async (req, res) => {
     try {
         const { Nam, MaDVDG, ThoiGianBatDau, ThoiGianKetThuc, TrangThai } = req.body
         sql.query(`SELECT *
         FROM thoigiandanhgia
         WHERE Nam = ${Nam}
         AND MaDVDG = ${MaDVDG}`,
-            (err, result) => {
+            async (err, result) => {
                 if (err) {
                     res.status(500).json({ msg: err.message })
                     return;
                 }
+
+                let sqlPromise = sql.promise();
+                const mail = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: 'vob1706895@student.ctu.edu.vn',
+                        pass: `${process.env.PASSWORD}`
+                    }
+                })
+
+                let mailOptions;
+
+                // DVDG: 1 -> Quyen: 13 
+                // DVDG: 2 -> Quyen: 14 
+                // DVDG: 3 -> Quyen: 15 
+
+                const [mailList, fML] = await sqlPromise.query(`
+                SELECT DISTINCT (dangvien.HoTen), dangvien.MaSoDangVien
+                    FROM quyenchucvu, quyendangvien, dangvien 
+                    WHERE (quyenchucvu.MaQuyen = ${MaDVDG}
+                    AND quyenchucvu.CoQuyen = 1
+                    AND dangvien.MaChucVu = quyenchucvu.MaChucVu)
+                    OR (quyendangvien.MaQuyen = ${MaDVDG}
+                    AND quyendangvien.CoQuyen = 1
+                    AND dangvien.MaSoDangVien = quyendangvien.MaSoDangVien)
+            `)
+                let subject;
                 if (result.length) {
+
                     sql.query(`UPDATE thoigiandanhgia SET ThoiGianBatDau = "${ThoiGianBatDau}",
                     ThoiGianKetThuc = "${ThoiGianKetThuc}",
                     TrangThai = 1
@@ -274,23 +303,86 @@ exports.setTimeEvaluate = (req, res) => {
                     AND MaDVDG = ${MaDVDG}
                     `,
                         (err, result1) => {
+
+                            if (MaDVDG == 13) {
+                                subject = `Cập nhật thời gian đánh giá Đảng viên khoa CNTT&TT, Đại học Cần Thơ`
+                            }
+                            if (MaDVDG == 14) {
+                                subject = `Cập nhật thời gian bộ môn đánh giá Đảng viên khoa CNTT&TT, Đại học Cần Thơ`
+                            }
+                            if (MaDVDG == 15) {
+                                subject = `Cập nhật thời gian khoa đánh giá Đảng viên khoa CNTT&TT, Đại học Cần Thơ`
+                            }
+
                             if (err) {
                                 res.status(500).json({ msg: err.message })
                                 return;
                             }
                             console.log("Updated!")
+
+                            mailOptions = {
+                                from: 'vob1706895@student.ctu.edu.vn',
+                                to: mailList.map(el => el.Email),
+                                subject: subject,
+                                html: `
+                                Thời gian mới: <b> ${(new Date(ThoiGianBatDau)).toLocaleDateString()} - ${(new Date(ThoiGianKetThuc)).toLocaleDateString()} </b>.<br/>
+                                Truy cập vào ${process.env.URL}evaluate để xem chi tiết.<br/>
+                                ...<br/>
+                                Thân,<br/>
+                                Nguyễn Văn Vỏ - B1706895
+                                `,
+                            }
+
+                            mail.sendMail(mailOptions, function (error, info) {
+                                if (error) {
+                                    console.log(error);
+                                } else {
+                                    console.log('Email sent: ' + info.response);
+                                }
+                            });
                             res.status(201).json(req.body)
                             return;
                         })
                 } else {
                     sql.query(`INSERT INTO thoigiandanhgia SET ?`, req.body,
                         (err, result2) => {
+
+                            if (MaDVDG == 13) {
+                                subject = `Mở thời gian đánh giá Đảng viên khoa CNTT&TT, Đại học Cần Thơ`
+                            }
+                            if (MaDVDG == 14) {
+                                subject = `Mở thời gian bộ môn đánh giá Đảng viên khoa CNTT&TT, Đại học Cần Thơ`
+                            }
+                            if (MaDVDG == 15) {
+                                subject = `Mở thời gian khoa đánh giá Đảng viên khoa CNTT&TT, Đại học Cần Thơ`
+                            }
+
                             if (err) {
                                 console.log(err);
                                 res.status(500).json({ msg: err.message })
                                 return;
                             }
                             console.log("Created!")
+                            mailOptions = {
+                                from: 'vob1706895@student.ctu.edu.vn',
+                                to: mailList.map(el => el.Email),
+                                subject: subject,
+                                html: `
+                                Thời gian: <b> ${(new Date(ThoiGianBatDau)).toLocaleDateString()} - ${(new Date(ThoiGianKetThuc)).toLocaleDateString()} </b>.<br/>
+                                Truy cập vào ${process.env.URL}evaluate để để xem chi tiết.<br/>
+                                ...<br/>
+                                Thân,<br/>
+                                Nguyễn Văn Vỏ - B1706895
+                                `,
+                            }
+
+                            mail.sendMail(mailOptions, function (error, info) {
+                                if (error) {
+                                    console.log(error);
+                                } else {
+                                    console.log('Email sent: ' + info.response);
+                                }
+                            });
                             res.status(201).json(req.body)
                             return;
                         }

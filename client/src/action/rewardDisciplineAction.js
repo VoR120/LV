@@ -49,6 +49,16 @@ export const getRewardDiscipline = async (payload) => {
     }
 }
 
+export const removeRewardDiscipline = async (payload) => {
+    try {
+        const res = await axios.delete(`/api/${payload.type}/${payload.id}`)
+        if (res.status == 200)
+            return res.data
+    } catch (error) {
+        return { error: error.response.data }
+    }
+}
+
 export const importRewardDiscipline = async (payload) => {
     const { type, file } = payload;
     try {

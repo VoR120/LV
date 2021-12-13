@@ -5,7 +5,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
 import { CSVLink } from 'react-csv';
 import { useForm } from 'react-hook-form';
-import { getMoveByPMId, getMoveByType, updateMove } from '../action/moveAction';
+import { getMoveByPMId, getMoveByType, removeMove, updateMove, updateReturnMove } from '../action/moveAction';
 import ActionMoveMenu from '../component/ActionMoveMenu';
 import Layout from '../component/Layout';
 import MoveReturnForm from '../component/MoveReturnForm';
@@ -103,9 +103,13 @@ const Move = () => {
                 title: "Chức năng", field: "action", sorting: false,
                 render: (params) => {
                     console.log(params);
-                    return <ActionMoveMenu type={typeChoose} data={params} />
-                }
-            },
+                    return <ActionMoveMenu
+                        handleDelete={(e) => handleDelete(e, params.MaChuyenSinhHoat)}
+                        fetchApi={fetchApi}
+                        type={typeChoose} data={params}
+                    />
+                },
+            }
         ],
         "Chuyển sinh hoạt đến": [
             { title: "Mã số Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
@@ -122,7 +126,11 @@ const Move = () => {
                 title: "Chức năng", field: "action", sorting: false,
                 render: (params) => {
                     console.log(params);
-                    return <ActionMoveMenu typeFirst={typeFirst} type={typeChoose} data={params} />
+                    return <ActionMoveMenu
+                        handleDelete={(e) => handleDelete(e, params.MaChuyenSinhHoat)}
+                        fetchApi={fetchApi}
+                        type={typeChoose} data={params}
+                    />
                 }
             },
         ],
@@ -142,7 +150,11 @@ const Move = () => {
                 title: "Chức năng", field: "action", sorting: false,
                 render: (params) => {
                     console.log(params);
-                    return <ActionMoveMenu type={typeChoose} data={params} />
+                    return <ActionMoveMenu
+                        handleDelete={(e) => handleDelete(e, params.MaChuyenSinhHoat)}
+                        fetchApi={fetchApi}
+                        type={typeChoose} data={params}
+                    />
                 }
             },
         ],
@@ -161,7 +173,11 @@ const Move = () => {
                 title: "Chức năng", field: "action", sorting: false,
                 render: (params) => {
                     console.log(params);
-                    return <ActionMoveMenu type={typeChoose} data={params} />
+                    return <ActionMoveMenu
+                        handleDelete={(e) => handleDelete(e, params.MaChuyenSinhHoat)}
+                        fetchApi={fetchApi}
+                        type={typeChoose} data={params}
+                    />
                 }
             },
         ],
@@ -197,9 +213,6 @@ const Move = () => {
                 }
             })
         } else {
-            typeFirst == "type"
-                ? setColumns(columnArr[typeChoose])
-                : setColumns(columnArr["Chuyển sinh hoạt theo Mã"])
             setRows(res);
         }
         setLoading(false)
@@ -210,12 +223,58 @@ const Move = () => {
         fetchApi();
     }
 
+    const handleDelete = async (e, id) => {
+        const res = await removeMove({ id })
+        if (res.error) {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: res.error.msg,
+                    type: "error"
+                }
+            })
+        } else {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: res.msg,
+                    type: "success"
+                }
+            })
+            setRows(rows.filter(el => el.MaChuyenSinhHoat != id))
+        }
+    }
+
     const handleSubmitReturn = async (data) => {
+        setLoading(true);
+        const res = await updateReturnMove(data);
+        console.log(res);
         console.log(rows);
-        const res = await updateMove(data, openSnackbarDispatch);
-        if (res) {
-            setLoading(true)
-            fetchApi();
+        if (res.error) {
+            setRows([])
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: res.error,
+                    type: "error"
+                }
+            })
+        } else {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Đã cập nhật!",
+                    type: "success"
+                }
+            })
+            typeFirst == "type"
+                ? setColumns(columnArr[typeChoose])
+                : setColumns(columnArr["Chuyển sinh hoạt theo Mã"])
+            setRows(rows.map(el => el.MaChuyenSinhHoat == data.MaChuyenSinhHoat
+                ? { ...el, NgayChuyenDen: res.NgayChuyenDen }
+                : el
+            ));
+            // fetchApi();
         }
     }
 
@@ -225,7 +284,7 @@ const Move = () => {
         if (typeFirst == "type") {
             if (typeChoose == "Chuyển sinh hoạt đi")
                 dd = moveOutPDF(rows, title);
-            if (typeChoose == "Chuyển sinh hoạt đến") 
+            if (typeChoose == "Chuyển sinh hoạt đến")
                 dd = moveInPDF(rows, title);
             if (typeChoose == "Chuyển sinh hoạt nội bộ")
                 dd = moveInternalPDF(rows, title);
@@ -234,6 +293,13 @@ const Move = () => {
         }
         pdfmakedownload(dd);
     }
+
+    useEffect(() => {
+        typeFirst == "type"
+            ? setColumns(columnArr[typeChoose])
+            : setColumns(columnArr["Chuyển sinh hoạt theo Mã"])
+        setLoading(false)
+    }, [rows])
 
     useEffect(() => {
         setLoading(true)

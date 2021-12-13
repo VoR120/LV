@@ -81,7 +81,11 @@ const Statistic = () => {
 
     const [rows, setRows] = useState([])
 
-    const [columns] = useState(allInfoColumn);
+    const col = allInfoColumn(rows, setRows);
+
+    col.pop()
+
+    const [columns, setColumns] = useState(col);
 
     const data = getExportData(rows, columns)
 
@@ -93,6 +97,7 @@ const Statistic = () => {
     const [ageS, setAgeS] = useState([])
     const [itS, setItS] = useState([])
     const [politicsS, setPoliticsS] = useState([])
+    const [flanguageS, setFlanguageS] = useState([])
 
     // Handle Function
     const handleChangeField = (e) => {
@@ -144,6 +149,11 @@ const Statistic = () => {
     }
 
     // UseEffect
+
+    useEffect(() => {
+        setColumns(col);
+    }, [rows])
+
     useEffect(() => {
         const fetchAPI = async () => {
             const res = await getStatistic({ name: "gender", condition: getCondition() })
@@ -172,6 +182,9 @@ const Statistic = () => {
             const res7 = await getStatistic({ name: "politics", condition: getCondition() })
             const newres7 = res7.map(el => ({ label: el.TenChinhTri, quantity: el.SoLuong }))
             setPoliticsS(newres7);
+            const res8 = await getStatistic({ name: "flanguage", condition: getCondition() })
+            const newres8 = res8.map(el => ({ label: el.TenNgoaiNgu, quantity: el.SoLuong }))
+            setFlanguageS(newres8);
         }
         fetchAPI();
     }, [])
@@ -255,6 +268,9 @@ const Statistic = () => {
                             </Grid>
                             <Grid item xs={3}>
                                 <DoughnutChart label={"TĐ Chính trị"} data={politicsS} />
+                            </Grid>
+                            <Grid item xs={3}>
+                                <DoughnutChart label={"Ngoại ngữ"} data={flanguageS} />
                             </Grid>
                         </Grid>
                     </AccordionDetails>

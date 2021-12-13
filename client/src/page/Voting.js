@@ -51,16 +51,15 @@ const useStyles = makeStyles(theme => ({
             backgroundColor: theme.palette.success.main,
         }
     },
-    checkbox: {
-        color: 'green !important',
-    }
+    // checkbox: {
+    //     color: 'green !important',
+    // }
 }))
 
 const Voting = () => {
     const classes = useStyles();
     const { loadingDispatch } = useContext(LoadingContext)
     const { info } = useContext(InfoContext);
-    console.log(info);
     const [pollArr, setPollArr] = useState([]);
     const DePer = info.info.Quyen["12"];
 
@@ -188,10 +187,21 @@ const VotingForm = ({ data }) => {
         const name = e.target.value.split("=")[0]
         const value = e.target.value.split("=")[1]
         setCheck(check.includes(name) ? check : [...check, name])
+        let newNames = [];
+        if (checkedValues?.includes(name)) {
+            if (value == 0)
+                newNames = checkedValues?.filter(n => n != name)
+            else
+                newNames = [...checkedValues]
+        } else
+            if (value == 0)
+                newNames = [...checkedValues]
+            else
+                newNames = [...(checkedValues ?? []), name]
 
-        const newNames = (checkedValues?.includes(name) && value == 0)
-            ? checkedValues?.filter(n => n !== name)
-            : [...(checkedValues ?? []), name];
+        // const newNames = (checkedValues?.includes(name) || value == 0)
+        //     ? checkedValues?.filter(n => n != name)
+        //     : [...(checkedValues ?? []), name];
         setCheckedValues(newNames);
 
     }
@@ -258,11 +268,13 @@ const VotingForm = ({ data }) => {
         if (res) {
             console.log(res);
             setIsVoted(res.isVoted);
-            res.isVoted &&
+            if (res.isVoted) {
                 setCheckedValues(Object.keys(res.Phieu).map(el => {
                     if (res.Phieu[el] == 1)
                         return el
                 }))
+                setCheck(Object.keys(res.Phieu))
+            }
         }
     }
 
@@ -271,8 +283,12 @@ const VotingForm = ({ data }) => {
     }, [])
 
     useEffect(() => {
-        console.log(check);
+        console.log("Check: ", check);
     }, [check])
+
+    useEffect(() => {
+        console.log("CheckArr: ", checkedValues);
+    }, [checkedValues])
 
     return (
         <>
@@ -317,7 +333,19 @@ const VotingForm = ({ data }) => {
                                                     render={({ props }) => {
                                                         return (
                                                             <Checkbox
-                                                                className={classes.checkbox}
+                                                                sx={{
+                                                                    '&.Mui-disabled': {
+                                                                        pointerEvents: 'auto',
+                                                                        cursor: 'not-allowed',
+                                                                        '&:hover': {
+                                                                            backgroundColor: 'transparent',
+                                                                        },
+                                                                        color: 'green !important',
+                                                                        '& .MuiSvgIcon-root': {
+                                                                            backgroundColor: '#eee',
+                                                                        },
+                                                                    },
+                                                                }}
                                                                 disabled={isVoted}
                                                                 checked={checkedValues.includes(el.MaUngCuVien)}
                                                                 onChange={(e) => handleSelect(e, el.MaUngCuVien)}
@@ -365,17 +393,49 @@ const VotingForm = ({ data }) => {
                                                         name="names"
                                                         render={({ props }) => {
                                                             return (
-                                                                <RadioGroup onChange={handleRadioSelect}>
+                                                                <RadioGroup
+                                                                    value={
+                                                                        (check.length > 0 && check.includes(el.MaUngCuVien)) ?
+                                                                            checkedValues.includes(el.MaUngCuVien)
+                                                                                ? el.MaUngCuVien + "=1"
+                                                                                : el.MaUngCuVien + "=0"
+                                                                            :
+                                                                            ""
+                                                                    }
+                                                                    onChange={handleRadioSelect}
+                                                                >
                                                                     <TableCell align='center'>
                                                                         <FormControlLabel
                                                                             value={el.MaUngCuVien + "=1"}
-                                                                            control={<Radio sx={{ m: '0 50px' }} />}
+                                                                            control={<Radio sx={{
+                                                                                m: '0 50px',
+                                                                                '&.Mui-disabled': {
+                                                                                    pointerEvents: 'auto',
+                                                                                    cursor: 'not-allowed',
+                                                                                    '&:hover': {
+                                                                                        backgroundColor: 'transparent',
+                                                                                    },
+                                                                                    color: 'green !important',
+                                                                                },
+                                                                            }} />}
                                                                             label=""
+                                                                            disabled={isVoted}
                                                                         />
                                                                         <FormControlLabel
                                                                             value={el.MaUngCuVien + "=0"}
-                                                                            control={<Radio sx={{ m: '0 50px' }} />}
+                                                                            control={<Radio sx={{
+                                                                                m: '0 50px',
+                                                                                '&.Mui-disabled': {
+                                                                                    pointerEvents: 'auto',
+                                                                                    cursor: 'not-allowed',
+                                                                                    '&:hover': {
+                                                                                        backgroundColor: 'transparent',
+                                                                                    },
+                                                                                    color: 'green !important',
+                                                                                },
+                                                                            }} />}
                                                                             label=""
+                                                                            disabled={isVoted}
                                                                         />
                                                                     </TableCell>
                                                                 </RadioGroup>

@@ -3,6 +3,7 @@ import { Button, Menu, MenuItem } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useState } from 'react';
 import { InfoContext } from '../contextAPI/InfoContext';
+import DeleteForm from './DeleteForm';
 import EditMoveForm from './EditMoveForm';
 
 const useStyles = makeStyles(theme => ({
@@ -26,7 +27,7 @@ const ActionMoveMenu = (props) => {
     const classes = useStyles();
     const [open, setOpen] = useState(null);
     const { info } = useContext(InfoContext)
-    const { data, type } = props
+    const { data, type, fetchApi, handleDelete } = props
     const handleClose = () => {
         setOpen(null)
     }
@@ -58,7 +59,8 @@ const ActionMoveMenu = (props) => {
                 MenuListProps={{ className: classes.menuList }}
             >
                 {/* {info.info.Quyen["2"] == 1 && */}
-                <MenuItem onClick={handleClose}><EditMoveForm type={type} data={data} /></MenuItem>
+                <MenuItem onClick={handleClose}><EditMoveForm type={type} data={data} fetchApi={fetchApi} /></MenuItem>
+                <MenuItem onClick={handleClose}><DeleteForm content="Bạn chắc chắn muốn xóa?" handleSubmit={handleDelete} /></MenuItem>
                 {/* } */}
             </Menu>
         </div>

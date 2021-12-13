@@ -20,7 +20,7 @@ export const updatePoll = async (payload) => {
             return res.data
         }
     } catch (error) {
-        console.log(error.response);
+        return { error: error.response.data }
     }
 }
 

@@ -13,7 +13,9 @@ import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { getAllCategory } from '../action/categoryAction';
+import { updateMove } from '../action/moveAction';
 import { CategoryContext } from '../contextAPI/CategoryContext';
+import { LoadingContext } from '../contextAPI/LoadingContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import { dateArr, getDate } from '../utils/utils';
 import InputGrid from './InputGrid';
@@ -37,10 +39,11 @@ const useStyles = makeStyles(theme => ({
 
 const EditMoveForm = (props) => {
     const classes = useStyles();
-    const { data, type } = props
+    const { data, type, fetchApi } = props
     const [open, setOpen] = useState(false);
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext);
     const { category, categoryDispatch } = useContext(CategoryContext);
+    const { loadingDispatch } = useContext(LoadingContext);
 
     const {
         register,
@@ -64,10 +67,35 @@ const EditMoveForm = (props) => {
         }
         setValue(e.target.name, e.target.value)
     }
-    const onSubmit = (data) => {
+    const onSubmit = async (data) => {
         console.log(data);
-        // createMove(data, openSnackbarDispatch);
-        // setOpen(false);
+        loadingDispatch({ type: 'OPEN_LOADING' })
+        const res = await updateMove(data);
+        if (res.error) {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: res.error,
+                    type: "error"
+                }
+            })
+        } else {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Đã cập nhật!",
+                    type: "success"
+                }
+            })
+            // typeFirst == "type"
+            //     ? setColumns(columnArr[typeChoose])
+            //     : setColumns(columnArr["Chuyển sinh hoạt theo Mã"])
+            // setRows(rows.map(el => el.MaChuyenSinhHoat == data.MaChuyenSinhHoat ? res : el));
+            fetchApi()
+
+        }
+        loadingDispatch({ type: 'CLOSE_LOADING' })
+
     }
 
     useEffect(() => {

@@ -1,6 +1,6 @@
 import MaterialTable from '@material-table/core';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import { Grid, MenuItem, Paper, TableContainer, Typography } from '@mui/material';
+import { Button, Grid, MenuItem, Paper, TableContainer, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
 import { CSVLink } from 'react-csv';
@@ -68,6 +68,7 @@ const Search = () => {
         setValue,
         clearErrors,
         getValues,
+        reset,
         formState: { errors }
     } = useForm();
 
@@ -82,6 +83,16 @@ const Search = () => {
         const res = await filterPartyMember(data)
         setRows(res);
         setLoadingTable(false)
+    }
+
+    const handleReset = () => {
+        setValue("partycell", "0")
+        setValue("status", "0")
+        setValue("name", "")
+        setValue("ethnic", "0")
+        setValue("religion", "0")
+        setValue("gender", "0")
+        setValue("province", "0")
     }
 
     const handleExportPDF = () => {
@@ -230,6 +241,7 @@ const Search = () => {
                 </Paper>
 
                 <MyButton primary onClick={handleSubmit(onSubmit)} >Xem</MyButton>
+                <Button variant="outlined" sx={{ ml: 1 }} onClick={handleReset} >reset</Button>
                 {data.data.length > 0 &&
                     <>
                         <CSVLink data={data.data} headers={data.headers} filename={"export.csv"}>

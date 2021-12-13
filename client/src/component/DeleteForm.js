@@ -1,18 +1,17 @@
 import DeleteIcon from '@mui/icons-material/Delete';
+import { Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useContext, useState } from 'react';
-import { removePartyMember } from '../action/partyMemberAction';
-import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
-import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import React, { useState } from 'react';
+import image from '../public/image/warning.png';
 import MyButton from './UI/MyButton';
 const useStyles = makeStyles(theme => ({
     dialogContent: {
-        marginBottom: theme.spacing(2),
+        textAlign: 'center'
     },
     icon: {
         margin: theme.spacing(0.5, 1, 0.5, 0),
@@ -35,11 +34,8 @@ const useStyles = makeStyles(theme => ({
 
 const DeleteForm = (props) => {
 
-    const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
-    const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
-
     const classes = useStyles();
-    const { name, id } = props;
+    const { content, handleSubmit, btn } = props;
     const [open, setOpen] = useState(false);
     const handleClose = () => {
         setOpen(false)
@@ -47,20 +43,24 @@ const DeleteForm = (props) => {
     const handleOpen = () => {
         setOpen(true)
     }
-    const handleSubmit = () => {
-        removePartyMember(partyMemberDispatch, { id }, openSnackbarDispatch)
-        setOpen(false);
-    }
 
     return (
         <>
-            <div className={classes.iconWrapper} onClick={handleOpen}>
-                <DeleteIcon className={classes.icon} />Xóa
-            </div>
+            {
+                btn
+                    ?
+                    <MyButton onClick={handleOpen} error><DeleteIcon /></MyButton>
+                    :
+                    <div className={classes.iconWrapper} onClick={handleOpen}>
+                        <DeleteIcon className={classes.icon} />Xóa
+                    </div>
+            }
+
             <Dialog fullWidth open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-                <DialogTitle id="form-dialog-title">Xóa Đảng viên</DialogTitle>
+                <DialogTitle id="form-dialog-title">Xóa</DialogTitle>
                 <DialogContent className={classes.dialogContent}>
-                    Bạn có muốn xóa Đảng viên "{name}" - "{id}"?
+                    <img style={{ width: '150px', height: '150px' }} src={image} alt="warning" />
+                    <Typography>{content}</Typography>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} >

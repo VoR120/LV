@@ -210,3 +210,33 @@ exports.getPoliticsStatistic = (req, res) => {
         return res.status(500).json({ msg: error.message })
     }
 }
+
+exports.getFLanguageStatistic = (req, res) => {
+    try {
+        const sqlQuery = req.query.MaChiBo 
+        ? `SELECT ngoaingu.MaNgoaiNgu, ngoaingu.TenNgoaiNgu, COUNT(ngoaingudangvien.MaNgoaiNgu) AS SoLuong
+        FROM ngoaingu
+        LEFT JOIN ngoaingudangvien
+        INNER JOIN dangvien
+        ON ngoaingudangvien.MaSoDangVien = dangvien.MaSoDangVien
+        AND dangvien.MaChiBo = ${req.query.MaChiBo}
+        ON ngoaingu.MaNgoaiNgu = ngoaingudangvien.MaNgoaiNgu
+        GROUP BY MaNgoaiNgu`
+        :
+        `SELECT ngoaingu.MaNgoaiNgu, ngoaingu.TenNgoaiNgu, COUNT(ngoaingudangvien.MaNgoaiNgu) AS SoLuong
+        FROM ngoaingu
+        LEFT JOIN ngoaingudangvien
+        ON ngoaingu.MaNgoaiNgu = ngoaingudangvien.MaNgoaiNgu
+        GROUP BY MaNgoaiNgu`
+        sql.query(sqlQuery,
+            (err, result) => {
+                if (err) {
+                    res.status(500).json({ err })
+                    return;
+                }
+                res.status(200).json({ data: result })
+            })
+    } catch (error) {
+        return res.status(500).json({ msg: error.message })
+    }
+}

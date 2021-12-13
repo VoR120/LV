@@ -5,7 +5,8 @@ import { Chip, MenuItem, Paper, TableContainer, Typography } from '@mui/material
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
 import { CSVLink } from 'react-csv';
-import { getRewardDiscipline, importRewardDiscipline } from '../action/rewardDisciplineAction';
+import { getRewardDiscipline, importRewardDiscipline, removeRewardDiscipline } from '../action/rewardDisciplineAction';
+import DeleteForm from '../component/DeleteForm';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
 import MySelect from '../component/UI/MySelect';
@@ -58,13 +59,16 @@ const RewardDiscipline = () => {
             { title: "Tên khen thưởng", field: "TenKhenThuong", },
             { title: "Ngày khen thưởng", field: "NgayKhenThuong", type: "date" },
             { title: "Hình thức", field: "HinhThuc", },
-            // {
-            //     title: "Chức năng", field: "action", sorting: false,
-            //     render: (params) => {
-            //         console.log(params);
-            //         return <ActionMenu data={params} />
-            //     }
-            // },
+            {
+                title: "Chức năng", field: "action", sorting: false,
+                render: (params) => {
+                    return <DeleteForm
+                        content="Bạn chắn chắn muốn xóa?"
+                        handleSubmit={(e) => handleDelete(e, params.MaKhenThuong)}
+                        btn
+                    />
+                }
+            }
         ],
         "Kỷ luật": [
             { title: "Mã số Đảng viên", field: "MaSoDangVien", maxWidth: 150 },
@@ -74,13 +78,16 @@ const RewardDiscipline = () => {
             { title: "Tên kỷ luật", field: "TenKyLuat", },
             { title: "Ngày kỷ luật", field: "NgayKyLuat", type: "date" },
             { title: "Hình thức", field: "HinhThuc", },
-            // {
-            //     title: "Chức năng", field: "action", sorting: false,
-            //     render: (params) => {
-            //         console.log(params);
-            //         return <ActionMenu data={params} />
-            //     }
-            // },
+            {
+                title: "Chức năng", field: "action", sorting: false,
+                render: (params) => {
+                    return <DeleteForm
+                        content="Bạn chắn chắn muốn xóa?"
+                        handleSubmit={(e) => handleDelete(e, params.MaKyLuat)}
+                        btn
+                    />
+                }
+            }
         ]
     }
 
@@ -100,13 +107,36 @@ const RewardDiscipline = () => {
             Loai: typeChoose == "Khen thưởng" ? "reward" : "discipline"
         });
         setRows(res);
-        setColumns(columnArr[typeChoose])
         setLoadingTable(false)
     };
 
     const handleSubmit = () => {
         setLoadingTable(true)
         fetchApi();
+    }
+
+    const handleDelete = async (e, id) => {
+        const res = await removeRewardDiscipline({ type: typeChoose == "Khen thưởng" ? "reward" : "discipline", id })
+        if (res.error) {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: res.error.msg,
+                    type: "error"
+                }
+            })
+        } else {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: res.msg,
+                    type: "success"
+                }
+            })
+            typeChoose == "Khen thưởng"
+                ? setRows(rows.filter(el => el.MaKhenThuong != id))
+                : setRows(rows.filter(el => el.MaKyLuat != id))
+        }
     }
 
     const handleImport = async () => {
@@ -128,6 +158,7 @@ const RewardDiscipline = () => {
                     type: "success"
                 }
             })
+            setFile("");
             fetchApi();
         }
     }
@@ -145,6 +176,10 @@ const RewardDiscipline = () => {
             : disciplinePDF(rows, "DANH SÁCH KỶ LUẬT ĐẢNG VIÊN")
         pdfmakedownload(dd);
     }
+
+    useEffect(() => {
+        setColumns(columnArr[typeChoose])
+    }, [rows])
 
     useEffect(() => {
         setLoadingTable(true)

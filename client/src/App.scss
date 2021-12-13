@@ -56,14 +56,21 @@ table:first-child {
         th:first-child {
           background-color: #fff;
           position: sticky;
-          left: 0;
+          left: 0px;
           z-index: 10;
         }
         & td:nth-child(2),
         th:nth-child(2) {
           background-color: #fff;
           position: sticky;
-          left: 150px;
+          left: 42px;
+          z-index: 10;
+        }
+        & td:nth-child(3),
+        th:nth-child(3) {
+          background-color: #fff;
+          position: sticky;
+          left: 192px;
           z-index: 10;
         }
       }
@@ -75,7 +82,8 @@ table:first-child {
 .decentralization-table,
 .statistic-table,
 .move-table,
-.search-table {
+.search-table,
+.reward-discipline-table {
   table:first-child {
     & tr {
       &:hover {

@@ -46,7 +46,8 @@ import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import DoneIcon from '@mui/icons-material/Done';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { CSVLink } from 'react-csv';
-import { votingResultPDF } from '../utils/pdf';
+import { votingResultConfidencePDF, votingResultPDF } from '../utils/pdf';
+import DoughnutChart from '../component/DoughnutChart';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -99,14 +100,13 @@ const Voting = () => {
     const [resultState, setResultState] = useState(null);
     const [label, setLabel] = useState([])
     const [quantity, setQuantity] = useState([]);
+    const [quantityCurrent, setQuantityCurrent] = useState([]);
     const [quantityPer, setQuantityPer] = useState("")
     const [resultVoting, setResultVoting] = useState([])
     const [votesList, setVotesList] = useState([]);
     const [noVotingList, setNoVotingList] = useState([]);
     const [indexForm, setIndexForm] = useState("")
     const [type, setType] = useState("Biểu quyết có số dư");
-
-    console.log(editState);
 
     const {
         handleSubmit,
@@ -168,6 +168,7 @@ const Voting = () => {
             setLabel(res.Data.map(el => `${el.MaSoDangVien} - ${el.HoTen}`));
             setQuantity(res.Data.map(el => el.SoPhieu));
             setQuantityPer(res.SoLuongBieuQuyet + "/" + res.SoLuong)
+            setQuantityCurrent(res.SoLuongBieuQuyet)
         }
         const getVotesAPI = async () => {
             const res = await getVotes({ id: resultState.MaBieuQuyet })
@@ -191,7 +192,15 @@ const Voting = () => {
         data.UngCuVien = candidate.map(el => el.MaUngCuVien);
         data.NguoiThamGia = voter.map(el => el.MaNguoiThamGia);
         const res = await updatePoll(data);
-        if (res) {
+        if (res.error) {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: res.error.msg,
+                    type: "error"
+                }
+            })
+        } else {
             openSnackbarDispatch({
                 type: 'SET_OPEN',
                 payload: {
@@ -200,14 +209,8 @@ const Voting = () => {
                 }
             })
             fetchAllPoll();
-        } else
-            openSnackbarDispatch({
-                type: 'SET_OPEN',
-                payload: {
-                    msg: "Đã xảy ra lỗi!",
-                    type: "error"
-                }
-            })
+        }
+
         loadingDispatch({ type: 'CLOSE_LOADING' })
         setEditOpen([]);
     }
@@ -262,25 +265,46 @@ const Voting = () => {
         const [openResult, setOpenResult] = useState(false);
         const [data, setData] = useState([]);
 
-        const getRate = (arr, quan) => {
-            const all = arr.reduce((a, b) => a + b.SoPhieu, 0)
-            return `${(quan / all * 100)}%`;
+        const getRate = (all, quan) => {
+            return `${+(quan / all * 100).toFixed(2)}%`;
         }
 
-        const columns = [
-            { title: "Mã số Đảng viên", field: "MaSoDangVien", },
-            { title: "Họ tên", field: "HoTen", },
-            { title: "Số phiếu", field: "SoPhieu", },
-            { title: "Tỉ lệ phiếu", field: "TiLe", },
-        ];
+        const columns = resultState.LoaiBieuQuyet == "Biểu quyết có số dư"
+            ? [
+                { title: "Mã số Đảng viên", field: "MaSoDangVien", },
+                { title: "Họ tên", field: "HoTen", },
+                { title: "Số phiếu", field: "SoPhieu", },
+                { title: "Tỉ lệ phiếu", field: "TiLe", },
+            ]
+            : [
+                { title: "Mã số Đảng viên", field: "MaSoDangVien", },
+                { title: "Họ tên", field: "HoTen", },
+                { title: "Số phiếu tín nhiệm", field: "SoPhieuTinNhiem", },
+                { title: "Số phiếu không tín nhiệm", field: "SoPhieuKhongTinNhiem", },
+                { title: "Tỉ lệ phiếu tín nhiệm", field: "TiLeTinNhiem", },
+                { title: "Tỉ lệ phiếu không tín nhiệm", field: "TiLeKhongTinNhiem", },
+            ]
 
-        const [rows, setRows] = useState(resultVoting.map((el, index) => ({
-            id: index,
-            HoTen: el.HoTen,
-            MaSoDangVien: el.MaSoDangVien,
-            SoPhieu: el.SoPhieu,
-            TiLe: getRate(resultVoting, el.SoPhieu)
-        })));
+        const [rows, setRows] = useState(
+            resultState.LoaiBieuQuyet == "Biểu quyết có số dư" ?
+                resultVoting.map((el, index) => ({
+                    id: index,
+                    HoTen: el.HoTen,
+                    MaSoDangVien: el.MaSoDangVien,
+                    SoPhieu: el.SoPhieu,
+                    TiLe: getRate(resultVoting.reduce((a, b) => a + b.SoPhieu, 0), el.SoPhieu)
+                }))
+                :
+                resultVoting.map((el, index) => ({
+                    id: index,
+                    HoTen: el.HoTen,
+                    MaSoDangVien: el.MaSoDangVien,
+                    SoPhieuTinNhiem: el.SoPhieu,
+                    SoPhieuKhongTinNhiem: quantityCurrent - el.SoPhieu,
+                    TiLeTinNhiem: getRate(quantityCurrent, el.SoPhieu),
+                    TiLeKhongTinNhiem: getRate(quantityCurrent, quantityCurrent - el.SoPhieu)
+                }))
+        );
 
         const [columnsVote, setColumnsVote] = useState([])
 
@@ -299,7 +323,9 @@ const Voting = () => {
         const dataResult = useMemo(() => getExportData(rows, columns))
 
         const handleExportPDF = () => {
-            const dd = votingResultPDF(rows, resultState, rowsNoVote.length);
+            let dd = resultState.LoaiBieuQuyet == "Biểu quyết có số dư"
+                ? votingResultPDF(rows, resultState, rowsNoVote.length)
+                : votingResultConfidencePDF(rows, resultState, rowsNoVote.length)
             pdfmakedownload(dd);
         }
 
@@ -339,49 +365,71 @@ const Voting = () => {
                     {resultState.TenBieuQuyet}
                 </Typography>
                 <Typography marginBottom="8px">Nội dung: {resultState.NoiDung}</Typography>
-                <Typography marginBottom="8px">Thời gian: <b>00:00 25/12/2021 - 23:59 27/12/2021</b></Typography>
-                <Typography marginBottom="8px">Số phiếu tối đa: <b>{resultState.SoPhieuToiDa}</b></Typography>
+                <Typography marginBottom="8px">Thời gian: <b>{getLocaleDateTime(resultState.ThoiGianBatDau)} - {getLocaleDateTime(resultState.ThoiGianKetThuc)}</b></Typography>
+                <Typography marginBottom="8px">Hình thức biểu quyết: <b>{resultState.LoaiBieuQuyet}</b></Typography>
+                {resultState.LoaiBieuQuyet == "Biểu quyết có số dư" &&
+                    <Typography marginBottom="8px">Số phiếu tối đa: <b>{resultState.SoPhieuToiDa}</b></Typography>
+                }
                 <Typography marginBottom="8px">Số người biểu quyết: <b>{quantityPer}</b></Typography>
-                <Bar
-                    width="500px"
-                    data={{
-                        labels: label
-                        ,
-                        datasets: [
-                            {
-                                label: "Số phiếu",
-                                backgroundColor: [
-                                    "#EF5350",
-                                    "#42A5F5",
-                                    "#FFEE58",
-                                    "#EC407A",
-                                    "#7E57C2",
-                                    "#66BB6A",
-                                    "#26A69A",
-                                    "#78909C",
-                                    "#AB47BC",
-                                    "#9CCC65",
-                                    "#FFA726",
-                                    "#5C6BC0",
-                                    "#8D6E63",
-                                ],
-                                data: quantity
-                            }
-                        ]
-                    }}
-                    options={{
-                        legend: { display: true },
-                        title: {
-                            display: true,
-                            text: "Predicted world population (millions) in 2050"
-                        },
-                    }}
-                />
+                {
+                    resultState.LoaiBieuQuyet == "Biểu quyết có số dư"
+                        ?
+                        <Bar
+                            width="500px"
+                            data={{
+                                labels: label
+                                ,
+                                datasets: [
+                                    {
+                                        label: "Số phiếu",
+                                        backgroundColor: [
+                                            "#EF5350",
+                                            "#42A5F5",
+                                            "#FFEE58",
+                                            "#EC407A",
+                                            "#7E57C2",
+                                            "#66BB6A",
+                                            "#26A69A",
+                                            "#78909C",
+                                            "#AB47BC",
+                                            "#9CCC65",
+                                            "#FFA726",
+                                            "#5C6BC0",
+                                            "#8D6E63",
+                                        ],
+                                        data: quantity
+                                    }
+                                ]
+                            }}
+                            options={{
+                                legend: { display: true },
+                                title: {
+                                    display: true,
+                                    text: "Predicted world population (millions) in 2050"
+                                },
+                            }}
+                        />
+                        :
+                        <Grid container spacing={2}>
+                            {resultVoting.map(el =>
+                                <Grid item xs={3} key={el.MaSoDangVien}>
+                                    <DoughnutChart
+                                        label={el.HoTen + " - " + el.MaSoDangVien}
+                                        data={[
+                                            { label: "Tín nhiệm", quantity: el.SoPhieu },
+                                            { label: "Không tín nhiệm", quantity: quantityCurrent - el.SoPhieu },
+                                        ]}
+                                        twoColor
+                                    />
+                                </Grid>
+                            )}
+                        </Grid>
+                }
 
                 <TableContainer sx={{ width: '1000px', margin: '0 auto', mt: 5, mb: 5 }} variant="outlined">
                     {dataResult.data.length > 0 &&
                         <>
-                            <CSVLink data={dataResult.data} headers={dataResult.headers} filename={"export.csv"}>
+                            <CSVLink data={dataResult.data} headers={dataResult.headers} filename={`${resultState.TenBieuQuyet}.csv`}>
                                 <MyButton style={{ marginLeft: 8 }} success>
                                     <FileDownloadIcon style={{ marginRight: 4 }} />Excel
                                 </MyButton>
@@ -448,28 +496,31 @@ const Voting = () => {
                     resultState={resultState}
                     setResultState={setResultState}
                 />
-                <TableContainer sx={{ width: '1000px', margin: '0 auto', mb: 5 }} variant="outlined">
-                    <MaterialTable
-                        components={{
-                            Container: (props) =>
-                                <Paper
-                                    {...props}
-                                    className={classes.table}
-                                    variant="outlined"
-                                />
-                        }}
-                        title={<Typography variant="button">Bảng thống kê phiếu</Typography>}
-                        columns={columnsVote}
-                        data={rowsVote}
+                {resultState.LoaiBieuQuyet == "Biểu quyết có số dư" &&
+                    <TableContainer sx={{ width: '1000px', margin: '0 auto', mb: 5 }} variant="outlined">
+                        <MaterialTable
+                            components={{
+                                Container: (props) =>
+                                    <Paper
+                                        {...props}
+                                        className={classes.table}
+                                        variant="outlined"
+                                    />
+                            }}
+                            title={<Typography variant="button">Bảng thống kê phiếu</Typography>}
+                            columns={columnsVote}
+                            data={rowsVote}
 
-                        options={{
-                            sorting: false,
-                            search: false,
-                            paging: false,
-                            padding: 'dense',
-                        }}
-                    />
-                </TableContainer>
+                            options={{
+                                sorting: false,
+                                search: false,
+                                paging: false,
+                                padding: 'dense',
+                            }}
+                        />
+                    </TableContainer>
+                }
+
                 <TableContainer sx={{ width: '1000px', margin: '0 auto', mb: 5 }} variant="outlined">
                     <MaterialTable
                         components={{
@@ -513,8 +564,8 @@ const Voting = () => {
                 <Grid style={{ width: '100%' }} container spacing={2}>
                     {pollArr.length > 0 ?
                         pollArr.map((el, index) =>
-                            <>
-                                <Grid item xs={6} key={el.MaBieuQuyet}>
+                            <React.Fragment key={el.MaBieuQuyet}>
+                                <Grid item xs={6}>
                                     <Paper className={classes.paper} variant="outlined">
                                         <Grid container justifyContent="space-between" marginBottom="40px">
                                             <Typography variant="button">
@@ -747,7 +798,7 @@ const Voting = () => {
                                                     {
                                                         candidate.length > 0 &&
                                                         candidate.map(el =>
-                                                            <Grid item xs={12}>
+                                                            <Grid key={el.MaUngCuVien} item xs={12}>
                                                                 <Chip style={{ marginBottom: '12px' }}
                                                                     size="medium"
                                                                     varian="outlined"
@@ -770,7 +821,7 @@ const Voting = () => {
                                                         {
                                                             voter.length > 0 &&
                                                             voter.map(el =>
-                                                                <Chip style={{ marginBottom: '12px', marginRight: '4px' }}
+                                                                <Chip key={el.MaNguoiThamGia} style={{ marginBottom: '12px', marginRight: '4px' }}
                                                                     size="small"
                                                                     varian="outlined"
                                                                     label={el.HoTen + " - " + el.MaNguoiThamGia}
@@ -793,7 +844,7 @@ const Voting = () => {
                                         </Paper>
                                     </Grid>
                                 }
-                            </>
+                            </React.Fragment>
                         )
                         :
                         <Typography>Không có cuộc biểu quyết nào đang diễn ra</Typography>

@@ -2,6 +2,7 @@ const express = require('express');
 const env = require('dotenv');
 const cors = require('cors');
 
+
 env.config();
 
 //Connect Database
@@ -14,8 +15,15 @@ app.use(express.urlencoded({
   }));
 app.use(cors());
 
+// Cron
+// var job = new CronJob('* * * * * *', function() {
+//   console.log('You will see this message every second');
+// }, null, true, 'America/Los_Angeles');
+// job.start()
+
 // Route
 const route = require('./routes/index');
+
 route(app);
 
 app.listen('4000', () => {

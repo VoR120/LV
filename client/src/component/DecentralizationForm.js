@@ -44,7 +44,7 @@ const useStyles = makeStyles(theme => ({
 
 
 const DecentralizationForm = (props) => {
-    const { value, setRows, pm, partycell, id, permission } = props
+    const { value, setRows, pm, partycell, id, permission, rows } = props
     const classes = useStyles();
     const [open, setOpen] = useState(false);
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
@@ -122,6 +122,7 @@ const DecentralizationForm = (props) => {
                         type: "success"
                     }
                 })
+                setRows(rows.map(el => el.MaSoDangVien == id ? { ...el, Quyen: res } : el))
             }
             setOpen(false)
         }

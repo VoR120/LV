@@ -317,6 +317,140 @@ export const partycellPDF = (data, title) => {
     return exportDD(body, title)
 }
 
+export const votingResultConfidencePDF = (data, result, noVoting) => {
+    console.log(data)
+    console.log(result)
+
+    const { TenBieuQuyet, NoiDung, ThoiGianBatDau, ThoiGianKetThuc, UngCuVien, NguoiThamGia } = result
+    let body = {
+        widths: ['auto', '*', 'auto', 'auto', 'auto', 'auto', 'auto'],
+        // keepWithHeaderRows: 1,
+        body: [
+            [
+                { text: 'STT', style: 'tableHeader', alignment: 'center', },
+                { text: 'Họ tên', style: 'tableHeader', alignment: 'center', },
+                { text: 'Mã số Đảng viên', style: 'tableHeader', alignment: 'center', },
+                { text: 'Số phiếu tín nhiệm', style: 'tableHeader', alignment: 'center', },
+                { text: 'Số phiếu không tín nhiệm', style: 'tableHeader', alignment: 'center', },
+                { text: 'Tỉ lệ phiếu tín nhiệm', style: 'tableHeader', alignment: 'center', },
+                { text: 'Tỉ lệ phiếu không tín nhiệm', style: 'tableHeader', alignment: 'center', },
+
+            ],
+        ],
+    }
+
+    data.map((el, index) => {
+        body.body.push([
+            index + 1, el.HoTen, el.MaSoDangVien, el.SoPhieuTinNhiem, el.SoPhieuKhongTinNhiem, el.TiLeTinNhiem, el.TiLeKhongTinNhiem
+        ])
+    })
+
+    return {
+        content: [
+            {
+                columns: [
+                    {
+                        text: [
+                            'ĐẢNG BỘ ĐẠI HỌC CẦN THƠ \n',
+                            'CHI BỘ KHOA CNTT&TT'
+                        ],
+                        alignment: 'center',
+                        margin: [0, 0, 30, 20]
+                    },
+                    [
+                        {
+                            text: 'ĐẢNG CỘNG SẢN VIỆT NAM \n',
+                            alignment: 'center',
+                            margin: [30, 0, 0, 0]
+                        },
+                        {
+                            text: `Ninh Kiều, ngày ${(new Date()).getDate()} tháng ${(new Date()).getMonth() + 1} năm ${(new Date()).getFullYear()} \n`,
+                            alignment: 'center',
+                            italics: true,
+                            margin: [30, 0, 0, 0],
+                        },
+                    ]
+                ],
+            },
+            {
+                text: 'KẾT QUẢ BIỂU QUYẾT \n',
+                alignment: 'center',
+                style: 'header',
+                bold: true,
+            },
+            {
+                text: `${TenBieuQuyet} \n`,
+                alignment: 'center',
+                bold: true,
+                fontSize: 15,
+                margin: [0, 10, 0, 20]
+            },
+            {
+                text: `Cuộc biểu quyết bắt đầu vào ${getLocaleDateTime(ThoiGianBatDau)} và kết thúc vào ${getLocaleDateTime(ThoiGianKetThuc)}`
+            },
+            {
+                text: `Nội dung: ${NoiDung}`
+            },
+            {
+                text: "1. Thống kê",
+                style: 'header1'
+            },
+            {
+                text: [
+                    `Số ứng cử viên: ${UngCuVien.length} \n`,
+                    `Số người tham gia biểu quyết: ${NguoiThamGia.length} \n`,
+                    `Số người không biểu quyết: ${noVoting} \n `,
+                    `Tỉ lệ người tham gia biểu quyết: ${+((NguoiThamGia.length - noVoting) / NguoiThamGia.length * 100).toFixed(2)}%`
+                ]
+            },
+            {
+                text: "2. Kết quả",
+                style: 'header1'
+            },
+            {
+                text: "(Kết quả được săp xếp theo số lượng phiếu bầu)."
+            },
+            {
+                style: 'tableExample',
+                color: '#222',
+                table: {
+                    headerRows: 2,
+                    widths: body.widths,
+                    // keepWithHeaderRows: 1,
+                    body: body.body
+                }
+            },
+        ],
+        styles: {
+            header: {
+                fontSize: 16,
+                alignment: 'justify'
+            },
+            tableExample: {
+                margin: [0, 5, 0, 15],
+            },
+            content: {
+                margin: [0, 30, 0, 0],
+            },
+            tableHeader: {
+                bold: true,
+                fontSize: 13,
+                color: 'black'
+            },
+            header1: {
+                margin: [0, 10, 0, 0],
+                bold: true
+            }
+        },
+        defaultStyle: {
+            fontSize: 13,
+            lineHeight: 1.3
+        }
+
+    }
+
+}
+
 export const votingResultPDF = (data, result, noVoting) => {
     console.log(data)
     console.log(result)

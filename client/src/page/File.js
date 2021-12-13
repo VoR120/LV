@@ -182,8 +182,31 @@ const File = () => {
                         title={"Hồ sơ Đảng viên"}
                         columns={columns}
                         data={rows}
+                        actions={[
+                            {
+                                // isFreeAction: true,
+                                icon: 'mail',
+                                tooltip: 'Kích hoạt',
+                                onClick: (event, rowData) => {
+                                    console.log(rowData);
+                                    // setData(rowData);
+                                    // setOpenResult(true)
+                                },
+                            },
+                            {
+                                // isFreeAction: true,
+                                icon: 'delete',
+                                tooltip: 'Xóa',
+                                onClick: (event, rowData) => {
+                                    console.log(rowData);
+                                    // setData(rowData);
+                                    // setOpenResult(true)
+                                },
+                            },
+                        ]}
                         options={{
                             padding: 'dense',
+                            selection: true
                         }}
                         isLoading={partyMember.loading || loading}
                     />

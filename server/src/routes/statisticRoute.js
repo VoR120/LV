@@ -1,7 +1,7 @@
 const express = require('express');
 const {
     getGenderStatistic, getPartyCellStatistic, getEthnicStatistic, getReligionStatistic, 
-    getAgeStatistic, getPositionStatistic, getITStatistic, getPoliticsStatistic
+    getAgeStatistic, getPositionStatistic, getITStatistic, getPoliticsStatistic, getFLanguageStatistic
 } = require('../controllers/statisticCtrller');
 const Router = express.Router();
 
@@ -13,5 +13,6 @@ Router.get('/statistic/religion', getReligionStatistic);
 Router.get('/statistic/age', getAgeStatistic);
 Router.get('/statistic/it', getITStatistic);
 Router.get('/statistic/politics', getPoliticsStatistic);
+Router.get('/statistic/flanguage', getFLanguageStatistic);
 
 module.exports = Router;

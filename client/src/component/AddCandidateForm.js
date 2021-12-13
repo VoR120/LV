@@ -22,6 +22,7 @@ import { getDate } from '../utils/utils';
 import InputGrid from './InputGrid';
 import MyButton from './UI/MyButton';
 import MySelect from './UI/MySelect';
+import MySelectReactHookForm from './UI/MySelectReactHookForm';
 
 const useStyles = makeStyles(theme => ({
     inputItem: {
@@ -240,7 +241,7 @@ const AddCandidateForm = (props) => {
     const customList = (items) => (
         <>
             {DePer ?
-                <Typography variant="subtitle2">* Họ tên - Mã Số ( - Số phiếu )</Typography>
+                <Typography variant="subtitle2">* Họ tên - Mã Số ( - Số phiếu / Số phiếu tín nhiệm )</Typography>
                 :
                 <Typography variant="subtitle2">* Họ tên - Mã Số</Typography>
             }
@@ -399,23 +400,35 @@ const AddCandidateForm = (props) => {
                                         <MyButton onClick={handleSubmit(handleSubmitDate)} sx={{ margin: '2px 8px 2px 0px' }} info>Tra cứu</MyButton>
                                         {`Tìm thấy ${pollArr.length} cuộc biểu quyết`}
                                     </Grid>
-                                    <Grid item >
-                                        <InputGrid
-                                            select
-                                            onChange={handleChangeSelect}
-                                            nameTitle={"Cuộc biểu quyết"}
-                                            name="poll"
-                                            defaultValue="0"
-                                            control={control}
-                                            errors={errors}
-                                        >
-                                            <MenuItem value="0">Không</MenuItem>
-                                            {pollArr.length &&
-                                                pollArr.map((el, index) =>
-                                                    <MenuItem key={index} value={el.MaBieuQuyet}>{el.TenBieuQuyet + " - " + el.PhamVi}</MenuItem>
-                                                )
-                                            }
-                                        </InputGrid>
+                                    <Grid item>
+                                        <Grid container sx={{ mt: 2 }}>
+                                            <Grid item style={{ width: '150px' }}>
+                                                <Typography>Cuộc biểu quyết</Typography>
+                                            </Grid>
+                                            <Grid item flex={1}
+                                                sx={{
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                }}>
+                                                <MySelectReactHookForm
+                                                    select
+                                                    onChange={handleChangeSelect}
+                                                    name="poll"
+                                                    defaultValue="0"
+                                                    control={control}
+                                                    errors={errors}
+                                                >
+                                                    <MenuItem value="0">Không</MenuItem>
+                                                    {pollArr.length &&
+                                                        pollArr.map((el, index) =>
+                                                            <MenuItem key={index} value={el.MaBieuQuyet}>{el.TenBieuQuyet + " - " + el.PhamVi}</MenuItem>
+                                                        )
+                                                    }
+                                                </MySelectReactHookForm>
+                                            </Grid>
+                                        </Grid>
+
                                     </Grid>
                                     <Grid style={{ width: '100%', textAlign: 'center', marginTop: 16 }}>
                                         <MyButton onClick={handleSubmit(onSubmitByPoll)} style={{ margin: '0 auto', marginRight: '8px' }} info >Liệt kê</MyButton>

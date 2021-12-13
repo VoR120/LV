@@ -137,7 +137,8 @@ const Grade = () => {
 
     useEffect(() => {
         if (yearGradeArr.length > 0) {
-            setYearGrade(yearGradeArr[yearGradeArr.length - 1].Nam)
+            // setYearGrade(yearGradeArr[yearGradeArr.length - 1].Nam)
+            setYearGrade((new Date()).getFullYear());
         }
     }, [yearGradeArr])
 

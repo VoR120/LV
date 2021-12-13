@@ -1,6 +1,7 @@
 const sql = require('../configs/db');
 const moment = require('moment');
 const nodemailer = require('nodemailer');
+const { CronJob } = require('cron');
 
 exports.createPoll = async (req, res) => {
     try {
@@ -31,6 +32,48 @@ exports.createPoll = async (req, res) => {
                 SET MaNguoiThamGia = "${el}",
                 MaBieuQuyet = ${MaBieuQuyet}`)
             }))
+
+            console.log('Before job instantiation');
+            let date = new Date(ThoiGianKetThuc);
+            date.setMinutes(date.getMinutes() - ThoiGianNhacNho);
+            if (date < new Date()) {
+                res.status(400).json({ msg: "Thời gian nhắc nhở không hợp lệ!" })
+                return;
+            }
+            const job = new CronJob(date, function () {
+                const mail = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: 'vob1706895@student.ctu.edu.vn',
+                        pass: `${process.env.PASSWORD}`
+                    }
+                })
+
+                const mailOptions = {
+                    from: 'vob1706895@student.ctu.edu.vn',
+                    to: "vonguyen2.vn@gmail.com",
+                    subject: `Nhắc nhở: Bạn có một cuộc biểu quyết Đảng viên khoa CNTT&TT, Đại học Cần Thơ`,
+                    html: `
+                Thời gian còn lại: ${ThoiGianNhacNho} phút. <br />
+                Thời gian: <b> ${new Date(ThoiGianBatDau).toLocaleString("vi-VN")} - ${new Date(ThoiGianKetThuc).toLocaleString("vi-VN")} </b>.<br/>
+                Truy cập vào ${process.env.URL}voting để xem chi tiết.<br/>
+                ...<br/>
+                Thân,<br/>
+                Nguyễn Văn Vỏ - B1706895
+                `,
+                }
+
+                mail.sendMail(mailOptions, function (error, info) {
+                    if (error) {
+                        console.log(error);
+                    } else {
+                        console.log('Email sent: ' + info.response);
+                    }
+                });
+            });
+            console.log('After job instantiation');
+            job.start();
+
             res.status(201).json({ id: MaBieuQuyet, ...data })
         }
     } catch (error) {
@@ -70,6 +113,48 @@ exports.updatePoll = async (req, res) => {
                 SET MaNguoiThamGia = "${el}",
                 MaBieuQuyet = ${id}`)
         }))
+
+        console.log('Before job instantiation');
+        let date = new Date(ThoiGianKetThuc);
+        date.setMinutes(date.getMinutes() - ThoiGianNhacNho);
+        if (date < new Date()) {
+            res.status(400).json({ msg: "Thời gian nhắc nhở không hợp lệ!" })
+            return;
+        }
+        const job = new CronJob(date, function () {
+            const mail = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'vob1706895@student.ctu.edu.vn',
+                    pass: `${process.env.PASSWORD}`
+                }
+            })
+
+            const mailOptions = {
+                from: 'vob1706895@student.ctu.edu.vn',
+                to: "vonguyen2.vn@gmail.com",
+                subject: `Nhắc nhở: Bạn có một cuộc biểu quyết Đảng viên khoa CNTT&TT, Đại học Cần Thơ`,
+                html: `
+                Thời gian còn lại: ${ThoiGianNhacNho} phút. <br />
+                Thời gian: <b> ${new Date(ThoiGianBatDau).toLocaleString("vi-VN")} - ${new Date(ThoiGianKetThuc).toLocaleString("vi-VN")} </b>.<br/>
+                Truy cập vào ${process.env.URL}voting để xem chi tiết.<br/>
+                ...<br/>
+                Thân,<br/>
+                Nguyễn Văn Vỏ - B1706895
+                `,
+            }
+
+            mail.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                }
+            });
+        });
+        console.log('After job instantiation');
+        job.start();
+
         res.status(200).json({ id: id, ...data })
     } catch (error) {
         res.status(500).json({ msg: error.message })
