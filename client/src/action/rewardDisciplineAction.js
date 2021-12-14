@@ -1,20 +1,21 @@
 import axios from '../helper/axios';
 
-export const createRewardDiscipline = async (payload, open) => {
+export const createRewardDiscipline = async (payload) => {
+    const { MaSoDangVienArr, TenKhenThuong, NgayKhenThuong,
+        TenKyLuat, NgayKyLuat, HinhThuc
+    } = payload.data
+    const newData = payload.type == "reward"
+        ? { MaSoDangVienArr, TenKhenThuong, NgayKhenThuong, HinhThuc }
+        : { MaSoDangVienArr, TenKyLuat, NgayKyLuat, HinhThuc }
     try {
-        const res = await axios.post(`/api/${payload.type}/create`, payload.data)
-        if (res.data) {
-            open({
-                type: 'SET_OPEN',
-                payload: {
-                    msg: "Đã lưu!",
-                    type: "success"
-                }
-            })
-        }
+        console.log(newData);
+        const res = await axios.post(`/api/${payload.type}/create`, newData)
         console.log(res);
+        if (res.status == 201) {
+            return { msg: "Đã cập nhật!" };
+        }
     } catch (error) {
-        console.log(error);
+        return { error: error.response.data }
     }
 }
 

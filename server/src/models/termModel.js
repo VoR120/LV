@@ -9,7 +9,7 @@ const Term = {
                 callback(err, null);
                 return;
             }
-            console.log("All: ", res);
+            // console.log("All: ", res);
             callback(null, { data: res, columnName: ["Mã nhiệm kỳ", "Năm bắt đầu", "Năm kết thúc"] });
         })
     },

@@ -34,7 +34,7 @@ const ActionMenu = (props) => {
     const classes = useStyles();
     const [open, setOpen] = useState(null);
     const { info } = useContext(InfoContext)
-    const { data, rows, setRows } = props;
+    const { data, rows, setRows, fetch , handleRemove} = props;
     const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
 
@@ -45,11 +45,6 @@ const ActionMenu = (props) => {
     const handleOpen = (event) => {
         setOpen(event.currentTarget);
     };
-
-    const handleSubmit = () => {
-        removePartyMember(partyMemberDispatch, { id: data.id }, openSnackbarDispatch)
-        setOpen(false);
-    }
 
     return (
         <div className={classes.root}>
@@ -79,22 +74,22 @@ const ActionMenu = (props) => {
                 {info.info.Quyen["2"] == 1 &&
                     <MenuItem onClick={handleClose}>
                         <DeleteForm
-                            handleSubmit={handleSubmit}
+                            handleSubmit={handleRemove}
                             content={`Bạn có muốn xóa Đảng viên "${data.HoTen}" - "${data.MaSoDangVien}"?`}
                         />
                     </MenuItem>
                 }
                 {info.info.Quyen["3"] == 1 &&
-                    <MenuItem onClick={handleClose}><MoveForm id={data.MaSoDangVien} partycell={data.MaChiBo} /></MenuItem>
+                    <MenuItem onClick={handleClose}><MoveForm dataSelect={new Array(data)} fetch={fetch} btn /></MenuItem>
                 }
                 {/* {info.info.Quyen["4"] == 1 &&
                     <MenuItem onClick={handleClose}><GradeForm id={data.MaSoDangVien} name={data.HoTen} partycell={data.TenChiBo} /></MenuItem>
                 } */}
                 {info.info.Quyen["5"] == 1 &&
-                    <MenuItem onClick={handleClose}><RewardDisciplineForm name={data.HoTen} id={data.MaSoDangVien} reward /></MenuItem>
+                    <MenuItem onClick={handleClose}><RewardDisciplineForm dataSelect={new Array(data)} reward btn /></MenuItem>
                 }
                 {info.info.Quyen["5"] == 1 &&
-                    <MenuItem onClick={handleClose}><RewardDisciplineForm name={data.HoTen} id={data.MaSoDangVien} /></MenuItem>
+                    <MenuItem onClick={handleClose}><RewardDisciplineForm dataSelect={new Array(data)} btn /></MenuItem>
                 }
                 {info.info.Quyen["11"] == 1 &&
                     <MenuItem onClick={handleClose}>

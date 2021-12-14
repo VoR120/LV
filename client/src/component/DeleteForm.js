@@ -6,7 +6,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import makeStyles from '@mui/styles/makeStyles';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import image from '../public/image/warning.png';
 import MyButton from './UI/MyButton';
 const useStyles = makeStyles(theme => ({
@@ -35,7 +35,7 @@ const useStyles = makeStyles(theme => ({
 const DeleteForm = (props) => {
 
     const classes = useStyles();
-    const { content, handleSubmit, btn } = props;
+    const { content, handleSubmit, btn, noBtn, openForm, setOpenForm } = props;
     const [open, setOpen] = useState(false);
     const handleClose = () => {
         setOpen(false)
@@ -44,16 +44,27 @@ const DeleteForm = (props) => {
         setOpen(true)
     }
 
+    const onSubmit = () => {
+        handleSubmit();
+        setOpen(false);
+    }
+
+    useEffect(() => {
+        setOpen(!!openForm);
+    }, [openForm])
+
     return (
         <>
             {
-                btn
+                !noBtn &&
+                (btn
                     ?
                     <MyButton onClick={handleOpen} error><DeleteIcon /></MyButton>
                     :
                     <div className={classes.iconWrapper} onClick={handleOpen}>
                         <DeleteIcon className={classes.icon} />Xóa
                     </div>
+                )
             }
 
             <Dialog fullWidth open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
@@ -66,7 +77,7 @@ const DeleteForm = (props) => {
                     <Button onClick={handleClose} >
                         Hủy
                     </Button>
-                    <MyButton onClick={handleSubmit} error>
+                    <MyButton onClick={onSubmit} error>
                         Xóa
                     </MyButton>
                 </DialogActions>

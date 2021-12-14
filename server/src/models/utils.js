@@ -20,7 +20,7 @@ exports.getAll = (table, id, name, columnName) => {
                 callback(err, null);
                 return;
             }
-            console.log("All: ", res);
+            // console.log("All: ", res);
             callback(null, { data: res, columnName });
         })
     }
@@ -38,7 +38,7 @@ exports.findById = (table, key) => {
                 return;
             }
             if (res.length) {
-                console.log("Found: ", res);
+                // console.log("Found: ", res);
                 callback(null, res);
                 return;
             }

@@ -296,53 +296,20 @@ export const updatePartyMember = async (dispatch, payload, open, setOpen, loadin
 
         if (res.status == 200) {
             return result[0];
-            // dispatch({
-            //     type: partyMemberConstant.UPDATE_PARTYMEMBER_SUCCESS,
-            //     payload: {
-            //         data: result[0]
-            //     }
-            // })
-            // open({
-            //     type: 'SET_OPEN',
-            //     payload: {
-            //         msg: "Đã cập nhật!",
-            //         type: "success"
-            //     }
-            // })
-            // setOpen(false);
-            // loading({ type: 'CLOSE_LOADING' })
         }
     } catch (error) {
         return { error: error.response.data.message }
-        // dispatch({
-        //     type: partyMemberConstant.UPDATE_PARTYMEMBER_FAILURE,
-        //     payload: {
-        //         error: error.response.data.message
-        //     }
-        // })
-        // throw new Error(error)
     }
 }
 
-export const removePartyMember = async (dispatch, payload, open) => {
+export const removePartyMember = async (payload) => {
     try {
-        dispatch({ type: partyMemberConstant.REMOVE_PARTYMEMBER_REQUEST })
-        const res = await axios.delete('/api/partymember/' + payload.id);
-        if (res.status == 200) {
-            dispatch({
-                type: partyMemberConstant.REMOVE_PARTYMEMBER_SUCCESS,
-                payload: { data: payload.id }
-            })
-            open({
-                type: 'SET_OPEN',
-                payload: {
-                    msg: "Đã cập nhật!",
-                    type: "success"
-                }
-            })
-        }
+        await Promise.all(payload.id.map(async el => {
+            await axios.delete('/api/partymember/' + el);
+        }))
+        return { msg: "Đã cập nhật!" }
     } catch (error) {
-        console.log(error);
+        return { error: error.response.data.message || error.response.data.msg }
     }
 }
 

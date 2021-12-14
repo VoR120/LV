@@ -1,36 +1,29 @@
 import axios from '../helper/axios';
 
-export const createMove = async (payload, open) => {
-    let { MaSoDangVien, MaHinhThuc, NgayChuyenDi, ChuyenTuDangBo, ChuyenTuChiBo, ChuyenDenDangBo, ChuyenDenChiBo, GhiChu } = payload
+export const createMove = async (payload) => {
+    let { MaSoDangVienArr, MaHinhThuc, NgayChuyenDi, ChuyenTuDangBo, ChuyenDenDangBo, ChuyenDenChiBo, GhiChu } = payload
     try {
         let newPayload = {
-            MaSoDangVien: MaSoDangVien,
-            MaHinhThuc: MaHinhThuc,
-            NgayChuyenDi: NgayChuyenDi,
+            MaSoDangVienArr,
+            MaHinhThuc,
+            NgayChuyenDi,
             ChuyenTuDangBo,
-            ChuyenTuChiBo,
             ChuyenDenDangBo,
             ChuyenDenChiBo,
-            GhiChu: GhiChu,
+            GhiChu,
         }
         const res = await axios.post('/api/move/create', newPayload)
-        if (res.data) {
-            const resPM = MaHinhThuc == 13
-                ? await axios.put('/api/partymember/' + MaSoDangVien, { MaChiBo: ChuyenDenChiBo })
-                : await axios.put('/api/partymember/' + MaSoDangVien, { TrangThai: 2 })
-            if (resPM.data) {
-                open({
-                    type: 'SET_OPEN',
-                    payload: {
-                        msg: "Đã cập nhật!",
-                        type: "success"
-                    }
-                })
-            }
+        if (res.status == 201) {
+            await Promise.all(MaSoDangVienArr.map(async el => {
+                MaHinhThuc == 13
+                    ? await axios.put('/api/partymember/' + el.MaSoDangVien, { MaChiBo: ChuyenDenChiBo })
+                    : await axios.put('/api/partymember/' + el.MaSoDangVien, { TrangThai: 2 })
+            }))
+            return { msg: "Đã cập nhật!" };
         }
         console.log(res);
     } catch (error) {
-        console.log(error);
+        return { error: error.response.data }
     }
 }
 

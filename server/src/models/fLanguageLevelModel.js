@@ -15,7 +15,7 @@ const FLanguageLevel = {
                     return;
                 }
 
-                console.log("All: ", res);
+                // console.log("All: ", res);
                 callback(null, { data: res, columnName: ["Mã trình độ", "Tên trình độ", "Tên ngoại ngữ"] });
             })
     },

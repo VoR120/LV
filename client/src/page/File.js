@@ -5,7 +5,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
 import { CSVLink } from 'react-csv';
 import { getAllCategoryPM } from '../action/categoryAction';
-import { filterPartyMember, getAllPartyMember, mailing } from '../action/partyMemberAction';
+import { filterPartyMember, getAllPartyMember, mailing, removePartyMember } from '../action/partyMemberAction';
 import AddForm from '../component/AddForm';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
@@ -16,6 +16,12 @@ import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import { partyMemberPDF } from '../utils/pdf';
 import { allInfoColumn, fileColumn, getExportData, pdfmakedownload } from '../utils/utils';
+import RedoIcon from '@mui/icons-material/Redo';
+import ThumbDownAltIcon from '@mui/icons-material/ThumbDownAlt';
+import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
+import MoveForm from '../component/MoveForm';
+import RewardDisciplineForm from '../component/RewardDisciplineForm';
+import DeleteForm from '../component/DeleteForm';
 
 
 const useStyles = makeStyles(theme => ({
@@ -51,6 +57,11 @@ const File = () => {
     const { info } = useContext(InfoContext);
     const [status, setStatus] = useState({ all: false, living: true, moving: false });
     const [loading, setLoading] = useState(false)
+    const [dataSelect, setDataSelect] = useState([]);
+    const [moveForm, setMoveForm] = useState(false);
+    const [rewardForm, setRewardForm] = useState(false);
+    const [disciplineForm, setDisciplineForm] = useState(false);
+    const [deleteForm, setDeleteForm] = useState(false);
 
     const [rows, setRows] = useState([])
 
@@ -64,7 +75,7 @@ const File = () => {
     const handleMailing = (e, email) => {
         const fetchMail = async () => {
             loadingDispatch({ type: 'OPEN_LOADING' })
-            let mailList = new Array(email);
+            let mailList = typeof email == "string" ? new Array(email) : email;
             const res = await mailing(mailList)
             if (res.error) {
                 openSnackbarDispatch({
@@ -82,25 +93,37 @@ const File = () => {
                         type: "success"
                     }
                 })
-                setRows(rows.map(el => el.Email == email ? { ...el, DaXacNhan: 1 } : el))
+                setRows(rows.map(el => mailList.includes(el.Email) ? { ...el, DaXacNhan: 1 } : el))
             }
             loadingDispatch({ type: 'CLOSE_LOADING' })
         }
         fetchMail();
     }
 
-    const [columns, setColumns] = useState(fileColumn(rows, setRows, handleMailing))
-
-    const data = getExportData(rows, columns)
-
-    const handleExportPDF = () => {
-        const dd = partyMemberPDF(rows);
-        pdfmakedownload(dd);
+    const handleRemove = async (e, id) => {
+        loadingDispatch({ type: 'OPEN_LOADING' })
+        const idArr = typeof id == "object" ? id : new Array(id)
+        const res = await removePartyMember({ id: idArr })
+        if (res.error) {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Đã xảy ra lỗi!",
+                    type: "error"
+                }
+            })
+        } else {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Đã cập nhật!",
+                    type: "success"
+                }
+            })
+            setRows(rows.filter(el => !idArr.includes(el.MaSoDangVien)))
+        }
+        loadingDispatch({ type: 'CLOSE_LOADING' })
     }
-
-    useEffect(() => {
-        setColumns(fileColumn(rows, setRows, handleMailing));
-    }, [rows])
 
     const fetchAPI = async (data) => {
         setLoading(true)
@@ -116,14 +139,7 @@ const File = () => {
         setLoading(false);
     }
 
-    useEffect(() => {
-        getAllCategoryPM(categoryDispatch);
-        info.info.Quyen["12"] == 1
-            ? fetchAPI({ status: 1 })
-            : fetchAPI({ status: 1, partycell: info.info.MaChiBo });
-    }, [])
-
-    useEffect(() => {
+    const fetch = () => {
         console.log(status);
         if (status.all)
             info.info.Quyen["12"] == 1
@@ -137,6 +153,30 @@ const File = () => {
             info.info.Quyen["12"] == 1
                 ? fetchAPI({ status: 2 })
                 : fetchAPI({ status: 2, partycell: info.info.MaChiBo });
+    }
+
+
+    const [columns, setColumns] = useState(fileColumn(rows, setRows, handleMailing, handleRemove, fetch))
+
+    const data = getExportData(rows, columns)
+
+    const handleExportPDF = () => {
+        const dd = partyMemberPDF(rows);
+        pdfmakedownload(dd);
+    }
+    useEffect(() => {
+        setColumns(fileColumn(rows, setRows, handleMailing, handleRemove, fetch));
+    }, [rows])
+
+    useEffect(() => {
+        getAllCategoryPM(categoryDispatch);
+        info.info.Quyen["12"] == 1
+            ? fetchAPI({ status: 1 })
+            : fetchAPI({ status: 1, partycell: info.info.MaChiBo });
+    }, [])
+
+    useEffect(() => {
+        fetch()
     }, [status])
 
     return (
@@ -185,32 +225,79 @@ const File = () => {
                         actions={[
                             {
                                 // isFreeAction: true,
-                                icon: 'mail',
-                                tooltip: 'Kích hoạt',
+                                icon: () => <RedoIcon color='info' />,
+                                tooltip: 'Chuyển sinh hoạt',
                                 onClick: (event, rowData) => {
-                                    console.log(rowData);
-                                    // setData(rowData);
-                                    // setOpenResult(true)
+                                    setDataSelect(rowData)
+                                    setMoveForm(true)
+                                },
+                            },
+                            {
+                                // isFreeAction: true,
+                                icon: () => <ThumbUpAltIcon color='info' />,
+                                tooltip: 'Khen thưởng',
+                                onClick: (event, rowData) => {
+                                    setDataSelect(rowData)
+                                    setRewardForm(true)
+                                },
+                            },
+                            {
+                                // isFreeAction: true,
+                                icon: () => <ThumbDownAltIcon color='info' />,
+                                tooltip: 'Kỷ luật',
+                                onClick: (event, rowData) => {
+                                    setDataSelect(rowData)
+                                    setDisciplineForm(true)
+                                },
+                            },
+                            {
+                                // isFreeAction: true,
+                                icon: 'mail',
+                                iconProps: { color: 'warning' },
+                                tooltip: 'Kích hoạt (chỉ gửi đến những email chưa kích hoạt)',
+                                onClick: (event, rowData) => {
+                                    handleMailing(event, rowData.map(el => el.Email))
                                 },
                             },
                             {
                                 // isFreeAction: true,
                                 icon: 'delete',
+                                iconProps: { color: 'error' },
                                 tooltip: 'Xóa',
                                 onClick: (event, rowData) => {
-                                    console.log(rowData);
-                                    // setData(rowData);
-                                    // setOpenResult(true)
+                                    setDataSelect(rowData)
+                                    setDeleteForm(true)
                                 },
                             },
                         ]}
                         options={{
                             padding: 'dense',
-                            selection: true
+                            selection: true,
+                            search: true,
                         }}
                         isLoading={partyMember.loading || loading}
                     />
                 </TableContainer>
+                {moveForm &&
+                    <MoveForm openForm={moveForm} setOpenForm={setMoveForm} dataSelect={dataSelect} fetch={fetch} />
+                }
+                {(rewardForm || disciplineForm) &&
+                    <RewardDisciplineForm
+                        openForm={rewardForm || disciplineForm}
+                        setOpenForm={setRewardForm || setDisciplineForm}
+                        dataSelect={dataSelect}
+                        reward={rewardForm}
+                    />
+                }
+                {deleteForm &&
+                    <DeleteForm
+                        noBtn
+                        openForm={deleteForm}
+                        setOpenForm={setDeleteForm}
+                        handleSubmit={e => handleRemove(e, dataSelect.map(el => el.MaSoDangVien))}
+                        content={`Bạn có muốn xóa những Đảng viên này?`}
+                    />
+                }
             </Layout>
         </>
     );

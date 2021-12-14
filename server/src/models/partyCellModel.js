@@ -29,7 +29,7 @@ const PartyCell = {
                     AND MaChiBo = ${el.MaChiBo}`)
                 result[index].PhoBiThu = result2.length > 0 ? result2[0].HoTen : "";
             }))
-            console.log("All: ", result);
+            // console.log("All: ", result);
             callback(null, { data: result, columnName: ["Mã Chi bộ", "Tên chi bộ", "Bí thư", "Phó bí thư", "Số Đảng viên"] });
         })
     },

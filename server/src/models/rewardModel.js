@@ -15,13 +15,27 @@ const Reward = {
                 callback(err, null);
                 return;
             }
-            console.log("All: ", res);
+            // console.log("All: ", res);
             callback(null, res);
             return;
         })
     },
     findById: findById("khenthuong", "MaKhenThuong"),
-    create: create("khenthuong", "MaKhenThuong"),
+    create: async (newValue, callback) => {
+        console.log(newValue);
+        try {
+            const { MaSoDangVienArr, TenKhenThuong, NgayKhenThuong, HinhThuc } = newValue
+            const sqlPromise = sql.promise();
+            await Promise.all(MaSoDangVienArr.map(async (el, index) => {
+                const value = { MaSoDangVien: el.MaSoDangVien, TenKhenThuong, NgayKhenThuong, HinhThuc }
+                await sqlPromise.query(`INSERT INTO khenthuong SET ?`, value)
+            }))
+            console.log("Created: ", newValue);
+            callback(null, { msg: "Đã cập nhật!" });
+        } catch (error) {
+            callback(error, null);
+        }
+    },
     updateById: updateById("khenthuong", "MaKhenThuong"),
     remove: (id, callback) => {
         const sqlQuery = `DELETE FROM khenthuong WHERE MaKhenThuong = ${id}`

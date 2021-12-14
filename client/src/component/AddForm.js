@@ -286,6 +286,7 @@ const AddForm = ({ edit, data, setRows, rows }) => {
     }, [])
 
     useEffect(() => {
+        let isMounted = true
         const setA = async () => {
             let arr = [];
             await Promise.all(flArray.map(async (el, index) => {
@@ -301,6 +302,7 @@ const AddForm = ({ edit, data, setRows, rows }) => {
         }
         if (flArray.length > 0)
             setA();
+        return () => isMounted = false
     }, [flArray])
 
     useEffect(() => {

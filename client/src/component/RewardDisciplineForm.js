@@ -13,6 +13,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { createRewardDiscipline } from '../action/rewardDisciplineAction';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import { getDate } from '../utils/utils';
 import InputGrid from './InputGrid';
 import MyButton from './UI/MyButton';
 
@@ -34,7 +35,7 @@ const useStyles = makeStyles(theme => ({
 
 const RewardDisciplineForm = (props) => {
     const classes = useStyles();
-    const { id, name, reward } = props
+    const { reward, dataSelect, btn, openForm, setOpenForm } = props
     const [open, setOpen] = useState(false);
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
 
@@ -49,6 +50,7 @@ const RewardDisciplineForm = (props) => {
     } = useForm();
 
     const handleClose = () => {
+        setOpenForm && setOpenForm(false);
         setOpen(false)
     }
     const handleOpen = () => {
@@ -57,51 +59,84 @@ const RewardDisciplineForm = (props) => {
     const handleChangeSelect = (e) => {
         setValue(e.target.name, e.target.value)
     }
-    const onSubmit = (data) => {
-        delete data.HoTen;
-        createRewardDiscipline({ data, type: reward ? "reward" : "discipline" }, openSnackbarDispatch)
+    const onSubmit = async (data) => {
+        data.MaSoDangVienArr = dataSelect.map(el => ({ MaSoDangVien: el.MaSoDangVien }))
+        const res = await createRewardDiscipline({ data, type: reward ? "reward" : "discipline" }, openSnackbarDispatch)
+        if (res.error) {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: res.error.message,
+                    type: "error"
+                }
+            })
+        } else {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: res.msg,
+                    type: "success"
+                }
+            })
+        }
         setOpen(false);
     }
 
     useEffect(() => {
-        setValue("MaSoDangVien", id)
-        setValue("HoTen", name)
+        setOpen(!!openForm);
+    }, [openForm])
+
+    useEffect(() => {
+        if (dataSelect) {
+            dataSelect.map((el, index) => {
+                setValue(`MaSoDangVien${index}`, el.MaSoDangVien)
+                setValue(`HoTen${index}`, el.HoTen)
+            })
+        }
     }, [])
 
     return (
         <>
-            <div className={classes.iconWrapper} onClick={handleOpen}>
-                {reward ?
-                    <><ThumbUpAltIcon className={classes.icon} />Khen thưởng</>
-                    :
-                    <><ThumbDownAltIcon className={classes.icon} />Kỷ luật</>
-                }
-            </div>
-            <Dialog PaperProps={{ style: { minWidth: '1000px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+            {btn &&
+                <div className={classes.iconWrapper} onClick={handleOpen}>
+                    {reward ?
+                        <><ThumbUpAltIcon className={classes.icon} />Khen thưởng</>
+                        :
+                        <><ThumbDownAltIcon className={classes.icon} />Kỷ luật</>
+                    }
+                </div>
+            }
+            <Dialog PaperProps={{ style: { minWidth: '1000px' } }} open={open} onClose={handleClose}>
                 <DialogTitle id="form-dialog-title">{reward ? "Khen thưởng" : "Kỷ luật"}</DialogTitle>
                 <DialogContent>
                     <FormControl margin="dense" fullWidth>
                         <Grid container spacing={1}>
-                            <Grid item xs={6}>
-                                <InputGrid
-                                    nameTitle={`Mã số Đảng viên`}
-                                    name={"MaSoDangVien"}
-                                    defaultValue={""}
-                                    control={control}
-                                    errors={errors}
-                                    disabled
-                                />
-                            </Grid>
-                            <Grid item xs={6}>
-                                <InputGrid
-                                    nameTitle={`Họ tên`}
-                                    name={"HoTen"}
-                                    defaultValue={""}
-                                    control={control}
-                                    errors={errors}
-                                    disabled
-                                />
-                            </Grid>
+                            {dataSelect.map((el, index) =>
+                                <React.Fragment key={index}>
+                                    <Grid item xs={6}>
+                                        <InputGrid
+                                            nameTitle={`Mã số Đảng viên`}
+                                            name={`MaSoDangVien${index}`}
+                                            defaultValue={""}
+                                            control={control}
+                                            errors={errors}
+                                            disabled
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <InputGrid
+                                            nameTitle={`Họ tên`}
+                                            name={`HoTen${index}`}
+                                            defaultValue={""}
+                                            control={control}
+                                            errors={errors}
+                                            disabled
+                                        />
+                                    </Grid>
+                                </React.Fragment>
+
+                            )}
+
                             {reward ?
                                 <Grid item xs={6}>
                                     <InputGrid
@@ -148,6 +183,7 @@ const RewardDisciplineForm = (props) => {
                             <Grid item xs={6}>
                                 <InputGrid
                                     type="date"
+                                    defaultValue={getDate(new Date)}
                                     nameTitle={reward ? "Ngày khen thưởng" : "Ngày kỷ luật"}
                                     name={reward ? "NgayKhenThuong" : "NgayKyLuat"}
                                     control={control}

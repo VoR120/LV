@@ -18,7 +18,7 @@ const Achievement = {
                     callback(err, null);
                     return;
                 }
-                console.log("All: ", res);
+                // console.log("All: ", res);
                 callback(null, { data: res, columnName: ["Mã thành tích", "Tên thành tích", "Số Đảng viên"] });
             })
     },

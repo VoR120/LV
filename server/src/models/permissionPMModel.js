@@ -39,7 +39,7 @@ const PermissionPM = {
                     res.map(e => {
                         result[e.MaQuyen] = e.CoQuyen
                     })
-                console.log("Found: ", { data: result });
+                // console.log("Found: ", { data: result });
                 callback(null, { data: result });
                 return;
             })

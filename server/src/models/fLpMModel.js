@@ -14,7 +14,7 @@ const fLpM = {
                     callback(err, null);
                     return;
                 }
-                console.log("All: ", res);
+                // console.log("All: ", res);
                 callback(null, { data: res });
             })
     },
@@ -30,7 +30,7 @@ const fLpM = {
                     callback(err, null);
                     return;
                 }
-                console.log("All: ", res);
+                // console.log("All: ", res);
                 callback(null, { data: res });
             })
     },

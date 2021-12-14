@@ -15,13 +15,26 @@ const Discipline = {
                 callback(err, null);
                 return;
             }
-            console.log("All: ", res);
+            // console.log("All: ", res);
             callback(null, res);
             return;
         })
     },
     findById: findById("kyluat", "MaKyLuat"),
-    create: create("kyluat", "MaKyLuat"),
+    create: async (newValue, callback) => {
+        try {
+            const { MaSoDangVienArr, TenKyLuat, NgayKyLuat, HinhThuc } = newValue
+            const sqlPromise = sql.promise();
+            await Promise.all(MaSoDangVienArr.map(async (el, index) => {
+                const value = { MaSoDangVien: el.MaSoDangVien, TenKyLuat, NgayKyLuat, HinhThuc }
+                await sqlPromise.query(`INSERT INTO kyluat SET ?`, value)
+            }))
+            console.log("Created: ", newValue);
+            callback(null, { msg: "Đã cập nhật!" });
+        } catch (error) {
+            callback(error, null);
+        }
+    },
     updateById: updateById("kyluat", "MaKyLuat"),
     remove: (id, callback) => {
         const sqlQuery = `DELETE FROM kyluat WHERE MaKyLuat = ${id}`

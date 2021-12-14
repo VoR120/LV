@@ -6,7 +6,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { CSVLink } from 'react-csv';
 import { useForm } from 'react-hook-form';
 import { getAllCategory } from '../action/categoryAction';
-import { filterPartyMember } from '../action/partyMemberAction';
+import { filterPartyMember, mailing, removePartyMember } from '../action/partyMemberAction';
 import InputGrid from '../component/InputGrid';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
@@ -14,7 +14,16 @@ import { CategoryContext } from '../contextAPI/CategoryContext';
 import { InfoContext } from '../contextAPI/InfoContext';
 import axios from '../helper/axios';
 import { partyMemberPDF } from '../utils/pdf';
-import { allInfoColumn, getExportData, pdfmakedownload } from '../utils/utils';
+import { allInfoColumn, fileColumn, getExportData, pdfmakedownload } from '../utils/utils';
+import RedoIcon from '@mui/icons-material/Redo';
+import ThumbDownAltIcon from '@mui/icons-material/ThumbDownAlt';
+import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
+import MoveForm from '../component/MoveForm';
+import RewardDisciplineForm from '../component/RewardDisciplineForm';
+import DeleteForm from '../component/DeleteForm';
+import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
+import { LoadingContext } from '../contextAPI/LoadingContext';
 
 const useStyles = makeStyles(theme => ({
     header: {
@@ -46,21 +55,22 @@ const useStyles = makeStyles(theme => ({
 const Search = () => {
 
     const [rows, setRows] = useState([])
-    const [columns, setColumns] = useState(allInfoColumn(rows, setRows))
-
-    useEffect(() => {
-        setColumns(allInfoColumn(rows, setRows))
-    }, [rows])
-
-    const data = getExportData(rows, columns)
 
     const classes = useStyles({ rows: rows });
     const [gender, setGender] = useState('2');
     const [loadingTable, setLoadingTable] = useState(false);
     const [provinceArr, setProvinceArr] = useState([]);
 
+    const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
     const { category, categoryDispatch } = useContext(CategoryContext);
+    const { openSnackbarDispatch } = useContext(SnackbarContext);
+    const { loadingDispatch } = useContext(LoadingContext);
     const { info } = useContext(InfoContext);
+    const [dataSelect, setDataSelect] = useState([]);
+    const [moveForm, setMoveForm] = useState(false);
+    const [rewardForm, setRewardForm] = useState(false);
+    const [disciplineForm, setDisciplineForm] = useState(false);
+    const [deleteForm, setDeleteForm] = useState(false);
 
     const {
         handleSubmit,
@@ -95,10 +105,71 @@ const Search = () => {
         setValue("province", "0")
     }
 
+    const handleMailing = (e, email) => {
+        const fetchMail = async () => {
+            loadingDispatch({ type: 'OPEN_LOADING' })
+            let mailList = typeof email == "string" ? new Array(email) : email;
+            const res = await mailing(mailList)
+            if (res.error) {
+                openSnackbarDispatch({
+                    type: 'SET_OPEN',
+                    payload: {
+                        msg: res.error.message,
+                        type: "error"
+                    }
+                })
+            } else {
+                openSnackbarDispatch({
+                    type: 'SET_OPEN',
+                    payload: {
+                        msg: res.msg,
+                        type: "success"
+                    }
+                })
+                setRows(rows.map(el => mailList.includes(el.Email) ? { ...el, DaXacNhan: 1 } : el))
+            }
+            loadingDispatch({ type: 'CLOSE_LOADING' })
+        }
+        fetchMail();
+    }
+
+    const handleRemove = async (e, id) => {
+        loadingDispatch({ type: 'OPEN_LOADING' })
+        const idArr = typeof id == "object" ? id : new Array(id)
+        const res = await removePartyMember({ id: idArr })
+        if (res.error) {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Đã xảy ra lỗi!",
+                    type: "error"
+                }
+            })
+        } else {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Đã cập nhật!",
+                    type: "success"
+                }
+            })
+            setRows(rows.filter(el => !idArr.includes(el.MaSoDangVien)))
+        }
+        loadingDispatch({ type: 'CLOSE_LOADING' })
+    }
+
     const handleExportPDF = () => {
         const dd = partyMemberPDF(rows);
         pdfmakedownload(dd);
     }
+    
+    const [columns, setColumns] = useState(fileColumn(rows, setRows, handleMailing, handleRemove, fetch))
+
+    const data = getExportData(rows, columns)
+
+    useEffect(() => {
+        setColumns(fileColumn(rows, setRows, handleMailing, handleRemove, fetch));
+    }, [rows])
 
     useEffect(() => {
         getAllCategory(categoryDispatch, "ethnic")
@@ -264,15 +335,85 @@ const Search = () => {
                                     variant="outlined"
                                 />
                         }}
-                        title={"Tìm kiếm"}
+                        title={"Hồ sơ Đảng viên"}
                         columns={columns}
                         data={rows}
+                        actions={[
+                            {
+                                // isFreeAction: true,
+                                icon: () => <RedoIcon color='info' />,
+                                tooltip: 'Chuyển sinh hoạt',
+                                onClick: (event, rowData) => {
+                                    setDataSelect(rowData)
+                                    setMoveForm(true)
+                                },
+                            },
+                            {
+                                // isFreeAction: true,
+                                icon: () => <ThumbUpAltIcon color='info' />,
+                                tooltip: 'Khen thưởng',
+                                onClick: (event, rowData) => {
+                                    setDataSelect(rowData)
+                                    setRewardForm(true)
+                                },
+                            },
+                            {
+                                // isFreeAction: true,
+                                icon: () => <ThumbDownAltIcon color='info' />,
+                                tooltip: 'Kỷ luật',
+                                onClick: (event, rowData) => {
+                                    setDataSelect(rowData)
+                                    setDisciplineForm(true)
+                                },
+                            },
+                            {
+                                // isFreeAction: true,
+                                icon: 'mail',
+                                iconProps: { color: 'warning' },
+                                tooltip: 'Kích hoạt (chỉ gửi đến những email chưa kích hoạt)',
+                                onClick: (event, rowData) => {
+                                    handleMailing(event, rowData.map(el => el.Email))
+                                },
+                            },
+                            {
+                                // isFreeAction: true,
+                                icon: 'delete',
+                                iconProps: { color: 'error' },
+                                tooltip: 'Xóa',
+                                onClick: (event, rowData) => {
+                                    setDataSelect(rowData)
+                                    setDeleteForm(true)
+                                },
+                            },
+                        ]}
                         options={{
                             padding: 'dense',
+                            selection: true,
+                            search: true,
                         }}
                         isLoading={loadingTable}
                     />
                 </TableContainer>
+                {moveForm &&
+                    <MoveForm openForm={moveForm} setOpenForm={setMoveForm} dataSelect={dataSelect} fetch={fetch} />
+                }
+                {(rewardForm || disciplineForm) &&
+                    <RewardDisciplineForm
+                        openForm={rewardForm || disciplineForm}
+                        setOpenForm={setRewardForm || setDisciplineForm}
+                        dataSelect={dataSelect}
+                        reward={rewardForm}
+                    />
+                }
+                {deleteForm &&
+                    <DeleteForm
+                        noBtn
+                        openForm={deleteForm}
+                        setOpenForm={setDeleteForm}
+                        handleSubmit={e => handleRemove(e, dataSelect.map(el => el.MaSoDangVien))}
+                        content={`Bạn có muốn xóa những Đảng viên này?`}
+                    />
+                }
                 {/* <Loading loading={loading} /> */}
             </Layout>
         </>

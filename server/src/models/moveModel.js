@@ -70,7 +70,7 @@ const Move = {
                     result[index].TenChiBoTu = result2[0].TenChiBoTu
                 }
             }))
-            console.log("Found: ", result);
+            // console.log("Found: ", result);
             callback(null, result);
             return;
         })
@@ -145,7 +145,7 @@ const Move = {
                     result[index].TenChiBoTu = result2[0].TenChiBoTu
                 }
             }))
-            console.log("Found: ", result);
+            // console.log("Found: ", result);
             callback(null, result);
             return;
         })
@@ -228,7 +228,7 @@ const Move = {
                                 }
                             }))
 
-                            console.log("Found By Id: ", result);
+                            // console.log("Found By Id: ", result);
                             callback(null, result);
                         }
                     )
@@ -308,21 +308,29 @@ const Move = {
                 callback(err, null);
                 return;
             }
-            console.log("Found: ", res);
+            // console.log("Found: ", res);
             callback(null, res);
             return;
         })
     },
-    create: (newValue, callback) => {
-        sql.query(`INSERT INTO chuyensinhhoat SET ?`, newValue, (err, res) => {
-            if (err) {
-                console.log("error: ", err);
-                callback(err, null);
-                return;
-            }
-            console.log("Created: ", { MaChuyenSinhHoat: res.insertId, ...newValue });
-            callback(null, { MaChuyenSinhHoat: res.insertId, ...newValue });
-        })
+    create: async (newValue, callback) => {
+        try {
+            const { MaSoDangVienArr, MaHinhThuc, NgayChuyenDi,
+                ChuyenTuDangBo, ChuyenDenDangBo, ChuyenDenChiBo, GhiChu,
+            } = newValue
+            const sqlPromise = sql.promise();
+            await Promise.all(MaSoDangVienArr.map(async (el, index) => {
+                const value = {
+                    MaSoDangVien: el.MaSoDangVien, MaHinhThuc, NgayChuyenDi,
+                    ChuyenTuDangBo, ChuyenTuChiBo: el.MaChiBo , ChuyenDenDangBo, ChuyenDenChiBo, GhiChu,
+                }
+                await sqlPromise.query(`INSERT INTO chuyensinhhoat SET ?`, value)
+            }))
+            console.log("Created: ", newValue);
+            callback(null, { msg: "Đã cập nhật!" });
+        } catch (error) {
+            callback(error, null);
+        }
     },
     updateById: (id, newValue, callback) => {
         const sqlQuery = `UPDATE chuyensinhhoat SET ? WHERE MaChuyenSinhHoat = ${id}`

@@ -93,21 +93,27 @@ export const allInfoColumn = (rows, setRows) => {
     return col
 }
 
-export const fileColumn = (rows, setRows, handleMailing) => {
+export const fileColumn = (rows, setRows, handleMailing, handleRemove, fetch) => {
     let col = infoColumns();
     col.push(
         {
-            title: "Kích hoạt", field: 'mailing', align: 'center',
+            title: "Kích hoạt", field: 'mailing', align: 'center', maxWidth: 100,
             render: (params) =>
                 params.DaXacNhan == 0 ?
-                    <MailIcon onClick={(e) => handleMailing(e, params.Email)} color="warning" sx={{ mr: 4, cursor: 'pointer' }} />
+                    <MailIcon onClick={(e) => handleMailing(e, params.Email)} color="warning" sx={{ mr: 1.25, cursor: 'pointer' }} />
                     :
-                    <MarkEmailReadIcon color="success" sx={{ mr: 4 }} />
+                    <MarkEmailReadIcon color="success" sx={{ mr: 1.25 }} />
         },
         {
             title: "Chức năng", field: "action", sorting: false, maxWidth: 120,
             render: (params) => {
-                return <ActionMenu data={params} rows={rows} setRows={setRows} />
+                return <ActionMenu
+                    data={params}
+                    rows={rows}
+                    setRows={setRows}
+                    fetch={fetch}
+                    handleRemove={(e) => handleRemove(e, params.MaSoDangVien)}
+                />
             }
         })
     return col

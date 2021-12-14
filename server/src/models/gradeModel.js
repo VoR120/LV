@@ -9,7 +9,7 @@ const Grade = {
                 callback(null, err);
                 return;
             }
-            console.log("All: ", res);
+            // console.log("All: ", res);
             let yearArray = [];
 
             // Lấy năm không trùng

@@ -42,9 +42,7 @@ table:first-child {
 }
   
   // First + Second child
-  .file-table,
   .statistic-table,
-  .search-table,
   .move-table,
   .reward-discipline-table {
     table:first-child {
@@ -58,31 +56,55 @@ table:first-child {
           position: sticky;
           left: 0px;
           z-index: 10;
-        }
+        };
         & td:nth-child(2),
         th:nth-child(2) {
           background-color: #fff;
           position: sticky;
-          left: 42px;
-          z-index: 10;
-        }
-        & td:nth-child(3),
-        th:nth-child(3) {
-          background-color: #fff;
-          position: sticky;
-          left: 192px;
+          left: 150px;
           z-index: 10;
         }
       }
     }
   }
+   // First (check) + Second + Third child
+   .file-table,
+   .search-table {
+     table:first-child {
+       & tr {
+         &:hover {
+           background-color: #fff !important
+         };
+         & td:first-child,
+         th:first-child {
+           background-color: #fff;
+           position: sticky;
+           left: 0px;
+           z-index: 10;
+         }
+         & td:nth-child(2),
+         th:nth-child(2) {
+           background-color: #fff;
+           position: sticky;
+           left: 42px;
+           z-index: 10;
+         }
+         & td:nth-child(3),
+         th:nth-child(3) {
+           background-color: #fff;
+           position: sticky;
+           left: 192px;
+           z-index: 10;
+         }
+       }
+     }
+   }
+     
     
     // Last child
-.file-table,
 .decentralization-table,
 .statistic-table,
 .move-table,
-.search-table,
 .reward-discipline-table {
   table:first-child {
     & tr {
@@ -100,8 +122,9 @@ table:first-child {
   }
 }
 
-//2 Last child
-.file-table {
+// 2 Last child
+.file-table,
+.search-table {
   table:first-child {
     & tr {
       &:hover {
@@ -114,8 +137,8 @@ table:first-child {
         right: 0;
         z-index: 10;
       }
-      & td:nth-child(25),
-      th:nth-child(25) {
+      & td:nth-child(26),
+      th:nth-child(26) {
         background-color: #fff;
         position: sticky;
         right: 102.66px;

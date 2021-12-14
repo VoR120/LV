@@ -17,7 +17,7 @@ const FLanguage = {
                     callback(err, null);
                     return;
                 }
-                console.log("All: ", res);
+                // console.log("All: ", res);
                 callback(null, { data: res, columnName: ["Mã Ngoại Ngữ", "Tên Ngoại Ngữ", "Số Đảng viên"] });
             })
     },
@@ -96,7 +96,7 @@ const FLanguage = {
                     callback(err, null);
                     return;
                 }
-                console.log("Id: ", res);
+                // console.log("Id: ", res);
                 callback(null, { data: res });
             })
     },
@@ -109,7 +109,7 @@ const FLanguage = {
                     callback(err, null);
                     return;
                 }
-                console.log("Id: ", res);
+                // console.log("Id: ", res);
                 callback(null, { data: res });
             })
     }

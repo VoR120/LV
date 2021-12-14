@@ -15,7 +15,7 @@ const gradepM = {
                     callback(err, null);
                     return;
                 }
-                console.log("All: ", res);
+                // console.log("All: ", res);
                 callback(null, { data: res });
             })
     },
