@@ -104,6 +104,7 @@ const EvaluateDepartment = () => {
     const [loadingTable, setLoadingTable] = useState(false)
     const [field, setField] = useState('all')
     const [isTime, setIsTime] = useState({ isTime: false, NgayBatDau: "", NgayKetThuc: "" });
+    const [firstLoading, setFirstLoading] = useState(true)
 
     // Handle Function
 
@@ -121,16 +122,16 @@ const EvaluateDepartment = () => {
                 MaDVDG: 3
             })
             if (res.status == 201) {
-                fetchAPI();
+                await fetchAPI();
+                openSnackbarDispatch({
+                    type: 'SET_OPEN',
+                    payload: {
+                        msg: "Đã đánh giá!",
+                        type: "success"
+                    }
+                })
+                setLoadingTable(false)
             }
-            openSnackbarDispatch({
-                type: 'SET_OPEN',
-                payload: {
-                    msg: "Đã đánh giá!",
-                    type: "success"
-                }
-            })
-            setLoadingTable(false)
         } catch (error) {
             openSnackbarDispatch({
                 type: 'SET_OPEN',
@@ -144,6 +145,7 @@ const EvaluateDepartment = () => {
 
     const fetchAPI = async () => {
         try {
+            setLoadingTable(true)
             let res;
             if (field == "all")
                 res = await axios.get(`/api/evaluate/getbysubject?Nam=${year}`)
@@ -154,21 +156,19 @@ const EvaluateDepartment = () => {
                 setRows(res.data);
             }
             setLoadingTable(false);
-            loadingDispatch({ type: 'CLOSE_LOADING' })
+            // loadingDispatch({ type: 'CLOSE_LOADING' })
         } catch (error) {
             console.log(error.message)
         }
     }
 
     const handleSubmit = async () => {
-        setLoadingTable(true)
         fetchAPI();
     }
 
     // UseEffect
     useEffect(() => {
         setLoadingTable(true)
-        loadingDispatch({ type: 'OPEN_LOADING' })
         getAllCategory(categoryDispatch, "grade");
         getAllCategory(categoryDispatch, "partycell");
         checkTime();
@@ -187,7 +187,7 @@ const EvaluateDepartment = () => {
                 setIsTime({ isTime: true, ThoiGianBatDau, ThoiGianKetThuc });
             }
         }
-        loadingDispatch({ type: 'CLOSE_LOADING' })
+        setFirstLoading(false)
     }
 
     useEffect(() => {
@@ -204,11 +204,17 @@ const EvaluateDepartment = () => {
         }
     }, [category.categories.grade])
 
+    useEffect(() => {
+        firstLoading
+        ? loadingDispatch({ type: 'OPEN_LOADING' })
+        : loadingDispatch({ type: 'CLOSE_LOADING' })
+    }, [firstLoading])
+
     return (
         <>
 
             <Layout sidebar>
-                {!loading.open &&
+                {!firstLoading &&
                     <>
                         <div className={classes.header} >
                             <Typography className={classes.headerContent} variant="h5">

@@ -47,16 +47,16 @@ exports.create = (Model, name) => {
 exports.updateById = (Model) => {
     return (req, res) => {
         Model.updateById(req.params.id, req.body, (err, data) => {
-            if (err)
-                if (err.type == "not_found") {
-                    res.status(400).json({ msg: "Not found!" })
-                } else {
-                    res.status(500).json({
+            if (err) {
+                console.log(err);
+                if (err.type == "duplicated") {
+                    res.status(400).json({ msg: `${err.value} đã tồn tại!`, type: err.field })
+                } else
+                    res.status(500).send({
                         message:
                             err.message || "ERROR!"
                     });
-                }
-
+            }
             else res.status(200).json(data);
         })
     }

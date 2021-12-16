@@ -287,6 +287,7 @@ const InfoForm = (props) => {
                         <InputGrid
                             type="date"
                             nameTitle={`Ngày sinh`}
+                            defaultValue={""}
                             name={"NgaySinh"}
                             control={control}
                             errors={errors}
@@ -449,6 +450,7 @@ const InfoForm = (props) => {
                         <InputGrid
                             noTitle
                             name={"Email"}
+                            defaultValue={""}
                             control={control}
                             errors={errors}
                             rules={{
@@ -464,6 +466,7 @@ const InfoForm = (props) => {
                         <InputGrid
                             noTitle
                             name={"SoDienThoai"}
+                            defaultValue={""}
                             control={control}
                             errors={errors}
                             rules={{

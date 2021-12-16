@@ -103,6 +103,7 @@ const EvaluateSubject = () => {
     const [isEvaluate, setIsEvaluate] = useState(false);
     const [loadingTable, setLoadingTable] = useState(false);
     const [isTime, setIsTime] = useState({ isTime: false, ThoiGianBatDau: "", ThoiGianKetThuc: "" });
+    const [firstLoading, setFirstLoading] = useState(true)
 
     // Handle Function
     const handleChange = async (e, id) => {
@@ -115,7 +116,7 @@ const EvaluateSubject = () => {
                 MaDVDG: 2
             })
             if (res.status == 201) {
-                fetchAPI();
+                await fetchAPI();
                 openSnackbarDispatch({
                     type: 'SET_OPEN',
                     payload: {
@@ -123,8 +124,8 @@ const EvaluateSubject = () => {
                         type: "success"
                     }
                 })
+                setLoadingTable(false)
             }
-            setLoadingTable(false)
         } catch (error) {
             openSnackbarDispatch({
                 type: 'SET_OPEN',
@@ -138,7 +139,8 @@ const EvaluateSubject = () => {
 
     const fetchAPI = async () => {
         try {
-            loadingDispatch({ type: 'OPEN_LOADING' })
+            setLoadingTable(true)
+            // loadingDispatch({ type: 'OPEN_LOADING' })
             const res = await axios.get(`/api/evaluate/getbysubject?MaChiBo=${info.info.MaChiBo}&Nam=${year}`)
             console.log(res.data);
             if (res.status == 200) {
@@ -150,7 +152,7 @@ const EvaluateSubject = () => {
                     // setIsEvaluate(true)
                 }
             }
-            loadingDispatch({ type: 'CLOSE_LOADING' })
+            // loadingDispatch({ type: 'CLOSE_LOADING' })
             setLoadingTable(false);
         } catch (error) {
             console.log(error.message)
@@ -159,7 +161,6 @@ const EvaluateSubject = () => {
 
     const checkTime = async () => {
         const res = await checkIsOpen({ id: 2 });
-        console.log(res);
         if (res) {
             const { ThoiGianBatDau, ThoiGianKetThuc, Nam } = res
             setYear(Nam)
@@ -170,7 +171,7 @@ const EvaluateSubject = () => {
                 setIsTime({ isTime: true, ThoiGianBatDau, ThoiGianKetThuc });
             }
         }
-        loadingDispatch({ type: 'CLOSE_LOADING' })
+        setFirstLoading(false)
     }
     // UseEffect
     useEffect(() => {
@@ -187,6 +188,12 @@ const EvaluateSubject = () => {
     }, [isTime])
 
     useEffect(() => {
+        firstLoading
+            ? loadingDispatch({ type: 'OPEN_LOADING' })
+            : loadingDispatch({ type: 'CLOSE_LOADING' })
+    }, [firstLoading])
+
+    useEffect(() => {
         if (category.categories.grade.length > 0) {
             category.categories.grade.map(el => {
                 el.Nam == year && setGradeArr(el.Data)
@@ -198,7 +205,7 @@ const EvaluateSubject = () => {
         <>
             <Layout sidebar>
                 {
-                    !loading.open &&
+                    !firstLoading &&
                     <>
                         <div className={classes.header} >
                             <Typography className={classes.headerContent} variant="h5">

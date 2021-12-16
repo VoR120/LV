@@ -155,7 +155,6 @@ const File = () => {
                 : fetchAPI({ status: 2, partycell: info.info.MaChiBo });
     }
 
-
     const [columns, setColumns] = useState(fileColumn(rows, setRows, handleMailing, handleRemove, fetch))
 
     const data = getExportData(rows, columns)

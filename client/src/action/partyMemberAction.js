@@ -45,7 +45,7 @@ export const getAllPartyMember = async (partycell) => {
     }
 }
 
-export const addPartyMember = async (dispatch, payload) => {
+export const addPartyMember = async (payload) => {
     let { HoTen, MaSoDangVien, GioiTinh, CMND, NgaySinh, NoiSinh, QuocTich,
         SoDienThoai, Email, NgheNghiep, TrinhDoHocVan, NgayVaoDoan, NoiVaoDoan,
         MaChiBo, MaChinhTri, MaChucVu, MaDanToc, MaTinHoc, MaTonGiao,
@@ -181,42 +181,14 @@ export const addPartyMember = async (dispatch, payload) => {
             console.log(result);
             if (res.status == 201) {
                 return result[0];
-                // dispatch({
-                //     type: partyMemberConstant.ADD_PARTYMEMBER_SUCCESS,
-                //     payload: {
-                //         data: result[0]
-                //     }
-                // })
-                // open({
-                //     type: 'SET_OPEN',
-                //     payload: {
-                //         msg: "Đã cập nhật!",
-                //         type: "success"
-                //     }
-                // })
-                // loading({ type: 'CLOSE_LOADING' })
-                // setOpen(false);
             }
         }
     } catch (error) {
         return { error: error.response.data }
-        dispatch({
-            type: partyMemberConstant.ADD_PARTYMEMBER_FAILURE,
-            payload: {
-                error: error.response.data
-            }
-        })
-        // open({
-        //     type: 'SET_OPEN',
-        //     payload: {
-        //         msg: error.response.data.msg,
-        //         type: "error"
-        //     }
-        // })
     }
 }
 
-export const updatePartyMember = async (dispatch, payload, open, setOpen, loading) => {
+export const updatePartyMember = async (payload) => {
     let { HoTen, MaSoDangVien, GioiTinh, CMND, NgaySinh, NoiSinh, QuocTich,
         SoDienThoai, Email, NgheNghiep, TrinhDoHocVan, NgayVaoDoan, NoiVaoDoan,
         MaChiBo, MaChinhTri, MaChucVu, MaDanToc, MaTinHoc, MaTonGiao,
@@ -225,8 +197,6 @@ export const updatePartyMember = async (dispatch, payload, open, setOpen, loadin
         NgoaiNgu, HinhThucThem, QQAddress, DCTTAddress, NOHTAddress, HinhAnh, SoThe
     } = payload
     try {
-        // dispatch({ type: partyMemberConstant.UPDATE_PARTYMEMBER_REQUEST });
-
         let newPayload = {
             HoTen, MaSoDangVien, GioiTinh, CMND, NgaySinh, NoiSinh, QuocTich,
             SoDienThoai, Email, NgheNghiep, TrinhDoHocVan, NgayVaoDoan, NoiVaoDoan,
@@ -290,7 +260,7 @@ export const updatePartyMember = async (dispatch, payload, open, setOpen, loadin
         }
 
         const res = await axios.put('/api/partymember/' + newPayload.MaSoDangVien, newPayload);
-        console.log("Add: ", res);
+        console.log("Update: ", res);
 
         let result = [...res.data];
 
@@ -298,7 +268,7 @@ export const updatePartyMember = async (dispatch, payload, open, setOpen, loadin
             return result[0];
         }
     } catch (error) {
-        return { error: error.response.data.message }
+        return { error: error.response.data }
     }
 }
 
@@ -336,7 +306,7 @@ export const filterPartyMember = async (payload) => {
             return res.data
         }
     } catch (error) {
-        console.log(error);
+        console.log(error.response.data);
     }
 }
 

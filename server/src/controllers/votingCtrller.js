@@ -7,12 +7,11 @@ exports.createPoll = async (req, res) => {
     try {
         const sqlPromise = sql.promise();
         const {
-            TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau, LoaiBieuQuyet,
+            TenBieuQuyet, SoPhieuToiDa, ThoiGianBatDau, LoaiBieuQuyet,
             ThoiGianKetThuc, UngCuVien, NguoiThamGia, PhamVi, ThoiGianNhacNho, MucDich
         } = req.body
         const data = {
             TenBieuQuyet,
-            NoiDung,
             SoPhieuToiDa: LoaiBieuQuyet == "Biểu quyết có số dư" ? SoPhieuToiDa : "0",
             ThoiGianBatDau, ThoiGianKetThuc,
             PhamVi, ThoiGianNhacNho,
@@ -34,12 +33,7 @@ exports.createPoll = async (req, res) => {
             }))
 
             console.log('Before job instantiation');
-            let date = new Date(ThoiGianKetThuc);
-            date.setMinutes(date.getMinutes() - ThoiGianNhacNho);
-            if (date < new Date()) {
-                res.status(400).json({ msg: "Thời gian nhắc nhở không hợp lệ!" })
-                return;
-            }
+
             const job = new CronJob(date, function () {
                 const mail = nodemailer.createTransport({
                     service: 'gmail',
@@ -85,13 +79,12 @@ exports.updatePoll = async (req, res) => {
     try {
         const sqlPromise = sql.promise();
         const {
-            TenBieuQuyet, NoiDung, SoPhieuToiDa, ThoiGianBatDau, LoaiBieuQuyet,
+            TenBieuQuyet, SoPhieuToiDa, ThoiGianBatDau, LoaiBieuQuyet,
             ThoiGianKetThuc, UngCuVien, NguoiThamGia, PhamVi, ThoiGianNhacNho, MucDich
         } = req.body
         const { id } = req.params;
         const data = {
             TenBieuQuyet,
-            NoiDung,
             SoPhieuToiDa: LoaiBieuQuyet == "Biểu quyết có số dư" ? SoPhieuToiDa : "0",
             ThoiGianBatDau, ThoiGianKetThuc,
             PhamVi, ThoiGianNhacNho,

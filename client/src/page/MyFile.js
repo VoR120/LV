@@ -203,7 +203,6 @@ const MyFile = () => {
     }
 
     useEffect(() => {
-        console.log(info)
         if (info.info && !info.loading) {
             Object.keys(info.info).forEach(key => {
                 function isEmpty(obj) {
@@ -380,22 +379,6 @@ const MyFile = () => {
                             </InputGrid>
                             <InputGrid
                                 select
-                                nameTitle={"Chức vụ"}
-                                name={"MaChucVu"}
-                                defaultValue=""
-                                control={control}
-                                errors={errors}
-                                disabled={true}
-                                onChange={handleChangeSelect}
-                            >
-                                {
-                                    category.categories.position.map(el =>
-                                        <MenuItem key={el.MaChucVu} value={el.MaChucVu}>{el.TenChucVu}</MenuItem>
-                                    )
-                                }
-                            </InputGrid>
-                            <InputGrid
-                                select
                                 onChange={handleChangeSelect}
                                 nameTitle={"Giới tính"}
                                 name={`GioiTinh`}
@@ -420,6 +403,22 @@ const MyFile = () => {
                                 errors={errors}
                                 disabled={disable}
                             />
+                            <InputGrid
+                                select
+                                nameTitle={"Chức vụ"}
+                                name={"MaChucVu"}
+                                defaultValue=""
+                                control={control}
+                                errors={errors}
+                                disabled={true}
+                                onChange={handleChangeSelect}
+                            >
+                                {
+                                    category.categories.position.map(el =>
+                                        <MenuItem key={el.MaChucVu} value={el.MaChucVu}>{el.TenChucVu}</MenuItem>
+                                    )
+                                }
+                            </InputGrid>
                         </Paper>
                     </Grid>
                     <Grid item xs={8}>

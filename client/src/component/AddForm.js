@@ -2,7 +2,7 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import {
     Box, Button,
-    Dialog, DialogActions, DialogTitle, Tab, Tabs
+    Dialog, DialogActions, DialogTitle, Tab, Tabs, Backdrop, CircularProgress
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
@@ -16,6 +16,7 @@ import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import axios from '../helper/axios';
 import '../public/css/Form.scss';
 import { dateArr, getDate } from '../utils/utils';
+import Loading from './CustomLoadingOverlay';
 import InfoForm from './InfoForm';
 import LevelForm from './LevelForm';
 import PartyForm from './PartyForm';
@@ -92,6 +93,10 @@ const useStyles = makeStyles(theme => ({
         width: '100%',
         height: '100%'
     },
+    backdrop: {
+        zIndex: theme.zIndex.drawer + 1,
+        color: '#fff',
+    },
 }))
 
 
@@ -99,8 +104,8 @@ const AddForm = ({ edit, data, setRows, rows }) => {
 
     const classes = useStyles();
     const [open, setOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
     const [step, setStep] = useState(0);
+    const [loading, setLoading] = useState(false);
     const { category, categoryDispatch } = useContext(CategoryContext);
     const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
     const { loadingDispatch } = useContext(LoadingContext);
@@ -147,11 +152,12 @@ const AddForm = ({ edit, data, setRows, rows }) => {
     };
 
     const updateAndFetch = async (newValue) => {
+        setLoading(true)
         let res = edit
-            ? await updatePartyMember(partyMemberDispatch, newValue)
-            : await addPartyMember(partyMemberDispatch, newValue);
+            ? await updatePartyMember(newValue)
+            : await addPartyMember(newValue);
+        console.log(res);
         if (res.error) {
-            loadingDispatch({ type: 'CLOSE_LOADING' })
             setStep(0);
             setError(res.error.type,
                 {
@@ -170,9 +176,8 @@ const AddForm = ({ edit, data, setRows, rows }) => {
             edit
                 ? setRows(rows.map(el => el.MaSoDangVien == res.MaSoDangVien ? res : el))
                 : setRows([...rows, res])
-            loadingDispatch({ type: 'CLOSE_LOADING' })
-            setOpen(false);
         }
+        setLoading(false)
     }
 
     const onSubmit = (newValue) => {
@@ -196,7 +201,6 @@ const AddForm = ({ edit, data, setRows, rows }) => {
         if (step != 2)
             setStep(previewStep => previewStep + 1);
         else {
-            loadingDispatch({ type: "OPEN_LOADING" })
             updateAndFetch(newValue);
         }
     }
@@ -204,6 +208,7 @@ const AddForm = ({ edit, data, setRows, rows }) => {
 
     useEffect(() => {
         if (edit) {
+            // setLoading(true)
             Object.keys(data).forEach(key => {
                 function isEmpty(obj) {
                     return Object.keys(obj).length === 0;
@@ -270,23 +275,22 @@ const AddForm = ({ edit, data, setRows, rows }) => {
                     if (!isEmpty(data["DiaChi"]))
                         getProvinceArr();
                 } else {
-                    setValue(key, data[key])
+                    setValue(key, data[key] == null ? "" : data[key])
                 }
             })
+            // setLoading(false);
         } else {
             const fetchAPI = async () => {
                 const res = await axios.get('https://provinces.open-api.vn/api/')
                 setQqArr({ ...qqArr, provinceArr: res.data })
                 setDcttArr({ ...dcttArr, provinceArr: res.data })
                 setNohtArr({ ...nohtArr, provinceArr: res.data })
-                setLoading(false);
             }
             fetchAPI();
         }
     }, [])
 
     useEffect(() => {
-        let isMounted = true
         const setA = async () => {
             let arr = [];
             await Promise.all(flArray.map(async (el, index) => {
@@ -302,7 +306,6 @@ const AddForm = ({ edit, data, setRows, rows }) => {
         }
         if (flArray.length > 0)
             setA();
-        return () => isMounted = false
     }, [flArray])
 
     useEffect(() => {
@@ -430,7 +433,11 @@ const AddForm = ({ edit, data, setRows, rows }) => {
                         {step != 2 ? "Tiếp" : "Lưu"}
                     </MyButton>
                 </DialogActions>
+                <Backdrop sx={{ color: '#fff', zIndex: (theme) => 1399, backgroundColor: 'rgba(0, 0, 0, 0.2)' }} open={loading}>
+                    <CircularProgress color="primary" />
+                </Backdrop>
             </Dialog>
+
         </>
     );
 };

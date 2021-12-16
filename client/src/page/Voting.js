@@ -112,9 +112,6 @@ const Voting = () => {
                                         {el.TenBieuQuyet}
                                     </Typography>
                                     <Typography textAlign="center" className={classes.title}>
-                                        {el.NoiDung}
-                                    </Typography>
-                                    <Typography textAlign="center" className={classes.title}>
                                         Phạm vi: <b>{el.PhamVi}</b>
                                     </Typography>
                                     {
@@ -311,7 +308,6 @@ const VotingForm = ({ data }) => {
                     <Typography className={classes.title} alignItems="center" variant="h5">
                         {data.TenBieuQuyet}
                     </Typography>
-                    <Typography marginBottom="8px">Nội dung: {data.NoiDung}</Typography>
                     <Typography marginBottom="8px">
                         Thời gian: <b>{getLocaleDateTime(data.ThoiGianBatDau)} - {getLocaleDateTime(data.ThoiGianKetThuc)}</b>
                     </Typography>

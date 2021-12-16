@@ -31,6 +31,7 @@ Router.post('/file/reward', upload.single("file"), (req, res) => {
             el.push(new Date().toISOString());
             return el;
         })
+        console.log(newRows);
         sql.query(`INSERT INTO KhenThuong (MaSoDangVien, TenKhenThuong, NgayKhenThuong, HinhThuc, NgayTao) VALUES ?`, [newRows],
             (err, result) => {
                 if (err) {

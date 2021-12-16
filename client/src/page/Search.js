@@ -162,7 +162,7 @@ const Search = () => {
         const dd = partyMemberPDF(rows);
         pdfmakedownload(dd);
     }
-    
+
     const [columns, setColumns] = useState(fileColumn(rows, setRows, handleMailing, handleRemove, fetch))
 
     const data = getExportData(rows, columns)
@@ -175,6 +175,7 @@ const Search = () => {
         getAllCategory(categoryDispatch, "ethnic")
         getAllCategory(categoryDispatch, "religion")
         getAllCategory(categoryDispatch, "partycell")
+        getAllCategory(categoryDispatch, "position")
         const fetchAPISetArr = async () => {
             const res = await axios.get('https://provinces.open-api.vn/api/')
             setProvinceArr(res.data);
@@ -213,6 +214,24 @@ const Search = () => {
                                 </InputGrid>
                             </Grid>
                         }
+                        <Grid item xs={4}>
+                            <InputGrid
+                                select
+                                onChange={handleChangeSelect}
+                                nameTitle={"Chức vụ"}
+                                name="position"
+                                defaultValue="0"
+                                control={control}
+                                errors={errors}
+                            >
+                                <MenuItem value="0">Tất cả</MenuItem>
+                                {
+                                    category.categories["position"].map(el =>
+                                        <MenuItem key={el.MaChucVu} value={el.MaChucVu} >{el.TenChucVu}</MenuItem>
+                                    )
+                                }
+                            </InputGrid>
+                        </Grid>
                         <Grid item xs={4}>
                             <InputGrid
                                 select

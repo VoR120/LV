@@ -321,7 +321,7 @@ export const votingResultConfidencePDF = (data, result, noVoting) => {
     console.log(data)
     console.log(result)
 
-    const { TenBieuQuyet, NoiDung, ThoiGianBatDau, ThoiGianKetThuc, UngCuVien, NguoiThamGia } = result
+    const { TenBieuQuyet, ThoiGianBatDau, ThoiGianKetThuc, UngCuVien, NguoiThamGia } = result
     let body = {
         widths: ['auto', '*', 'auto', 'auto', 'auto', 'auto', 'auto'],
         // keepWithHeaderRows: 1,
@@ -389,9 +389,6 @@ export const votingResultConfidencePDF = (data, result, noVoting) => {
                 text: `Cuộc biểu quyết bắt đầu vào ${getLocaleDateTime(ThoiGianBatDau)} và kết thúc vào ${getLocaleDateTime(ThoiGianKetThuc)}`
             },
             {
-                text: `Nội dung: ${NoiDung}`
-            },
-            {
                 text: "1. Thống kê",
                 style: 'header1'
             },
@@ -455,7 +452,7 @@ export const votingResultPDF = (data, result, noVoting) => {
     console.log(data)
     console.log(result)
 
-    const { TenBieuQuyet, NoiDung, ThoiGianBatDau, ThoiGianKetThuc, UngCuVien, NguoiThamGia } = result
+    const { TenBieuQuyet, ThoiGianBatDau, ThoiGianKetThuc, UngCuVien, NguoiThamGia } = result
     let body = {
         widths: ['auto', '*', 'auto', 'auto', 'auto'],
         // keepWithHeaderRows: 1,
@@ -519,9 +516,6 @@ export const votingResultPDF = (data, result, noVoting) => {
             },
             {
                 text: `Cuộc biểu quyết bắt đầu vào ${getLocaleDateTime(ThoiGianBatDau)} và kết thúc vào ${getLocaleDateTime(ThoiGianKetThuc)}`
-            },
-            {
-                text: `Nội dung: ${NoiDung}`
             },
             {
                 text: "1. Thống kê",

@@ -69,6 +69,8 @@ const CreateVoting = () => {
 
     const ThoiGianBatDau = useRef({});
     ThoiGianBatDau.current = watch("ThoiGianBatDau", "");
+    const SoPhut = useRef({});
+    SoPhut.current = watch("ThoiGianNhacNho", 0)
 
     const handleChangeSelect = (e) => {
         if (e.target.value != 0) {
@@ -117,7 +119,6 @@ const CreateVoting = () => {
                     ThoiGianBatDau: "",
                     ThoiGianKetThuc: "",
                     SoPhieuToiDa: 1,
-                    NoiDung: "",
                 });
                 setCandidate([]);
                 setVoter([]);
@@ -252,8 +253,18 @@ const CreateVoting = () => {
                                 errors={errors}
                                 rules={{
                                     required: "Vui lòng nhập trường này!",
-                                    validate: value =>
-                                        new Date(value) >= new Date(ThoiGianBatDau.current) || "Ngày kết thúc phải lớn hơn ngày bắt đầu"
+                                    validate: value => {
+                                        if (new Date(value) < new Date(ThoiGianBatDau.current))
+                                            return "Thời gian kết thúc phải lớn hơn thời gian bắt đầu"
+                                        if (new Date(value) < new Date())
+                                            return "Thời gian kết thúc phải hơn thời gian hiện tại"
+                                        let date = new Date(value);
+                                        date.setMinutes(date.getMinutes() - SoPhut.current);
+                                        if (date < new Date()) {
+                                            return "Đã quá thời gian nhắc nhở"
+                                        }
+                                        return true
+                                    }
                                 }}
                             />
                         </Grid>
@@ -285,24 +296,6 @@ const CreateVoting = () => {
                                 InputProps={{ inputProps: { min: 10 } }}
                                 defaultValue="10"
                                 name="ThoiGianNhacNho"
-                                control={control}
-                                errors={errors}
-                                rules={{
-                                    required: "Vui lòng nhập trường này!",
-                                }}
-                            />
-                        </Grid>
-                    </Grid>
-                    <Grid container className={classes.inputItem} alignItems="center" >
-                        <Grid item xs={4}>
-                            <Typography>Nội dung biểu quyết</Typography>
-                        </Grid>
-                        <Grid item xs={8}>
-                            <InputGrid
-                                noTitle
-                                multiline
-                                minRows={3}
-                                name="NoiDung"
                                 control={control}
                                 errors={errors}
                                 rules={{

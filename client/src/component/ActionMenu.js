@@ -3,15 +3,15 @@ import { Button, Menu, MenuItem } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useState } from 'react';
 import { InfoContext } from '../contextAPI/InfoContext';
+import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import AddForm from './AddForm';
+import Loading from './CustomLoadingOverlay';
 import DecentralizationForm from './DecentralizationForm';
 import DeleteForm from './DeleteForm';
 import ExportFile from './ExportFile';
 import MoveForm from './MoveForm';
 import RewardDisciplineForm from './RewardDisciplineForm';
-import { removePartyMember } from '../action/partyMemberAction';
-import { PartyMemberContext } from '../contextAPI/PartyMemberContext';
-import { SnackbarContext } from '../contextAPI/SnackbarContext';
 
 const useStyles = makeStyles(theme => ({
     icon: {
@@ -34,9 +34,7 @@ const ActionMenu = (props) => {
     const classes = useStyles();
     const [open, setOpen] = useState(null);
     const { info } = useContext(InfoContext)
-    const { data, rows, setRows, fetch , handleRemove} = props;
-    const { partyMember, partyMemberDispatch } = useContext(PartyMemberContext);
-    const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
+    const { data, rows, setRows, fetch, handleRemove } = props;
 
     const handleClose = () => {
         setOpen(null)

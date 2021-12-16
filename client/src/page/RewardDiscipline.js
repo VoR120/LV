@@ -102,8 +102,8 @@ const RewardDiscipline = () => {
     }
 
     const fetchApi = async () => {
+        setLoadingTable(true)
         const res = await getRewardDiscipline({
-            MaHinhThuc: type,
             Loai: typeChoose == "Khen thưởng" ? "reward" : "discipline"
         });
         setRows(res);
@@ -111,11 +111,11 @@ const RewardDiscipline = () => {
     };
 
     const handleSubmit = () => {
-        setLoadingTable(true)
         fetchApi();
     }
 
     const handleDelete = async (e, id) => {
+        setLoadingTable(true)
         const res = await removeRewardDiscipline({ type: typeChoose == "Khen thưởng" ? "reward" : "discipline", id })
         if (res.error) {
             openSnackbarDispatch({
@@ -137,6 +137,7 @@ const RewardDiscipline = () => {
                 ? setRows(rows.filter(el => el.MaKhenThuong != id))
                 : setRows(rows.filter(el => el.MaKyLuat != id))
         }
+        setLoadingTable(false)
     }
 
     const handleImport = async () => {

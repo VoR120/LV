@@ -169,7 +169,7 @@ const Category = () => {
                         <MenuItem value="it">Trình độ tin học</MenuItem>
                         <MenuItem value="politics">Trình độ chính trị</MenuItem>
                         <MenuItem value="grade">Loại Đảng viên</MenuItem>
-                        <MenuItem value="achievement">Thành tích Đảng viên</MenuItem>
+                        {/* <MenuItem value="achievement">Thành tích Đảng viên</MenuItem> */}
                     </MySelect>
                 </Paper>
 

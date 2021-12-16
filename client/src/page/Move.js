@@ -224,6 +224,7 @@ const Move = () => {
     }
 
     const handleDelete = async (e, id) => {
+        setLoading(true);
         const res = await removeMove({ id })
         if (res.error) {
             openSnackbarDispatch({
@@ -243,6 +244,7 @@ const Move = () => {
             })
             setRows(rows.filter(el => el.MaChuyenSinhHoat != id))
         }
+        setLoading(false);
     }
 
     const handleSubmitReturn = async (data) => {

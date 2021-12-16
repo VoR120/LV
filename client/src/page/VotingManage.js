@@ -121,6 +121,8 @@ const Voting = () => {
 
     const ThoiGianBatDau = useRef({});
     ThoiGianBatDau.current = watch("ThoiGianBatDau", "");
+    const SoPhut = useRef({});
+    SoPhut.current = watch("ThoiGianNhacNho", 0)
 
     const handleChangeSelect = (e) => {
         if (e.target.value != 0) {
@@ -240,7 +242,6 @@ const Voting = () => {
             setValue("MaBieuQuyet", editState.MaBieuQuyet);
             setValue("MucDich", editState.MucDich);
             setValue("TenBieuQuyet", editState.TenBieuQuyet);
-            setValue("NoiDung", editState.NoiDung);
             setValue("ThoiGianNhacNho", editState.ThoiGianNhacNho);
             setValue("PhamVi", editState.PhamVi);
             setValue("LoaiBieuQuyet", editState.LoaiBieuQuyet);
@@ -364,7 +365,6 @@ const Voting = () => {
                 <Typography textAlign="center" style={{ marginBottom: '40px' }} variant="h5">
                     {resultState.TenBieuQuyet}
                 </Typography>
-                <Typography marginBottom="8px">Nội dung: {resultState.NoiDung}</Typography>
                 <Typography marginBottom="8px">Thời gian: <b>{getLocaleDateTime(resultState.ThoiGianBatDau)} - {getLocaleDateTime(resultState.ThoiGianKetThuc)}</b></Typography>
                 <Typography marginBottom="8px">Hình thức biểu quyết: <b>{resultState.LoaiBieuQuyet}</b></Typography>
                 {resultState.LoaiBieuQuyet == "Biểu quyết có số dư" &&
@@ -577,9 +577,6 @@ const Voting = () => {
                                             {el.TenBieuQuyet}
                                         </Typography>
                                         <Typography textAlign="center" className={classes.title}>
-                                            {el.NoiDung}
-                                        </Typography>
-                                        <Typography textAlign="center" className={classes.title}>
                                             Phạm vi: <b>{el.PhamVi}</b>
                                         </Typography>
                                         {
@@ -600,9 +597,15 @@ const Voting = () => {
                                             }
                                             {/* {getStatus(el.ThoiGianBatDau, el.ThoiGianKetThuc) == 1 && */}
                                             <>
-                                                <MyButton onClick={() => handleEditToggle(el, index)} primary style={{ marginBottom: '20px', marginLeft: "8px" }}>
-                                                    {editOpen[index] ? 'Hủy' : 'Chỉnh sửa'}
-                                                </MyButton>
+                                                {editOpen[index] ?
+                                                    <Button onClick={() => handleEditToggle(el, index)} variant='outlined' style={{ marginBottom: '20px', marginLeft: "8px" }}>
+                                                        Hủy
+                                                    </Button>
+                                                    :
+                                                    <MyButton onClick={() => handleEditToggle(el, index)} primary style={{ marginBottom: '20px', marginLeft: "8px" }}>
+                                                        Chỉnh sửa
+                                                    </MyButton>
+                                                }
                                                 <MyButton onClick={() => handleSendEmail(el.MaBieuQuyet)} primary style={{ marginBottom: '20px', marginLeft: "8px" }}>
                                                     Gửi mail
                                                 </MyButton>
@@ -731,8 +734,18 @@ const Voting = () => {
                                                         errors={errors}
                                                         rules={{
                                                             required: "Vui lòng nhập trường này!",
-                                                            validate: value =>
-                                                                new Date(value) >= new Date(ThoiGianBatDau.current) || "Ngày kết thúc phải lớn hơn ngày bắt đầu"
+                                                            validate: value => {
+                                                                if (new Date(value) < new Date(ThoiGianBatDau.current))
+                                                                    return "Thời gian kết thúc phải lớn hơn thời gian bắt đầu"
+                                                                if (new Date(value) < new Date())
+                                                                    return "Thời gian kết thúc phải hơn thời gian hiện tại"
+                                                                let date = new Date(value);
+                                                                date.setMinutes(date.getMinutes() - SoPhut.current);
+                                                                if (date < new Date()) {
+                                                                    return "Đã quá thời gian nhắc nhở"
+                                                                }
+                                                                return true
+                                                            }
                                                         }}
                                                     />
                                                 </Grid>
@@ -764,24 +777,6 @@ const Voting = () => {
                                                         InputProps={{ inputProps: { min: 10 } }}
                                                         defaultValue="10"
                                                         name="ThoiGianNhacNho"
-                                                        control={control}
-                                                        errors={errors}
-                                                        rules={{
-                                                            required: "Vui lòng nhập trường này!",
-                                                        }}
-                                                    />
-                                                </Grid>
-                                            </Grid>
-                                            <Grid container className={classes.inputItem} alignItems="center" >
-                                                <Grid item xs={4}>
-                                                    <Typography>Nội dung biểu quyết</Typography>
-                                                </Grid>
-                                                <Grid item xs={8}>
-                                                    <InputGrid
-                                                        noTitle
-                                                        multiline
-                                                        minRows={3}
-                                                        name="NoiDung"
                                                         control={control}
                                                         errors={errors}
                                                         rules={{
@@ -839,6 +834,9 @@ const Voting = () => {
                                                 </Grid>
                                                 <Grid item xs={8}>
                                                     <MyButton onClick={handleSubmit(onSubmit)} info>Lưu</MyButton>
+                                                    <Button onClick={() => handleEditToggle(el, index)} variant='outlined' style={{ marginLeft: "8px" }}>
+                                                        Hủy
+                                                    </Button>
                                                 </Grid>
                                             </Grid>
                                         </Paper>

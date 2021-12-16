@@ -248,9 +248,11 @@ const Statistic = () => {
                             <Grid item xs={3}>
                                 <DoughnutChart label={"Giới tính"} data={genderS} />
                             </Grid>
-                            <Grid item xs={3}>
-                                <DoughnutChart label={"Chi bộ"} data={partyCellS} />
-                            </Grid>
+                            {info.info.Quyen["12"] == 1 &&
+                                <Grid item xs={3}>
+                                    <DoughnutChart label={"Chi bộ"} data={partyCellS} />
+                                </Grid>
+                            }
                             <Grid item xs={3}>
                                 <DoughnutChart label={"Chức vụ"} data={positionS} />
                             </Grid>

@@ -4,6 +4,7 @@ import { Divider, Grid, IconButton, MenuItem } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { Fragment, useContext } from 'react';
 import { CategoryContext } from '../contextAPI/CategoryContext';
+import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import InputGrid from './InputGrid';
 
 const useStyles = makeStyles(theme => ({
@@ -37,6 +38,7 @@ const MyLevel = (props) => {
     const classes = useStyles();
     const { disable, control, errors, setValue, loading, flArray, levelArray, setFlArray, setLevelArray } = props;
     const { category, categoryDispatch } = useContext(CategoryContext);
+    const { openSnackbarDispatch } = useContext(SnackbarContext);
 
     const handleChangeFLSelect = (e, index) => {
         const { name, value } = e.target
@@ -58,7 +60,13 @@ const MyLevel = (props) => {
 
     const handleRemoveInput = (id, index) => {
         if (flArray.length == 1) {
-            alert("Bạn phải nhập ít nhất 1 trình độ ngoại ngữ")
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    type: "error",
+                    msg: "Bạn phải chọn ít nhất một ngoại ngữ"
+                }
+            })
             return;
         }
         let newData = [...flArray];

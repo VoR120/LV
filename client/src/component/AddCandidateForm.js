@@ -267,7 +267,7 @@ const AddCandidateForm = (props) => {
                                         }}
                                     />
                                 </ListItemIcon>
-                                {value.SoPhieu ?
+                                {value.hasOwnProperty("SoPhieu") ?
                                     <ListItemText id={labelId} primary={value.HoTen + " - " + value.MaSoDangVien + " - " + value.SoPhieu} />
                                     :
                                     <ListItemText id={labelId} primary={value.HoTen + " - " + value.MaSoDangVien} />

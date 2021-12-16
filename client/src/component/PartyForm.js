@@ -120,6 +120,7 @@ const PartyForm = (props) => {
                                     nameTitle={`Chuyển từ Đảng bộ`}
                                     name={"ChuyenTuDangBo"}
                                     control={control}
+                                    defaultValue={""}
                                     errors={errors}
                                 />
                             </Grid>
@@ -127,6 +128,7 @@ const PartyForm = (props) => {
                                 <InputGrid
                                     nameTitle={`Chuyển từ Chi bộ`}
                                     name={"ChuyenTuChiBo"}
+                                    defaultValue={""}
                                     control={control}
                                     errors={errors}
                                 />
@@ -163,6 +165,7 @@ const PartyForm = (props) => {
                                     type="date"
                                     nameTitle={`Ngày chuyển`}
                                     name={"NgayChuyenDen"}
+                                    defaultValue={""}
                                     control={control}
                                     errors={errors}
                                 />
@@ -170,6 +173,7 @@ const PartyForm = (props) => {
                             <Grid item xs={12}>
                                 <InputGrid
                                     nameTitle={`Ghi chú`}
+                                    defaultValue={""}
                                     name={"GhiChu"}
                                     control={control}
                                     errors={errors}
@@ -185,6 +189,7 @@ const PartyForm = (props) => {
                     <InputGrid
                         type="date"
                         nameTitle={`Ngày vào Đoàn TNCSHCM`}
+                        defaultValue={""}
                         name={"NgayVaoDoan"}
                         control={control}
                         errors={errors}
@@ -193,6 +198,7 @@ const PartyForm = (props) => {
                 <Grid item xs={6}>
                     <InputGrid
                         nameTitle={`Nơi vào Đoàn TNCSHCM`}
+                        defaultValue={""}
                         name={"NoiVaoDoan"}
                         control={control}
                         errors={errors}
@@ -202,6 +208,7 @@ const PartyForm = (props) => {
                     <InputGrid
                         type="date"
                         nameTitle={`Ngày vào Đảng lần đầu`}
+                        defaultValue={""}
                         name={"NgayVaoDang"}
                         control={control}
                         errors={errors}
@@ -213,6 +220,7 @@ const PartyForm = (props) => {
                 <Grid item xs={6}>
                     <InputGrid
                         nameTitle={`Nơi vào Đảng lần đầu`}
+                        defaultValue={""}
                         name={"NoiVaoDangLanDau"}
                         control={control}
                         errors={errors}
@@ -222,6 +230,7 @@ const PartyForm = (props) => {
                     <InputGrid
                         type="date"
                         nameTitle={`Ngày vào Đảng chính thức`}
+                        defaultValue={""}
                         name={"NgayChinhThuc"}
                         control={control}
                         errors={errors}
@@ -239,6 +248,7 @@ const PartyForm = (props) => {
                 <Grid item xs={6}>
                     <InputGrid
                         nameTitle={`Nơi vào Đảng chính thức`}
+                        defaultValue={""}
                         name={"NoiVaoDangChinhThuc"}
                         control={control}
                         errors={errors}
@@ -248,6 +258,7 @@ const PartyForm = (props) => {
                     <InputGrid
                         nameTitle={`Người giới thiệu`}
                         name={"NguoiGioiThieu"}
+                        defaultValue={""}
                         control={control}
                         errors={errors}
                     />

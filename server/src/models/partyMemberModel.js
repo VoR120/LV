@@ -333,6 +333,47 @@ const PartyMember = {
     updateById: async (id, newValue, callback) => {
         try {
             const sqlPromise = sql.promise()
+            const [checkEmail, fCE] = await sqlPromise.query(`
+                SELECT MaSoDangVien 
+                FROM dangvien 
+                WHERE MaSoDangVien != "${newValue.MaSoDangVien}" 
+                AND Email = "${newValue.Email}"
+            `)
+            if (checkEmail.length) {
+                callback({ type: "duplicated", value: "Email", field: "Email" }, null)
+                return;
+            }
+            const [checkPhone, fCP] = await sqlPromise.query(`
+                SELECT MaSoDangVien 
+                FROM dangvien 
+                WHERE MaSoDangVien != "${newValue.MaSoDangVien}" 
+                AND SoDienThoai = "${newValue.SoDienThoai}"
+            `)
+            if (checkPhone.length) {
+                callback({ type: "duplicated", value: "Số điện thoại", field: "SoDienThoai" }, null)
+                return;
+            }
+            const [checkCMND, fCCMND] = await sqlPromise.query(`
+                SELECT MaSoDangVien 
+                FROM dangvien 
+                WHERE MaSoDangVien != "${newValue.MaSoDangVien}" 
+                AND CMND = "${newValue.CMND}"
+            `)
+            if (checkCMND.length) {
+                callback({ type: "duplicated", value: "CMND", field: "CMND" }, null)
+                return;
+            }
+
+            const [checkSoThe, fCSoThe] = await sqlPromise.query(`
+                SELECT MaSoDangVien 
+                FROM dangvien 
+                WHERE MaSoDangVien != "${newValue.MaSoDangVien}" 
+                AND SoThe = "${newValue.SoThe}"
+            `)
+            if (checkSoThe.length) {
+                callback({ type: "duplicated", value: "SoThe", field: "SoThe" }, null)
+                return;
+            }
             sql.query(`UPDATE dangvien SET ? WHERE MaSoDangVien = "${id}"`, newValue, (async (err, resUp) => {
                 if (err) {
                     console.log("error: ", err);
@@ -531,38 +572,39 @@ const PartyMember = {
                     WHERE diachidangvien.MaLoaiDiaChi = loaidiachi.MaLoaiDiaChi
                     AND diachidangvien.MaDiaChi = diachi.MaDiaChi
                     AND diachidangvien.MaSoDangVien = "${data.MaSoDangVien}"`)
-                    await Promise.all(resAddress.map(async (el, index) => {
-                        const resPro = await axios.get(`https://provinces.open-api.vn/api/p/${el.MaTinh}?depth=1`);
-                        const resDis = await axios.get(`https://provinces.open-api.vn/api/d/${el.MaHuyen}?depth=1`);
-                        const resWard = await axios.get(`https://provinces.open-api.vn/api/w/${el.MaXa}?depth=1`);
-                        if (el.MaLoaiDiaChi == "1") {
-                            addressArr.QueQuan = {
-                                provinceValue: el.MaTinh,
-                                districtValue: el.MaHuyen,
-                                wardValue: el.MaXa,
-                                detail: el.DiaChiCuThe
+                    if (resAddress.length)
+                        await Promise.all(resAddress.map(async (el, index) => {
+                            const resPro = await axios.get(`https://provinces.open-api.vn/api/p/${el.MaTinh}?depth=1`);
+                            const resDis = await axios.get(`https://provinces.open-api.vn/api/d/${el.MaHuyen}?depth=1`);
+                            const resWard = await axios.get(`https://provinces.open-api.vn/api/w/${el.MaXa}?depth=1`);
+                            if (el.MaLoaiDiaChi == "1") {
+                                addressArr.QueQuan = {
+                                    provinceValue: el.MaTinh,
+                                    districtValue: el.MaHuyen,
+                                    wardValue: el.MaXa,
+                                    detail: el.DiaChiCuThe
+                                }
+                                addressFull.QueQuan = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
                             }
-                            addressFull.QueQuan = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
-                        }
-                        if (el.MaLoaiDiaChi == "2") {
-                            addressArr.DiaChiThuongTru = {
-                                provinceValue: el.MaTinh,
-                                districtValue: el.MaHuyen,
-                                wardValue: el.MaXa,
-                                detail: el.DiaChiCuThe
+                            if (el.MaLoaiDiaChi == "2") {
+                                addressArr.DiaChiThuongTru = {
+                                    provinceValue: el.MaTinh,
+                                    districtValue: el.MaHuyen,
+                                    wardValue: el.MaXa,
+                                    detail: el.DiaChiCuThe
+                                }
+                                addressFull.DiaChiThuongTru = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
                             }
-                            addressFull.DiaChiThuongTru = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
-                        }
-                        if (el.MaLoaiDiaChi == "3") {
-                            addressArr.NoiOHienTai = {
-                                provinceValue: el.MaTinh,
-                                districtValue: el.MaHuyen,
-                                wardValue: el.MaXa,
-                                detail: el.DiaChiCuThe
+                            if (el.MaLoaiDiaChi == "3") {
+                                addressArr.NoiOHienTai = {
+                                    provinceValue: el.MaTinh,
+                                    districtValue: el.MaHuyen,
+                                    wardValue: el.MaXa,
+                                    detail: el.DiaChiCuThe
+                                }
+                                addressFull.NoiOHienTai = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
                             }
-                            addressFull.NoiOHienTai = `${el.DiaChiCuThe}, ${resWard.data.name}, ${resDis.data.name}, ${resPro.data.name}`
-                        }
-                    }))
+                        }))
 
                     const [resPermission, f2] = await sqlPromise.query(`
                         SELECT MaQuyen, CoQuyen 
@@ -610,7 +652,7 @@ const PartyMember = {
             length: 8,
             numbers: true,
         })
-
+        const hashPassword = await bcrypt.hash(newPassword, 10);
         const mail = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -643,7 +685,7 @@ const PartyMember = {
                 const sqlPromise = sql.promise()
                 await Promise.all(data.mailList.map(async el => {
                     try {
-                        await sqlPromise.query(`UPDATE dangvien SET DaXacNhan = 1 WHERE Email = "${el}"`)
+                        await sqlPromise.query(`UPDATE dangvien SET DaXacNhan = 1, HashPassword = "${hashPassword}" WHERE Email = "${el}"`)
                     } catch (error) {
                         console.log(error);
                         callback({ message: "Đã có lỗi xảy ra!" }, null)

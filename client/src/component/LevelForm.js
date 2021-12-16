@@ -171,6 +171,7 @@ const LevelForm = (props) => {
                     <InputGrid
                         nameTitle={`Nghề nghiệp`}
                         name={"NgheNghiep"}
+                        defaultValue={""}
                         control={control}
                         errors={errors}
                     />
@@ -179,6 +180,7 @@ const LevelForm = (props) => {
                     <InputGrid
                         nameTitle={`Trình độ học vấn`}
                         name={"TrinhDoHocVan"}
+                        defaultValue={""}
                         control={control}
                         errors={errors}
                     />

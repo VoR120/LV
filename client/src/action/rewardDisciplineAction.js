@@ -36,13 +36,9 @@ export const createRewardDisciplines = async (payload, id) => {
 }
 
 export const getRewardDiscipline = async (payload) => {
-    const { Loai, MaHinhThuc } = payload
+    const { Loai } = payload
     try {
-        let res;
-        if (MaHinhThuc == "all")
-            res = await axios.get('/api/' + Loai)
-        else
-            res = await axios.get(`/api/${Loai}/getbytypeid/${MaHinhThuc}`)
+        let res = await axios.get('/api/' + Loai)
         console.log(res);
         return res.data
     } catch (error) {
