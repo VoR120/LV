@@ -2,13 +2,23 @@ const { getAll, findById, create, updateById, removeAll, remove } = require('./u
 const sql = require('../configs/db');
 
 const Discipline = {
-    getAll: (callback) => {
-        const sqlQuery = `SELECT kl.MaSoDangVien, dv.HoTen , dv.Email, dv.SoDienThoai, kl.TenKyLuat, kl.NgayKyLuat, kl.HinhThuc, 
+    getAll: (data, callback) => {
+        const { MaChiBo } = data;
+        const sqlQuery = MaChiBo ?
+            `SELECT kl.MaSoDangVien, dv.HoTen , dv.Email, dv.SoDienThoai, kl.TenKyLuat, kl.NgayKyLuat, kl.HinhThuc, 
             kl.MaKyLuat
             FROM kyluat kl, dangvien dv
             WHERE kl.MaSoDangVien = dv.MaSoDangVien
             AND dv.DaXoa = 0
-            ORDER BY NgayTao DESC`;
+            AND MaChiBo = ${MaChiBo}
+            ORDER BY kl.NgayTao DESC`
+            :
+            `SELECT kl.MaSoDangVien, dv.HoTen , dv.Email, dv.SoDienThoai, kl.TenKyLuat, kl.NgayKyLuat, kl.HinhThuc, 
+            kl.MaKyLuat
+            FROM kyluat kl, dangvien dv
+            WHERE kl.MaSoDangVien = dv.MaSoDangVien
+            AND dv.DaXoa = 0
+            ORDER BY kl.NgayTao DESC`
         sql.query(sqlQuery, (err, res) => {
             if (err) {
                 console.log("error: ", err);

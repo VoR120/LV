@@ -111,10 +111,43 @@ export const actionGrade = async (dispatch, payload, open) => {
             }))
         }
         if (remove.length > 0) {
+            let isUsed = false;
             await Promise.all(remove.map(async (data) => {
-                let res = await axios.delete('/api/grade/' + data)
-                console.log(res);
+                let resGet = await axios.get('/api/grade/findone/' + data)
+                if (resGet.status == 200) {
+                    if (resGet.data.length > 0) {
+                        isUsed = true
+                    }
+                }
             }))
+            if (isUsed == true) {
+                dispatch({ type: categoryConstant.GET_ALL_CATEGORY_REQUEST })
+                const res = await axios.get('/api/grade');
+                console.log(res);
+                if (res.status == 200) {
+                    dispatch({
+                        type: categoryConstant.GET_ALL_CATEGORY_SUCCESS,
+                        payload: {
+                            data: res.data.data,
+                            name: res.data.columnName,
+                            key: 'grade',
+                        }
+                    })
+                }
+                open({
+                    type: 'SET_OPEN',
+                    payload: {
+                        msg: "Loại này đang được sử dụng, không thể xóa!",
+                        type: "error"
+                    }
+                })
+                return;
+            } else {
+                await Promise.all(remove.map(async (data) => {
+                    let res = await axios.delete('/api/grade/' + data)
+                    console.log(res);
+                }))
+            }
         }
         dispatch({ type: categoryConstant.GET_ALL_CATEGORY_REQUEST })
         const res = await axios.get('/api/grade');
@@ -200,6 +233,7 @@ export const createCategory = async (dispatch, payload, open) => {
 }
 
 export const updateCategory = async (dispatch, payload, open) => {
+    console.log(payload);
     try {
         dispatch({ type: categoryConstant.UPDATE_CATEGORY_REQUEST });
         const res = await axios.put('/api/' + payload.categoryField + '/' + payload.id, payload.data);

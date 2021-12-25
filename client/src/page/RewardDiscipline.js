@@ -10,6 +10,7 @@ import DeleteForm from '../component/DeleteForm';
 import Layout from '../component/Layout';
 import MyButton from '../component/UI/MyButton';
 import MySelect from '../component/UI/MySelect';
+import { InfoContext } from '../contextAPI/InfoContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import exampleRewardFile from '../public/excel/KhenThuong.xlsx';
 import exampleDisciplineFile from '../public/excel/KyLuat.xlsx';
@@ -42,6 +43,8 @@ const RewardDiscipline = () => {
     const classes = useStyles();
 
     const { openSnackbarDispatch } = useContext(SnackbarContext);
+    const { info } = useContext(InfoContext);
+    const isDeP = info.info.Quyen["12"] == 1;
 
     const [typeChoose, setTypeChoose] = useState('Khen thưởng');
     const [type, setType] = useState("all");
@@ -103,9 +106,13 @@ const RewardDiscipline = () => {
 
     const fetchApi = async () => {
         setLoadingTable(true)
-        const res = await getRewardDiscipline({
-            Loai: typeChoose == "Khen thưởng" ? "reward" : "discipline"
-        });
+        const res = isDeP
+            ? await getRewardDiscipline({
+                Loai: typeChoose == "Khen thưởng" ? "reward" : "discipline"
+            })
+            : await getRewardDiscipline({
+                Loai: typeChoose == "Khen thưởng" ? "reward" : "discipline", MaChiBo: info.info.MaChiBo
+            })
         setRows(res);
         setLoadingTable(false)
     };

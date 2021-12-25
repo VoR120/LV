@@ -3,9 +3,22 @@ const sql = require('../configs/db');
 const e = require('express');
 
 const Move = {
-    getAll: (callback) => {
+    getAll: (data, callback) => {
+        const { MaChiBo } = data;
         const sqlPromise = sql.promise();
-        const sqlQuery = `SELECT 
+        const sqlQuery = MaChiBo
+            ? `SELECT 
+        csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, ht.LoaiHinhThuc,
+        ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, 
+        csh.ChuyenDenDangBo, csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu
+        FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht
+        WHERE csh.MaHinhThuc = ht.MaHinhThuc
+        AND csh.MaSoDangVien = dv.MaSoDangVien
+        AND dv.MaChiBo = ${MaChiBo}
+        AND dv.DaXoa = 0
+        `
+            :
+            `SELECT 
         csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, ht.LoaiHinhThuc,
         ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, 
         csh.ChuyenDenDangBo, csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu
@@ -13,7 +26,7 @@ const Move = {
         WHERE csh.MaHinhThuc = ht.MaHinhThuc
         AND csh.MaSoDangVien = dv.MaSoDangVien
         AND dv.DaXoa = 0
-        `;
+        `
         sql.query(sqlQuery, async (err, res) => {
             if (err) {
                 console.log("error: ", err);
@@ -76,18 +89,32 @@ const Move = {
         })
     },
     findById: findById("chuyensinhhoat", "MaSoDangVien"),
-    findByTypeId: (id, callback) => {
+    findByTypeId: (data, callback) => {
+        const { MaChiBo, MaHinhThuc } = data
         const sqlPromise = sql.promise();
-        const sqlQuery = `SELECT 
+        const sqlQuery = MaChiBo ?
+            `SELECT 
         csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, ht.LoaiHinhThuc,
         ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, 
         csh.ChuyenDenDangBo, csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu
         FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht
-        WHERE csh.MaHinhThuc = "${id}"
+        WHERE csh.MaHinhThuc = "${MaHinhThuc}"
+        AND csh.MaHinhThuc = ht.MaHinhThuc
+        AND csh.MaSoDangVien = dv.MaSoDangVien
+        AND dv.MaChiBo = ${MaChiBo}
+        AND dv.DaXoa = 0
+        `
+            :
+            `SELECT 
+        csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat, ht.LoaiHinhThuc,
+        ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, 
+        csh.ChuyenDenDangBo, csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu
+        FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht
+        WHERE csh.MaHinhThuc = "${MaHinhThuc}"
         AND csh.MaHinhThuc = ht.MaHinhThuc
         AND csh.MaSoDangVien = dv.MaSoDangVien
         AND dv.DaXoa = 0
-        `;
+        `
         sql.query(sqlQuery, async (err, res) => {
             if (err) {
                 console.log("error: ", err);
@@ -150,9 +177,14 @@ const Move = {
             return;
         })
     },
-    findByPMId: (id, callback) => {
+    findByPMId: (data, callback) => {
+        const { MaSoDangVien, MaChiBo } = data;
         const sqlPromise = sql.promise();
-        sql.query(`SELECT HoTen FROM dangvien WHERE MaSoDangVien = "${id}" AND DaXoa = 0`,
+        let sqlQuery = MaChiBo ?
+            `SELECT HoTen FROM dangvien WHERE MaSoDangVien = "${MaSoDangVien}" AND DaXoa = 0 AND MaChiBo = ${MaChiBo}`
+            :
+            `SELECT HoTen FROM dangvien WHERE MaSoDangVien = "${MaSoDangVien}" AND DaXoa = 0`
+        sql.query(sqlQuery,
             (err, res) => {
                 if (!res.length) {
                     console.log("Error: MaSoDangVien not found");
@@ -166,7 +198,7 @@ const Move = {
                     FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht
                     WHERE csh.MaHinhThuc = ht.MaHinhThuc
                     AND csh.MaSoDangVien = dv.MaSoDangVien
-                    AND csh.MaSoDangVien = "${id}"
+                    AND csh.MaSoDangVien = "${MaSoDangVien}"
                     AND dv.DaXoa = 0`,
                         async (err, res) => {
                             if (err) {
@@ -236,49 +268,113 @@ const Move = {
             }
         )
     },
-    findByType: (type, callback) => {
+    findByType: (data, callback) => {
+        console.log(data);
+        let { LoaiHinhThuc, MaChiBo } = data
+        if (LoaiHinhThuc == "Di") LoaiHinhThuc = "Chuyển sinh hoạt đi"
+        if (LoaiHinhThuc == "Den") LoaiHinhThuc = "Chuyển sinh hoạt đến"
+        if (LoaiHinhThuc == "NoiBo") LoaiHinhThuc = "Chuyển sinh hoạt nội bộ"
         let sqlQuery = `SELECT 
             csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat,ht.LoaiHinhThuc,
             ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo AS TenChiBoTu,
             csh.ChuyenDenDangBo,csh.ChuyenDenChiBo AS TenChiBoDen, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu
             FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht
             WHERE csh.MaHinhThuc IN (
-            SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "${type}"
+            SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "${LoaiHinhThuc}"
             )
             AND csh.MaHinhThuc = ht.MaHinhThuc
             AND csh.MaSoDangVien = dv.MaSoDangVien
             AND dv.DaXoa = 0`;
-        if (type == "Chuyển sinh hoạt đi") {
-            sqlQuery = `SELECT 
+        if (LoaiHinhThuc == "Chuyển sinh hoạt đi") {
+            sqlQuery = MaChiBo
+                ?
+                `SELECT 
             csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat,ht.LoaiHinhThuc,
             ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, cb.TenChiBo AS TenChiBoTu,
             csh.ChuyenDenDangBo,csh.ChuyenDenChiBo AS TenChiBoDen, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
             ht.TenHinhThuc
             FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht, chibo cb
             WHERE csh.MaHinhThuc IN (
-            SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "${type}"
+            SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "${LoaiHinhThuc}"
             )
             AND csh.ChuyenTuChiBo = cb.MaChiBo
             AND csh.MaHinhThuc = ht.MaHinhThuc
             AND csh.MaSoDangVien = dv.MaSoDangVien
-            AND dv.DaXoa = 0`;
+            AND dv.MaChiBo = ${MaChiBo}
+            AND dv.DaXoa = 0`
+                :
+                `SELECT 
+            csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat,ht.LoaiHinhThuc,
+            ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, cb.TenChiBo AS TenChiBoTu,
+            csh.ChuyenDenDangBo,csh.ChuyenDenChiBo AS TenChiBoDen, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu,
+            ht.TenHinhThuc
+            FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht, chibo cb
+            WHERE csh.MaHinhThuc IN (
+            SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "${LoaiHinhThuc}"
+            )
+            AND csh.ChuyenTuChiBo = cb.MaChiBo
+            AND csh.MaHinhThuc = ht.MaHinhThuc
+            AND csh.MaSoDangVien = dv.MaSoDangVien
+            AND dv.DaXoa = 0`
         }
-        if (type == "Chuyển sinh hoạt đến") {
-            sqlQuery = `SELECT 
+        if (LoaiHinhThuc == "Chuyển sinh hoạt đến") {
+            sqlQuery = MaChiBo
+                ? `SELECT 
             csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat,ht.LoaiHinhThuc,
             ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo AS TenChiBoTu, cb.TenChiBo AS TenChiBoDen,
             csh.ChuyenDenDangBo,csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu
             FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht, chibo cb
             WHERE csh.MaHinhThuc IN (
-            SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "${type}"
+            SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "${LoaiHinhThuc}"
             )
             AND csh.ChuyenDenChiBo = cb.MaChiBo
             AND csh.MaHinhThuc = ht.MaHinhThuc
             AND csh.MaSoDangVien = dv.MaSoDangVien
-            AND dv.DaXoa = 0`;
+            AND dv.MaChiBo = ${MaChiBo}
+            AND dv.DaXoa = 0`
+                :
+                `SELECT 
+            csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat,ht.LoaiHinhThuc,
+            ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo AS TenChiBoTu, cb.TenChiBo AS TenChiBoDen,
+            csh.ChuyenDenDangBo,csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu
+            FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht, chibo cb
+            WHERE csh.MaHinhThuc IN (
+            SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "${LoaiHinhThuc}"
+            )
+            AND csh.ChuyenDenChiBo = cb.MaChiBo
+            AND csh.MaHinhThuc = ht.MaHinhThuc
+            AND csh.MaSoDangVien = dv.MaSoDangVien
+            AND dv.DaXoa = 0`
         }
-        if (type == "Chuyển sinh hoạt nội bộ") {
-            sqlQuery = `SELECT 
+        if (LoaiHinhThuc == "Chuyển sinh hoạt nội bộ") {
+            sqlQuery = MaChiBo
+                ? `SELECT 
+            csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat,ht.LoaiHinhThuc,
+            ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, cb.TenChiBo AS TenChiBoTu, chiboden.TenChiBoDen,
+            csh.ChuyenDenDangBo,csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu
+            FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht, chibo cb,
+            (SELECT 
+                cb.TenChiBo AS TenChiBoDen
+                FROM chuyensinhhoat csh, dangvien dv, hinhthuc ht, chibo cb
+                WHERE csh.MaHinhThuc IN (
+                SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "Chuyển sinh hoạt nội bộ"
+                )
+                AND csh.ChuyenDenChiBo = cb.MaChiBo
+                AND csh.MaHinhThuc = ht.MaHinhThuc
+                AND csh.MaSoDangVien = dv.MaSoDangVien
+                AND dv.MaChiBo = ${MaChiBo}
+                AND dv.DaXoa = 0
+			) AS chiboden
+            WHERE csh.MaHinhThuc IN (
+            SELECT MaHinhThuc FROM hinhthuc WHERE LoaiHinhThuc = "Chuyển sinh hoạt nội bộ"
+            )
+            AND csh.ChuyenTuChiBo = cb.MaChiBo
+            AND csh.MaHinhThuc = ht.MaHinhThuc
+            AND csh.MaSoDangVien = dv.MaSoDangVien
+            AND dv.MaChiBo = ${MaChiBo}
+            AND dv.DaXoa = 0`
+                :
+                `SELECT 
             csh.MaSoDangVien, dv.HoTen,  csh.MaChuyenSinhHoat,ht.LoaiHinhThuc,
             ht.TenHinhThuc, csh.ChuyenTuDangBo, csh.ChuyenTuChiBo, cb.TenChiBo AS TenChiBoTu, chiboden.TenChiBoDen,
             csh.ChuyenDenDangBo,csh.ChuyenDenChiBo, csh.NgayChuyenDi, csh.NgayChuyenDen, csh.MaHinhThuc, csh.GhiChu
@@ -315,17 +411,26 @@ const Move = {
     },
     create: async (newValue, callback) => {
         try {
-            const { MaSoDangVienArr, MaHinhThuc, NgayChuyenDi,
+            const { MaSoDangVienArr, MaHinhThuc, NgayChuyenDi, NgayChuyenDen, ChuyenTuChiBo,
                 ChuyenTuDangBo, ChuyenDenDangBo, ChuyenDenChiBo, GhiChu,
             } = newValue
             const sqlPromise = sql.promise();
-            await Promise.all(MaSoDangVienArr.map(async (el, index) => {
-                const value = {
-                    MaSoDangVien: el.MaSoDangVien, MaHinhThuc, NgayChuyenDi,
-                    ChuyenTuDangBo, ChuyenTuChiBo: el.MaChiBo , ChuyenDenDangBo, ChuyenDenChiBo, GhiChu,
-                }
-                await sqlPromise.query(`INSERT INTO chuyensinhhoat SET ?`, value)
-            }))
+            if (MaHinhThuc == "3" || MaHinhThuc == "4") {
+                await Promise.all(MaSoDangVienArr.map(async (el, index) => {
+                    const value = {
+                        MaSoDangVien: el.MaSoDangVien, MaHinhThuc, NgayChuyenDen,
+                        ChuyenTuDangBo, ChuyenTuChiBo, ChuyenDenDangBo, ChuyenDenChiBo, GhiChu,
+                    }
+                    await sqlPromise.query(`INSERT INTO chuyensinhhoat SET ?`, value)
+                }))
+            } else
+                await Promise.all(MaSoDangVienArr.map(async (el, index) => {
+                    const value = {
+                        MaSoDangVien: el.MaSoDangVien, MaHinhThuc, NgayChuyenDi,
+                        ChuyenTuDangBo, ChuyenTuChiBo: el.MaChiBo, ChuyenDenDangBo, ChuyenDenChiBo, GhiChu,
+                    }
+                    await sqlPromise.query(`INSERT INTO chuyensinhhoat SET ?`, value)
+                }))
             console.log("Created: ", newValue);
             callback(null, { msg: "Đã cập nhật!" });
         } catch (error) {

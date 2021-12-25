@@ -28,28 +28,42 @@ export const createMove = async (payload) => {
 }
 
 export const getMoveByType = async (payload) => {
-    const { LoaiHinhThuc, MaHinhThuc } = payload
+    let { LoaiHinhThuc, MaHinhThuc, MaChiBo } = payload
+    if (LoaiHinhThuc == "Chuyển sinh hoạt đi") LoaiHinhThuc = "Di"
+    if (LoaiHinhThuc == "Chuyển sinh hoạt đến") LoaiHinhThuc = "Den"
+    if (LoaiHinhThuc == "Chuyển sinh hoạt nội bộ") LoaiHinhThuc = "NoiBo"
     try {
         let res;
         if (MaHinhThuc == "all")
-            res = await axios.post('/api/move/getbytype', { LoaiHinhThuc })
+            res = MaChiBo
+                ? await axios.get(`/api/move/getbytype?LoaiHinhThuc=${LoaiHinhThuc}&MaChiBo=${MaChiBo}`)
+                : await axios.get(`/api/move/getbytype?LoaiHinhThuc=${LoaiHinhThuc}`)
         else
-            res = await axios.get('/api/move/getbytypeid/' + MaHinhThuc)
+            res = MaChiBo
+                ? await axios.get(`/api/move/getbytypeid?MaHinhThuc=${MaHinhThuc}&MaChiBo=${MaChiBo}`)
+                : await axios.get(`/api/move/getbytypeid?MaHinhThuc=${MaHinhThuc}`)
         console.log(res);
         if (res.status == 200)
             return res.data
     } catch (error) {
-        console.log(error);
+        return { error: error.response.data.msg };
     }
 }
 
 export const getMoveByPMId = async (payload) => {
-    const { MaSoDangVien } = payload
-    console.log(MaSoDangVien);
+    const { MaSoDangVien, MaChiBo } = payload
     try {
-        const res = MaSoDangVien == "" ?
-            await axios.get('/api/move') :
-            await axios.get('/api/move/getbypmid/' + MaSoDangVien);
+        let res
+        if (MaSoDangVien == "") {
+            res = MaChiBo
+                ? await axios.get(`/api/move?MaChiBo=${MaChiBo}`)
+                : await axios.get('/api/move')
+        } else {
+            res = MaChiBo
+                ? await axios.get(`/api/move/getbypmid?MaSoDangVien=${MaSoDangVien}&MaChiBo=${MaChiBo}`)
+                : await axios.get(`/api/move/getbypmid?MaSoDangVien=${MaSoDangVien}`)
+        }
+        console.log(res);
         if (res.status == 200)
             return res.data
     } catch (error) {

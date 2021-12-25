@@ -1,7 +1,16 @@
 const Discipline = require('../models/disciplineModel');
 const { getAll, findById, create, updateById, remove, removeAll } = require('./utils');
 
-exports.getAllDiscipline = getAll(Discipline);
+exports.getAllDiscipline = (req, res) => {
+    Discipline.getAll(req.query, (err, data) => {
+        if (err)
+            res.status(500).send({
+                message:
+                    err.message || "ERROR!"
+            });
+        else res.status(200).json(data);
+    })
+};;
 
 exports.findByIdDiscipline = findById(Discipline);
 

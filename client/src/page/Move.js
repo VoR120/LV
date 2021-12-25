@@ -11,6 +11,7 @@ import Layout from '../component/Layout';
 import MoveReturnForm from '../component/MoveReturnForm';
 import MyButton from '../component/UI/MyButton';
 import MySelect from '../component/UI/MySelect';
+import { InfoContext } from '../contextAPI/InfoContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import { moveInPDF, moveInternalPDF, moveOutPDF, movePDF } from '../utils/pdf';
 import { getExportData, pdfmakedownload } from '../utils/utils';
@@ -50,6 +51,8 @@ const Move = () => {
     const [loading, setLoading] = useState(false);
 
     const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext);
+    const { info } = useContext(InfoContext);
+    const isDeP = info.info.Quyen["12"] == 1;
 
     const [rows, setRows] = useState([])
 
@@ -198,11 +201,16 @@ const Move = () => {
     }
 
     const fetchApi = async () => {
-        console.log(typeFirst);
-        let res;
-        typeFirst == "type"
-            ? res = await getMoveByType({ LoaiHinhThuc: typeChoose, MaHinhThuc: type })
-            : res = await getMoveByPMId({ MaSoDangVien: id })
+        let res
+        if (isDeP) {
+            typeFirst == "type"
+                ? res = await getMoveByType({ LoaiHinhThuc: typeChoose, MaHinhThuc: type })
+                : res = await getMoveByPMId({ MaSoDangVien: id })
+        } else {
+            typeFirst == "type"
+                ? res = await getMoveByType({ LoaiHinhThuc: typeChoose, MaHinhThuc: type, MaChiBo: info.info.MaChiBo })
+                : res = await getMoveByPMId({ MaSoDangVien: id, MaChiBo: info.info.MaChiBo })
+        }
         if (res.error) {
             setRows([])
             openSnackbarDispatch({

@@ -2,12 +2,8 @@ const { findByType } = require('../models/moveModel');
 const Move = require('../models/moveModel');
 const { getAll, findById, create, updateById, remove, removeAll } = require('./utils');
 
-exports.getAllMove = getAll(Move);
-
-exports.findByIdMove = findById(Move);
-
-exports.findByTypeMove = (req, res) => {
-    Move.findByType(req.body.LoaiHinhThuc, (err, data) => {
+exports.getAllMove = (req, res) => {
+    Move.getAll(req.query, (err, data) => {
         if (err)
             res.status(500).send({
                 message:
@@ -17,8 +13,23 @@ exports.findByTypeMove = (req, res) => {
     })
 };
 
+exports.findByIdMove = findById(Move);
+
+exports.findByTypeMove = (req, res) => {
+    Move.findByType(req.query, (err, data) => {
+        if (err) {
+            console.log(err);
+            res.status(500).send({
+                message:
+                    err.message || "ERROR!"
+            });
+        }
+        else res.status(200).json(data);
+    })
+};
+
 exports.findByTypeIdMove = (req, res) => {
-    Move.findByTypeId(req.params.id, (err, data) => {
+    Move.findByTypeId(req.query, (err, data) => {
         if (err)
             res.status(500).send({
                 message:
@@ -29,7 +40,7 @@ exports.findByTypeIdMove = (req, res) => {
 };
 
 exports.findByPMId = (req, res) => {
-    Move.findByPMId(req.params.id, (err, data) => {
+    Move.findByPMId(req.query, (err, data) => {
         if (err) {
             if (err.type == "not_found") {
                 res.status(400).json({ msg: "Không tìm thấy Đảng viên!" })

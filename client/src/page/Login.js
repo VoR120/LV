@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
         letterSpacing: '6px',
         transform: 'translateY(-50%)',
         textAlign: 'center',
-        marginTop: '60px',
+        marginTop: '40px',
     },
     logoWrapper: {
         width: '300px',
@@ -173,7 +173,11 @@ const Login = () => {
                         <div className={classes.logoWrapper}>
                             <img className={classes.logo} src={logo} alt="party-logo" />
                         </div>
-                        <Typography className={classes.content} variant="h4">Quản lý hồ sơ Đảng viên</Typography>
+                        <Typography className={classes.content} variant="h4">
+                            Quản lý hồ sơ Đảng viên
+                        </Typography>
+                        <Typography variant='h5' sx={{ textAlign: 'center', letterSpacing: '2px' }}>Khoa CNTT&TT</Typography>
+                        <Typography variant='h5' sx={{ textAlign: 'center', letterSpacing: '2px' }}>Đại học Cần Thơ</Typography>
                     </div>
                 </Grid>
                 <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>

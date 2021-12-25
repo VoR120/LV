@@ -4,11 +4,12 @@ const nodemailer = require('nodemailer');
 
 exports.getByPartyMember = (req, res) => {
     try {
-        const { Nam, MaSoDangVien } = req.query;
+        const { Nam, MaSoDangVien, MaDVDG } = req.query;
         sql.query(`SELECT *
             FROM danhgiadangvien
             WHERE MaSoDangVien = "${MaSoDangVien}"
             AND Nam = ${Nam}
+            AND MaDVDG = ${MaDVDG}
         `,
             (err, result) => {
                 if (err) {

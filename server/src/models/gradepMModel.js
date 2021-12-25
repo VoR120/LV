@@ -116,9 +116,6 @@ const gradepM = {
                 }
             })
     },
-    updateById: updateById("ngoaingudangvien", "MaSoDangVien"),
-    remove: remove("ngoaingudangvien", "MaSoDangVien"),
-    removeAll: removeAll("ngoaingudangvien")
 }
 
 module.exports = gradepM;

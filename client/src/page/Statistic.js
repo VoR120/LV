@@ -103,6 +103,8 @@ const Statistic = () => {
     const handleChangeField = (e) => {
         if (e.target.value == "age")
             setFieldValue("from18to30")
+        if (e.target.value == "gender")
+            setFieldValue("m");
         setField(e.target.value);
     }
 
@@ -190,7 +192,7 @@ const Statistic = () => {
     }, [])
 
     useEffect(() => {
-        if (field != "age") {
+        if (field != "age" && field != "gender") {
             setFieldValue("")
             getAllCategory(categoryDispatch, field)
         }
@@ -291,8 +293,12 @@ const Statistic = () => {
                         <MenuItem value="position">Chức vụ</MenuItem>
                         <MenuItem value="grade">Xếp Loại</MenuItem>
                         <MenuItem value="age">Tuổi</MenuItem>
+                        <MenuItem value="gender">Giới tính</MenuItem>
                         <MenuItem value="ethnic">Dân tộc</MenuItem>
                         <MenuItem value="religion">Tôn giáo</MenuItem>
+                        <MenuItem value="it">Trình độ tin học</MenuItem>
+                        <MenuItem value="politics">Trình độ chính trị</MenuItem>
+                        <MenuItem value="flanguage">Ngoại ngữ</MenuItem>
                     </MySelect>
                     {
                         field == "age" &&
@@ -307,6 +313,19 @@ const Statistic = () => {
                             <MenuItem value="from41to50">Từ 41 đến 50 tuổi</MenuItem>
                             <MenuItem value="from51to60">Từ 51 đến 60 tuổi</MenuItem>
                             <MenuItem value="over60">Trên 61 tuổi</MenuItem>
+                        </MySelect>
+                    }
+                    {
+                        field == "gender" &&
+                        <MySelect
+                            style={{ marginLeft: '16px' }}
+                            value={fieldValue}
+                            autowidth
+                            onChange={handleChangeFieldValue}
+                        >
+                            <MenuItem value="m">Nam</MenuItem>
+                            <MenuItem value="f">Nữ</MenuItem>
+                            <MenuItem value="u">Khác</MenuItem>
                         </MySelect>
                     }
                     {
@@ -337,7 +356,7 @@ const Statistic = () => {
                         </>
                     }
                     {
-                        (field != "grade" && field != "age") &&
+                        (field != "grade" && field != "age" && field != "gender") &&
                         <MySelect
                             style={{ marginLeft: '16px' }}
                             value={fieldValue}
@@ -376,7 +395,7 @@ const Statistic = () => {
                                     variant="outlined"
                                 />
                         }}
-                        title={"Báo cáo"}
+                        title={""}
                         columns={columns}
                         data={rows}
                         options={{

@@ -94,7 +94,29 @@ const DrawerList = () => {
                             <ListItemIcon>
                                 <LayersIcon />
                             </ListItemIcon>
-                            <ListItemText primary="Hồ sơ Đảng viên" />
+                            <ListItemText primary="Hồ sơ đảng viên" />
+                        </ListItemButton>
+                    </NavLink>
+                }
+                {
+                    info.info.Quyen["3"] == 1 &&
+                    <NavLink to={"/move"}>
+                        <ListItemButton >
+                            <ListItemIcon>
+                                <SyncAltIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="Chuyển sinh hoạt" />
+                        </ListItemButton>
+                    </NavLink>
+                }
+                {
+                    info.info.Quyen["5"] == 1 &&
+                    <NavLink to={"/rewarddiscipline"}>
+                        <ListItemButton >
+                            <ListItemIcon>
+                                <ThumbsUpDownIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="Khen thưởng - kỷ luật" />
                         </ListItemButton>
                     </NavLink>
                 }
@@ -110,7 +132,7 @@ const DrawerList = () => {
                 <Collapse in={listOpen.list1} timeout="auto" unmountOnExit>
                     <List component="div" disablePadding>
                         {
-                            info.info.Quyen["15"] == 1 &&
+                            permission.some(p => [14, 15].includes(p)) &&
                             <NavLink onClick={handleStayOpen1} to={"/grade"}>
                                 <ListItemButton >
                                     <ListItemIcon>
@@ -121,7 +143,7 @@ const DrawerList = () => {
                             </NavLink>
                         }
                         {
-                            info.info.Quyen["14"] == 1 &&
+                            info.info.Quyen["15"] == 1 &&
                             <NavLink onClick={handleStayOpen1} to={"/openevaluate"}>
                                 <ListItemButton >
                                     <ListItemIcon>
@@ -164,39 +186,17 @@ const DrawerList = () => {
                     </List>
                 </Collapse>
                 {
-                    info.info.Quyen["3"] == 1 &&
-                    <NavLink to={"/move"}>
-                        <ListItemButton >
-                            <ListItemIcon>
-                                <SyncAltIcon />
-                            </ListItemIcon>
-                            <ListItemText primary="Chuyển sinh hoạt" />
-                        </ListItemButton>
-                    </NavLink>
-                }
-                {
-                    info.info.Quyen["5"] == 1 &&
-                    <NavLink to={"/rewarddiscipline"}>
-                        <ListItemButton >
-                            <ListItemIcon>
-                                <ThumbsUpDownIcon />
-                            </ListItemIcon>
-                            <ListItemText primary="Khen thưởng - kỷ luật" />
-                        </ListItemButton>
-                    </NavLink>
-                }
-                {
                     info.info.Quyen["6"] == 1 &&
                     <NavLink to={"/statistic"}>
                         <ListItemButton >
                             <ListItemIcon>
                                 <EqualizerIcon />
                             </ListItemIcon>
-                            <ListItemText primary="Báo cáo - Thống kê" />
+                            <ListItemText primary="Báo cáo thống kê" />
                         </ListItemButton>
                     </NavLink>
                 }
-                {info.info.Quyen["2"] == 1 &&
+                {permission.some(p => [2,3,5].includes(p)) &&
                     <NavLink to={"/search"}>
                         <ListItemButton >
                             <ListItemIcon>

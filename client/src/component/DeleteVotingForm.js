@@ -5,6 +5,8 @@ import {
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useState } from 'react';
+import { deletePoll } from '../action/votingAction';
+import { LoadingContext } from '../contextAPI/LoadingContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import MyButton from './UI/MyButton';
 
@@ -24,8 +26,9 @@ const useStyles = makeStyles(theme => ({
 
 const DeleteVotingForm = (props) => {
     const classes = useStyles();
-    const { data } = props;
-    const { openSnackbar, openSnackbarDispatch } = useContext(SnackbarContext)
+    const { data, fetchAllPoll } = props;
+    const { openSnackbarDispatch } = useContext(SnackbarContext)
+    const { loadingDispatch } = useContext(LoadingContext)
 
     const [open, setOpen] = useState(false);
 
@@ -36,7 +39,27 @@ const DeleteVotingForm = (props) => {
         setOpen(true)
     }
     const handleSubmit = async () => {
-        // const
+        loadingDispatch({ type: "OPEN_LOADING" })
+        const res = await deletePoll({ id: data.MaBieuQuyet })
+        if (res.error) {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: res.error.msg,
+                    type: "error"
+                }
+            })
+        } else {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Đã xóa!",
+                    type: "success"
+                }
+            })
+        }
+        loadingDispatch({ type: 'CLOSE_LOADING' })
+        fetchAllPoll();
     }
 
     return (
@@ -45,7 +68,7 @@ const DeleteVotingForm = (props) => {
             <Dialog fullWidth open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">Hủy cuộc  biểu quyết</DialogTitle>
                 <DialogContent className={classes.dialogContent}>
-                    <Typography>Bạn có muốn hủy cuộc biểu quyết này?</Typography>
+                    <Typography>Bạn có muốn xóa cuộc biểu quyết này?</Typography>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} >

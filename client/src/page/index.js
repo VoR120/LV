@@ -57,7 +57,7 @@ export const routes = [
         exact: true,
         component: lazy(() => import('./Evaluate')),
         isPrivate: true,
-        permission: [13]
+        permission: [13, 14, 15]
     },
     {
         path: '/evaluatesubject',
@@ -84,20 +84,21 @@ export const routes = [
         exact: true,
         component: lazy(() => import('./Statistic')),
         isPrivate: true,
-        permission: [8]
+        permission: [6]
     },
     {
         path: '/rewarddiscipline',
         exact: true,
         component: lazy(() => import('./RewardDiscipline')),
         isPrivate: true,
+        permission: [5]
     },
     {
         path: '/decentralization',
         exact: true,
         component: lazy(() => import('./Decentralization')),
         isPrivate: true,
-        permission: [5]
+        permission: [11]
     },
     {
         path: '/createvoting',
@@ -131,7 +132,7 @@ export const routes = [
         exact: true,
         component: lazy(() => import('./Grade')),
         isPrivate: true,
-        permission: [4]
+        permission: [14,15]
     },
     {
         path: '/accessdenied',

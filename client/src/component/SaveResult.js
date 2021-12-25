@@ -62,7 +62,7 @@ const SaveResult = (props) => {
         setValue(e.target.name, e.target.value)
     }
     const onSubmit = async (d) => {
-        d.DanhSach = data.map(el => el.MaSoDangVien)
+        d.DanhSach = data
         d.type = voteFor == "Khen thưởng" ? "reward" : "discipline"
         console.log(d);
         const res = await createRewardDisciplines(d, id)

@@ -1,10 +1,12 @@
 import DeleteIcon from '@mui/icons-material/Delete';
+import Info from '@mui/icons-material/Info';
 import {
     FormControl, Grid, IconButton, MenuItem, Typography
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useState } from 'react';
 import { CategoryContext } from '../contextAPI/CategoryContext';
+import { InfoContext } from '../contextAPI/InfoContext';
 import axios from '../helper/axios';
 import InputGrid from './InputGrid';
 import MySelectReactHookForm from './UI/MySelectReactHookForm';
@@ -93,6 +95,8 @@ const InfoForm = (props) => {
 
     // ContextAPI
     const { category, categoryDispatch } = useContext(CategoryContext);
+    const { info } = useContext(InfoContext);
+    const isDePer = info.info.Quyen["12"] == 1;
 
     // Function
     const handleRemove = () => {
@@ -261,7 +265,9 @@ const InfoForm = (props) => {
     //         }
     //     }
     // }, [imageUpload])
-
+    let positionArr = isDePer
+        ? category.categories.position
+        : category.categories.position.filter(el => [2, 3, 4].includes(el.MaChucVu))
     return (
         <FormControl margin="dense" fullWidth>
             <Grid container spacing={1}>
@@ -311,12 +317,14 @@ const InfoForm = (props) => {
                             name={"SoThe"}
                             rules={{
                                 pattern: {
-                                    value:  /^\d+$/,
+                                    value: /^\d+$/,
                                     message: "Số thẻ không hợp lệ!"
-                                }
+                                },
+                                validate: value =>
+                                    ("" + value).length <= 8 || "Số thẻ không hợp lệ"
                             }}
                             control={control}
-                        errors={errors}
+                            errors={errors}
                         />
                     </Grid>
                     <Grid item xs={6}>
@@ -325,7 +333,8 @@ const InfoForm = (props) => {
                             onChange={handleChangeSelect}
                             nameTitle={"Chi bộ"}
                             name={`MaChiBo`}
-                            defaultValue={"0"}
+                            defaultValue={isDePer ? "0" : info.info.MaChiBo}
+                            disabled={!isDePer}
                             rules={{
                                 validate: value =>
                                     value != "0" || "Vui lòng nhập trường này!"
@@ -355,7 +364,7 @@ const InfoForm = (props) => {
                         >
                             <MenuItem value="0">Chọn chức vụ</MenuItem>
                             {category.categories.position.length > 0 &&
-                                category.categories.position.map(el =>
+                                positionArr.map(el =>
                                     <MenuItem key={el.MaChucVu} value={el.MaChucVu}>{el.TenChucVu}</MenuItem>
                                 )
                             }
@@ -455,7 +464,7 @@ const InfoForm = (props) => {
                             errors={errors}
                             rules={{
                                 pattern: {
-                                    value:  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                                    value: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
                                     message: "Số điện thoại không hợp lệ!"
                                 }
                             }}
@@ -471,7 +480,7 @@ const InfoForm = (props) => {
                             errors={errors}
                             rules={{
                                 pattern: {
-                                    value:  /^\d+$/,
+                                    value: /^\d+$/,
                                     message: "Số điện thoại không hợp lệ!"
                                 }
                             }}

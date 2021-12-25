@@ -68,6 +68,7 @@ const ExportFile = ({ data , button }) => {
                                     `Họ tên: ${data.HoTen} \n\n`,
                                     `Ngày sinh: ${getLocaleDate(data.NgaySinh)} \n\n`,
                                     `CMND: ${data.CMND} \n\n`,
+                                    `Mã số đảng viên: ${data.MaSoDangVien} \n\n`,
                                     `Dân tộc: ${data.TenDanToc} \n\n`,
                                 ],
                             },
@@ -76,7 +77,8 @@ const ExportFile = ({ data , button }) => {
                                     `Giới tính: ${data.TenGioiTinh} \n\n`,
                                     `Nơi sinh: ${data.NoiSinh} \n\n`,
                                     `Quốc tịch: ${data.QuocTich} \n\n`,
-                                    `Tôn giáo: ${data.TenTonGiao} \n\n`
+                                    `Tôn giáo: ${data.TenTonGiao} \n\n`,
+                                    `Chi bộ: ${data.TenChiBo} \n\n`,
                                 ],
                             }
                         ],
@@ -97,14 +99,14 @@ const ExportFile = ({ data , button }) => {
                 columns: [
                     {
                         text: [
-                            `Chi bộ: CNTT&TT \n\n`,
-                            `Trình độ tin học: Sơ cấp \n\n`,
+                            `Chi bộ: ${data.TenChiBo} \n\n`,
+                            `Trình độ tin học: ${data.TenTinHoc} \n\n`,
                         ],
                     },
                     {
                         text: [
-                            `Trình độ học vấn: 12/12 \n\n`,
-                            `Trình độ chính trị: Sơ cấp \n\n`,
+                            `Trình độ học vấn: ${data.TrinhDoHocVan} \n\n`,
+                            `Trình độ chính trị: ${data.TenChinhTri} \n\n`,
                         ],
                         width: 210
                     }

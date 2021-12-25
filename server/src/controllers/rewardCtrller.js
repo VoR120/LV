@@ -1,7 +1,16 @@
 const Reward = require('../models/rewardModel');
 const { getAll, findById, create, updateById, remove, removeAll } = require('./utils');
 
-exports.getAllReward = getAll(Reward);
+exports.getAllReward = (req, res) => {
+    Reward.getAll(req.query, (err, data) => {
+        if (err)
+            res.status(500).send({
+                message:
+                    err.message || "ERROR!"
+            });
+        else res.status(200).json(data);
+    })
+};
 
 exports.findByIdReward = findById(Reward);
 

@@ -2,6 +2,7 @@ import { Divider, FormControl, Grid, MenuItem } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useRef, useState } from 'react';
 import { CategoryContext } from '../contextAPI/CategoryContext';
+import { InfoContext } from '../contextAPI/InfoContext';
 import InputGrid from './InputGrid';
 import MySelect from './UI/MySelect';
 
@@ -71,12 +72,14 @@ const useStyles = makeStyles(theme => ({
 
 const PartyForm = (props) => {
     const classes = useStyles();
-    const { disable, control, errors, setValue, watch, clearErrors } = props
+    const { disable, control, errors, setValue, watch, clearErrors, addType, setAddType } = props
     const [imageUpload, setImageUpload] = useState('');
     const [loading, setLoading] = useState(false);
-    const [addType, setAddType] = useState(0);
+    // const [addType, setAddType] = useState(0);
 
     const { category, categoryDispatch } = useContext(CategoryContext);
+    const { info } = useContext(InfoContext);
+    const isDePer = info.info.Quyen["12"] == 1;
 
     const hanleChangeType = (e) => {
         setValue(e.target.name, e.target.value)
@@ -148,7 +151,8 @@ const PartyForm = (props) => {
                                     onChange={handleChangeSelect}
                                     nameTitle={"Chuyển đến chi bộ"}
                                     name={`ChuyenDenChiBo`}
-                                    defaultValue={'0'}
+                                    defaultValue={isDePer ? "0" : info.info.MaChiBo}
+                                    disabled={!isDePer}
                                     control={control}
                                     errors={errors}
                                 >

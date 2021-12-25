@@ -138,7 +138,7 @@ const AddGradeForm = (props) => {
                     <MyButton onClick={handleOpen} success ><AddIcon />Thêm</MyButton>
                 )
             }
-            <Dialog PaperProps={{ style: { minWidth: '300px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+            <Dialog PaperProps={{ style: { minWidth: '600px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">{`Cập nhật loại Đảng viên`}</DialogTitle>
                 <DialogContent>
                     <InputGrid
@@ -146,6 +146,7 @@ const AddGradeForm = (props) => {
                         disabled={edit}
                         nameTitle={`Năm`}
                         name={"Nam"}
+                        defaultValue={""}
                         control={control}
                         rules={{ required: "Vui lòng nhập trường này!" }}
                         errors={errors}
@@ -159,6 +160,7 @@ const AddGradeForm = (props) => {
                                         onChange={(e) => handleChangeInput(e, c.id)}
                                         nameTitle={`Tên loại`}
                                         name={c.name}
+                                        defaultValue={""}
                                         control={control}
                                         rules={{ required: "Vui lòng nhập trường này!" }}
                                         errors={errors}
@@ -181,6 +183,7 @@ const AddGradeForm = (props) => {
                                         onChange={(e) => handleChangeAddInput(e, index)}
                                         nameTitle={"Tên loại"}
                                         name={inputName}
+                                        defaultValue={""}
                                         control={control}
                                         rules={{ required: "Vui lòng nhập trường này!" }}
                                         errors={errors}

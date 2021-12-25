@@ -79,11 +79,11 @@ const AddCandidateForm = (props) => {
     }
 
     const handleAdd = () => {
-        if (right.length < 2) {
+        if (right.length == 0) {
             openSnackbarDispatch({
                 type: 'SET_OPEN',
                 payload: {
-                    msg: "Phải có ít nhất 2 ứng cử viên",
+                    msg: "Bạn chưa chọn ứng cử viên",
                     type: "error"
                 }
             })
@@ -147,12 +147,28 @@ const AddCandidateForm = (props) => {
     };
 
     const handleAllRight = () => {
-        setRight(right.concat(left));
+        const sum = right.concat(left)
+        var result = sum.reduce((unique, o) => {
+            if (!unique.some(obj => obj.MaSoDangVien === o.MaSoDangVien)) {
+                unique.push(o);
+            }
+            return unique;
+        }, []);
+        setRight(result);
         setLeft([]);
     };
 
     const handleCheckedRight = () => {
-        setRight(right.concat(leftChecked));
+
+        const sum = right.concat(leftChecked)
+        var result = sum.reduce((unique, o) => {
+            if (!unique.some(obj => obj.MaSoDangVien == o.MaSoDangVien)) {
+                unique.push(o);
+            }
+            return unique;
+        }, []);
+
+        setRight(result);
         setLeft(not(left, leftChecked));
         setChecked(not(checked, leftChecked));
     };

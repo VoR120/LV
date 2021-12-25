@@ -32,8 +32,19 @@ exports.createPoll = async (req, res) => {
                 MaBieuQuyet = ${MaBieuQuyet}`)
             }))
 
-            console.log('Before job instantiation');
+            const [mailList, fML] = await sqlPromise.query(`
+                SELECT Email FROM nguoithamgia, dangvien 
+                WHERE nguoithamgia.MaNguoiThamGia = dangvien.MaSoDangVien
+                AND nguoithamgia.MaBieuQuyet = ${MaBieuQuyet}
+            `)
 
+            console.log('Before job instantiation');
+            let date = new Date(ThoiGianKetThuc);
+            date.setMinutes(date.getMinutes() - ThoiGianNhacNho);
+            if (date < new Date()) {
+                res.status(400).json({ msg: "Thời gian nhắc nhở không hợp lệ!" })
+                return;
+            }
             const job = new CronJob(date, function () {
                 const mail = nodemailer.createTransport({
                     service: 'gmail',
@@ -45,7 +56,7 @@ exports.createPoll = async (req, res) => {
 
                 const mailOptions = {
                     from: 'vob1706895@student.ctu.edu.vn',
-                    to: "vonguyen2.vn@gmail.com",
+                    to: mailList.map(el => el.Email),
                     subject: `Nhắc nhở: Bạn có một cuộc biểu quyết Đảng viên khoa CNTT&TT, Đại học Cần Thơ`,
                     html: `
                 Thời gian còn lại: ${ThoiGianNhacNho} phút. <br />
@@ -312,15 +323,17 @@ exports.getResult = async (req, res) => {
         SELECT DISTINCT MaSoDangVien, HoTen, ifnull(chitietphieu1.SoPhieu, 0) AS SoPhieu
         FROM chitietphieu
         INNER JOIN dangvien
-                    ON dangvien.MaSoDangVien = chitietphieu.MaUngCuVien
-                    INNER JOIN phieu
-                    ON phieu.MaBieuQuyet = ${id}
-                    AND phieu.MaPhieu = chitietphieu.MaPhieu
+        ON dangvien.MaSoDangVien = chitietphieu.MaUngCuVien
+        INNER JOIN phieu
+        ON phieu.MaBieuQuyet = ${id}
+        AND phieu.MaPhieu = chitietphieu.MaPhieu
         LEFT JOIN
         (
         SELECT chitietphieu.*,  COUNT(*) AS SoPhieu 
-        FROM chitietphieu
+        FROM chitietphieu, phieu
         WHERE DongY = 1
+        AND phieu.MaPhieu = chitietphieu.MaPhieu
+        AND phieu.MaBieuQuyet = ${id}
         GROUP BY MaUngCuVien
         ) AS chitietphieu1
         ON chitietphieu1.MaUngCuVien = chitietphieu.MaUngCuVien

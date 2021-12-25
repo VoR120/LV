@@ -15,6 +15,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { filterPartyMember } from '../action/partyMemberAction';
 import { CategoryContext } from '../contextAPI/CategoryContext';
+import { InfoContext } from '../contextAPI/InfoContext';
 import { LoadingContext } from '../contextAPI/LoadingContext';
 import { SnackbarContext } from '../contextAPI/SnackbarContext';
 import InputGrid from './InputGrid';
@@ -42,6 +43,8 @@ const AddVoterForm = (props) => {
     const [open, setOpen] = useState(false);
 
     const { category, categoryDispatch } = useContext(CategoryContext);
+    const { info } = useContext(InfoContext);
+    const isDeP = info.info.Quyen["12"] == 1;
     const { openSnackbarDispatch } = useContext(SnackbarContext);
     const { loadingDispatch } = useContext(LoadingContext);
 
@@ -120,12 +123,28 @@ const AddVoterForm = (props) => {
     };
 
     const handleAllRight = () => {
-        setRight(right.concat(left));
+        const sum = right.concat(left)
+        var result = sum.reduce((unique, o) => {
+            if (!unique.some(obj => obj.MaSoDangVien == o.MaSoDangVien)) {
+                unique.push(o);
+            }
+            return unique;
+        }, []);
+
+        setRight(result);
         setLeft([]);
     };
 
     const handleCheckedRight = () => {
-        setRight(right.concat(leftChecked));
+        const sum = right.concat(leftChecked)
+        var result = sum.reduce((unique, o) => {
+            if (!unique.some(obj => obj.MaSoDangVien === o.MaSoDangVien)) {
+                unique.push(o);
+            }
+            return unique;
+        }, []);
+
+        setRight(result);
         setLeft(not(left, leftChecked));
         setChecked(not(checked, leftChecked));
     };
@@ -198,7 +217,8 @@ const AddVoterForm = (props) => {
                         onChange={handleChangeSelect}
                         nameTitle={"Chi bộ"}
                         name="partycell"
-                        defaultValue="0"
+                        defaultValue={isDeP ? "0" : info.info.MaChiBo}
+                        disabled={!isDeP}
                         control={control}
                         errors={errors}
                     >

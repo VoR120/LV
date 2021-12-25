@@ -22,12 +22,14 @@ export const createRewardDiscipline = async (payload) => {
 export const createRewardDisciplines = async (payload, id) => {
     try {
         const { DanhSach, type, ...other } = payload;
-        await Promise.all(DanhSach.map(async el => {
-            const res = await axios.post(`/api/${type}/create`, { MaSoDangVien: el, ...other })
-            if (res)
-                console.log(res.data);
-        }))
+        // await Promise.all(DanhSach.map(async el => {
+        //     const res = await axios.post(`/api/${type}/create`, { MaSoDangVien: el, ...other })
+        //     if (res)
+        //         console.log(res.data);
+        // }))
+        const res = await axios.post(`/api/${type}/create`, { MaSoDangVienArr: DanhSach, ...other })
         const resUpdate = await axios.post(`/api/voting/saveresult/` + id)
+        console.log(resUpdate);
         if (resUpdate)
             return { msg: "Đã lưu!" }
     } catch (error) {
@@ -36,9 +38,11 @@ export const createRewardDisciplines = async (payload, id) => {
 }
 
 export const getRewardDiscipline = async (payload) => {
-    const { Loai } = payload
+    const { Loai, MaChiBo } = payload
     try {
-        let res = await axios.get('/api/' + Loai)
+        let res = MaChiBo
+            ? await axios.get(`/api/${Loai}?MaChiBo=${MaChiBo}`)
+            : await axios.get('/api/' + Loai)
         console.log(res);
         return res.data
     } catch (error) {

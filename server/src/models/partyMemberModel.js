@@ -15,7 +15,8 @@ const query = {
         INNER JOIN tinhoc ON dangvien.MaTinHoc = tinhoc.MaTinHoc
         INNER JOIN chinhtri ON dangvien.MaChinhTri = chinhtri.MaChinhTri 
         WHERE MaSoDangVien = "${id}"
-        AND DaXoa = 0`,
+        AND DaXoa = 0
+        ORDER BY dangvien.NgayTao DESC`,
     getFLanguageWithName: (id) => `SELECT ngoaingudangvien.*, ngoaingu.TenNgoaiNgu, trinhdongoaingu.TenTrinhDo
         FROM ngoaingudangvien, ngoaingu, trinhdongoaingu
         WHERE ngoaingudangvien.MaNgoaiNgu = ngoaingu.MaNgoaiNgu
@@ -36,7 +37,8 @@ const PartyMember = {
                     INNER JOIN tongiao ON dangvien.MaTonGiao = tongiao.MaTonGiao
                     INNER JOIN tinhoc ON dangvien.MaTinHoc = tinhoc.MaTinHoc
                     INNER JOIN chinhtri ON dangvien.MaChinhTri = chinhtri.MaChinhTri
-                    AND DaXoa = 0`)
+                    AND DaXoa = 0
+                    ORDER BY dangvien.NgayTao DESC`)
             let result = [...res]
             if (res.length > 0) {
                 await Promise.all(res.map(async (data, index) => {
@@ -522,6 +524,10 @@ const PartyMember = {
                     ON danhgiadangvien.MaSoDangVien = dangvien.MaSoDangVien
                     AND danhgiadangvien.${el} = ${data[el]}
                     AND danhgiadangvien.MaDVDG = 3`
+                } else if (el == "MaNgoaiNgu") {
+                    dataStr = dataStr + ` INNER JOIN ngoaingudangvien
+                    ON ngoaingudangvien.MaSoDangVien = dangvien.MaSoDangVien
+                    AND ngoaingudangvien.MaNgoaiNgu = ${data[el]}`
                 } else if (el == "KhongDuBi") {
                     dataStr = dataStr + ` AND dangvien.MaChucVu != 4`
                 } else if (el == "Tuoigt") {
@@ -546,7 +552,8 @@ const PartyMember = {
                 INNER JOIN tinhoc ON dangvien.MaTinHoc = tinhoc.MaTinHoc
                 INNER JOIN chinhtri ON dangvien.MaChinhTri = chinhtri.MaChinhTri
                 AND dangvien.DaXoa = 0
-                ${dataStr}`;
+                ${dataStr}
+                 ORDER BY dangvien.NgayTao DESC`;
             const sqlPromise = sql.promise();
             const [res, f] = await sqlPromise.query(query)
             let result = [...res]

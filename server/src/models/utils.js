@@ -67,6 +67,8 @@ exports.create = (table, key) => {
 
 exports.updateById = (table, key, name) => {
     return (id, newValue, callback) => {
+        console.log("id:", id);
+        console.log("newvalue:", newValue);
         const sqlQuery = typeof (id) === "number" ?
             `UPDATE ${table} SET ? WHERE ${key} = ${id}` :
             `UPDATE ${table} SET ? WHERE ${key} = "${id}"`
@@ -83,9 +85,8 @@ exports.updateById = (table, key, name) => {
             }
 
             sql.query(`SELECT ${table}.${key}, ${table}.${name}, count(dangvien.${key}) AS SoDangVien 
-                    FROM ${table} 
-                    LEFT JOIN dangvien 
-                    ON ${table}.${key}=dangvien.${key}
+                    FROM ${table}, dangvien 
+                    WHERE ${table}.${key}=dangvien.${key}
                     AND dangvien.DaXoa = 0
                     AND ${table}.${key} = ${id}
                     `, (err, res1) => {
@@ -95,7 +96,7 @@ exports.updateById = (table, key, name) => {
                     return;
                 }
                 console.log("Updated: ", res1[0]);
-                callback(null, res1[0] );
+                callback(null, res1[0]);
             })
         }))
     }

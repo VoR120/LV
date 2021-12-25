@@ -114,6 +114,7 @@ const AddForm = ({ edit, data, setRows, rows }) => {
     const [levelArray, setLevelArray] = useState([]);
     const [imageUpload, setImageUpload] = useState("")
     const [firstImage, setFirstImage] = useState("")
+    const [addType, setAddType] = useState("0")
 
     const [qqArr, setQqArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
     const [dcttArr, setDcttArr] = useState({ provinceArr: [], districtArr: [], wardArr: [] })
@@ -175,7 +176,8 @@ const AddForm = ({ edit, data, setRows, rows }) => {
             })
             edit
                 ? setRows(rows.map(el => el.MaSoDangVien == res.MaSoDangVien ? res : el))
-                : setRows([...rows, res])
+                : setRows([res, ...rows])
+            setOpen(false)
         }
         setLoading(false)
     }
@@ -324,7 +326,7 @@ const AddForm = ({ edit, data, setRows, rows }) => {
                     <MyButton onClick={handleOpen} success><AddIcon />Thêm</MyButton>
             }
             <Dialog PaperProps={{ style: { minWidth: '1100px' } }} open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-                <DialogTitle id="form-dialog-title">Thêm Đảng viên</DialogTitle>
+                <DialogTitle id="form-dialog-title">{edit ? "Sửa đảng viên" : "Thêm đảng viên"}</DialogTitle>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs
                         value={step}
@@ -333,6 +335,7 @@ const AddForm = ({ edit, data, setRows, rows }) => {
                         indicatorColor="primary"
                         textColor="primary"
                     >
+
                         <Tab label="Cơ bản" {...a11yProps(0)} />
                         <Tab label="Trình độ" {...a11yProps(1)} />
                         <Tab label="Về Đoàn / Đảng" {...a11yProps(2)} />
@@ -408,6 +411,8 @@ const AddForm = ({ edit, data, setRows, rows }) => {
                                     setValue={setValue}
                                     watch={watch}
                                     clearErrors={clearErrors}
+                                    addType={addType}
+                                    setAddType={setAddType}
                                 />
                             </Box>
                         )}

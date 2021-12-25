@@ -181,8 +181,10 @@ const Voting = () => {
             const res = await getNoVoting({ id: resultState.MaBieuQuyet })
             console.log(res);
             setNoVotingList(res)
+            loadingDispatch({ type: 'CLOSE_LOADING' })
         }
         if (resultState) {
+            loadingDispatch({ type: 'OPEN_LOADING' })
             getResultAPI()
             getVotesAPI()
             getNoVotingAPI()
@@ -255,7 +257,6 @@ const Voting = () => {
     }, [editState])
 
     useEffect(() => {
-        getAllCategory(categoryDispatch, "achievement");
         getAllCategory(categoryDispatch, "partycell");
         getAllCategory(categoryDispatch, "position");
         getAllCategory(categoryDispatch, "grade");
@@ -595,23 +596,40 @@ const Voting = () => {
                                                     {open[index] ? 'Ẩn' : 'Xem kết quả'}
                                                 </MyButton>
                                             }
-                                            {/* {getStatus(el.ThoiGianBatDau, el.ThoiGianKetThuc) == 1 && */}
-                                            <>
-                                                {editOpen[index] ?
-                                                    <Button onClick={() => handleEditToggle(el, index)} variant='outlined' style={{ marginBottom: '20px', marginLeft: "8px" }}>
-                                                        Hủy
-                                                    </Button>
-                                                    :
-                                                    <MyButton onClick={() => handleEditToggle(el, index)} primary style={{ marginBottom: '20px', marginLeft: "8px" }}>
-                                                        Chỉnh sửa
+                                            {/* {getStatus(el.ThoiGianBatDau, el.ThoiGianKetThuc) == 1 &&
+                                                <>
+                                                    {editOpen[index] ?
+                                                        <Button onClick={() => handleEditToggle(el, index)} variant='outlined' style={{ marginBottom: '20px', marginLeft: "8px" }}>
+                                                            Hủy
+                                                        </Button>
+                                                        :
+                                                        <MyButton onClick={() => handleEditToggle(el, index)} primary style={{ marginBottom: '20px', marginLeft: "8px" }}>
+                                                            Chỉnh sửa
+                                                        </MyButton>
+                                                    }
+                                                </>
+                                            } */}
+                                            {getStatus(el.ThoiGianBatDau, el.ThoiGianKetThuc) != 2 &&
+                                                <>
+                                                    {
+                                                        getStatus(el.ThoiGianBatDau, el.ThoiGianKetThuc) == 0 &&
+                                                        (
+                                                            editOpen[index] ?
+                                                                <Button onClick={() => handleEditToggle(el, index)} variant='outlined' style={{ marginBottom: '20px', marginLeft: "8px" }}>
+                                                                    Hủy
+                                                                </Button>
+                                                                :
+                                                                <MyButton onClick={() => handleEditToggle(el, index)} primary style={{ marginBottom: '20px', marginLeft: "8px" }}>
+                                                                    Chỉnh sửa
+                                                                </MyButton>
+                                                        )
+                                                    }
+                                                    <MyButton onClick={() => handleSendEmail(el.MaBieuQuyet)} primary style={{ marginBottom: '20px', marginLeft: "8px" }}>
+                                                        Gửi mail
                                                     </MyButton>
-                                                }
-                                                <MyButton onClick={() => handleSendEmail(el.MaBieuQuyet)} primary style={{ marginBottom: '20px', marginLeft: "8px" }}>
-                                                    Gửi mail
-                                                </MyButton>
-                                            </>
-                                            {/* } */}
-                                            <DeleteVotingForm data={el} />
+                                                </>
+                                            }
+                                            <DeleteVotingForm data={el} fetchAllPoll={fetchAllPoll} />
                                         </Grid>
 
                                     </Paper>
@@ -624,7 +642,7 @@ const Voting = () => {
                                 {checkEditOpen(index) &&
                                     <Grid item xs={12}>
                                         <Paper className={classes.paperForm} variant="outlined">
-                                            <Typography style={{ textTransform: 'uppercase', marginBottom: 30 }}>Tạo biểu quyết</Typography>
+                                            <Typography style={{ textTransform: 'uppercase', marginBottom: 30 }}>Chỉnh sửa biểu quyết</Typography>
                                             <Grid container className={classes.inputItem} alignItems="center">
                                                 <Grid item xs={4}>
                                                     <Typography>Tên biểu quyết</Typography>

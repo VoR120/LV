@@ -89,7 +89,7 @@ const Evaluate = () => {
     const fetchGetEvaluate = async () => {
         try {
             loadingDispatch({ type: 'OPEN_LOADING' })
-            const res = await axios.get(`/api/evaluate/getbypm?MaSoDangVien=${info.info.MaSoDangVien}&Nam=${year}`)
+            const res = await axios.get(`/api/evaluate/getbypm?MaSoDangVien=${info.info.MaSoDangVien}&Nam=${year}&MaDVDG=1`)
             console.log(res.data);
             if (res.status == 200) {
                 if (res.data.length > 0) {

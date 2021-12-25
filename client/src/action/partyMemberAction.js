@@ -14,7 +14,11 @@ const getIdField = (field) => {
         province: "QQTinh",
         achievement: "MaThanhTich",
         notreserve: "KhongDuBi",
-        status: "TrangThai"
+        it: "MaTinHoc",
+        politics: "MaChinhTri",
+        flanguage: "MaNgoaiNgu",
+        status: "TrangThai",
+        isnew: "KetNapMoi"
     }
     return idField[field]
 }
@@ -79,7 +83,7 @@ export const addPartyMember = async (payload) => {
         if (res.status == 201) {
             if (HinhThucThem == "3" || HinhThucThem == "4") {
                 const res = await axios.post('/api/move/create', {
-                    MaSoDangVien,
+                    MaSoDangVienArr: new Array({ MaSoDangVien }),
                     MaHinhThuc: HinhThucThem,
                     ChuyenTuDangBo,
                     ChuyenTuChiBo,
@@ -286,13 +290,18 @@ export const removePartyMember = async (payload) => {
 export const filterPartyMember = async (payload) => {
     try {
         Object.keys(payload).map(el => {
-            if (el != "age") {
+            if (el != "age" && el != "isnew") {
                 if (!payload[el] || payload[el] == "" || payload[el] == "0")
                     delete payload[el];
                 else {
                     payload[getIdField(el)] = payload[el]
                     delete payload[el];
                 }
+            }
+            if (el == "isnew") {
+                if (payload[el] == "yes") payload[getIdField(el)] = 1;
+                if (payload[el] == "no") payload[getIdField(el)] = 0;
+                delete payload[el];
             }
         })
 

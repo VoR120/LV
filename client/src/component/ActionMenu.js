@@ -9,6 +9,7 @@ import AddForm from './AddForm';
 import Loading from './CustomLoadingOverlay';
 import DecentralizationForm from './DecentralizationForm';
 import DeleteForm from './DeleteForm';
+import DetailForm from './DetailForm';
 import ExportFile from './ExportFile';
 import MoveForm from './MoveForm';
 import RewardDisciplineForm from './RewardDisciplineForm';
@@ -66,6 +67,9 @@ const ActionMenu = (props) => {
                 }}
                 MenuListProps={{ className: classes.menuList }}
             >
+                {info.info.Quyen["2"] == 1 &&
+                    <MenuItem onClick={handleClose}><DetailForm data={data}/></MenuItem>
+                }
                 {info.info.Quyen["2"] == 1 &&
                     <MenuItem onClick={handleClose}><AddForm edit data={data} rows={rows} setRows={setRows} /></MenuItem>
                 }

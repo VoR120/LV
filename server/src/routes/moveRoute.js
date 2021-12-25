@@ -13,10 +13,10 @@ const {
 const Router = express.Router();
 
 Router.get('/move', getAllMove);
+Router.get('/move/getbytype', findByTypeMove);
+Router.get('/move/getbypmid', findByPMId);
+Router.get('/move/getbytypeid', findByTypeIdMove);
 Router.get('/move/:id', findByIdMove);
-Router.get('/move/getbytypeid/:id', findByTypeIdMove);
-Router.get('/move/getbypmid/:id', findByPMId);
-Router.post('/move/getbytype', findByTypeMove);
 Router.post('/move/create', createMove);
 Router.put('/move/:id', updateByIdMove);
 Router.delete('/move/:id', removeMove);

@@ -107,6 +107,8 @@ const EvaluateSubject = () => {
 
     // Handle Function
     const handleChange = async (e, id) => {
+        if (e.target.value == 0)
+            return;
         try {
             setLoadingTable(true)
             const res = await axios.post('/api/evaluate/create', {

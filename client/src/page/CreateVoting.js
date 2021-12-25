@@ -86,7 +86,7 @@ const CreateVoting = () => {
 
     const onSubmit = async (data) => {
         console.log(data);
-        if (candidate.length == 0)
+        if (candidate.length == 0) {
             openSnackbarDispatch({
                 type: 'SET_OPEN',
                 payload: {
@@ -94,7 +94,9 @@ const CreateVoting = () => {
                     type: "error"
                 }
             })
-        else if (voter.length == 0)
+            return;
+        }
+        if (voter.length == 0) {
             openSnackbarDispatch({
                 type: 'SET_OPEN',
                 payload: {
@@ -102,27 +104,38 @@ const CreateVoting = () => {
                     type: "error"
                 }
             })
-        else {
-            data.UngCuVien = candidate.map(el => el.MaUngCuVien);
-            data.NguoiThamGia = voter.map(el => el.MaNguoiThamGia);
-            const res = await createPoll(data);
-            if (res) {
-                openSnackbarDispatch({
-                    type: 'SET_OPEN',
-                    payload: {
-                        msg: "Đã tạo cuộc biểu quyết",
-                        type: "success"
-                    }
-                })
-                reset({
-                    TenBieuQuyet: "",
-                    ThoiGianBatDau: "",
-                    ThoiGianKetThuc: "",
-                    SoPhieuToiDa: 1,
-                });
-                setCandidate([]);
-                setVoter([]);
-            }
+            return;
+        }
+        if (candidate.length == 1 && data.LoaiBieuQuyet == "Biểu quyết có số dư") {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Biểu quyết có số dư phải chọn ít nhất 2 ứng cử viên!",
+                    type: "error"
+                }
+            })
+            return;
+        }
+
+        data.UngCuVien = candidate.map(el => el.MaUngCuVien);
+        data.NguoiThamGia = voter.map(el => el.MaNguoiThamGia);
+        const res = await createPoll(data);
+        if (res) {
+            openSnackbarDispatch({
+                type: 'SET_OPEN',
+                payload: {
+                    msg: "Đã tạo cuộc biểu quyết",
+                    type: "success"
+                }
+            })
+            reset({
+                TenBieuQuyet: "",
+                ThoiGianBatDau: "",
+                ThoiGianKetThuc: "",
+                SoPhieuToiDa: 1,
+            });
+            setCandidate([]);
+            setVoter([]);
         }
     }
 
@@ -344,7 +357,7 @@ const CreateVoting = () => {
                                 }
                             </Grid>
                             <Grid item xs={12}>
-                                <AddVoterForm setVoter={setVoter} />
+                                <AddVoterForm voter={voter} setVoter={setVoter} />
                             </Grid>
                         </Grid>
                     </Grid>

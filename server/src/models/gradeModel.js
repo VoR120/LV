@@ -52,6 +52,18 @@ const Grade = {
             callback(null, { data: result, columnName });
         })
     },
+    findOne: (id, callback) => {
+        const sqlQuery = `SELECT * FROM danhgiadangvien WHERE MaLoai = ${id}`
+        sql.query(sqlQuery, (err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                callback(err, null);
+                return;
+            }
+            callback(null, res);
+            return
+        })
+    },
     findById: findById("loai", "MaLoai"),
     create: (newValue, callback) => {
         sql.query(`SELECT MaLoai FROM loai 
@@ -78,8 +90,52 @@ const Grade = {
                 })
             })
     },
-    updateById: updateById("loai", "MaLoai"),
-    remove: remove("loai", "MaLoai"),
+    updateById: (id, newValue, callback) => {
+        const sqlQuery = `UPDATE loai SET ? WHERE MaLoai = ${id}`
+        sql.query(sqlQuery, newValue, ((err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                callback(err, null);
+                return;
+            }
+
+            if (res.affectedRows == 0) {
+                callback({ type: "not_found" }, null);
+                return;
+            }
+            callback(null, { msg: "Thành công!" })
+        }))
+    },
+    remove: (id, callback) => {
+        const sqlQuerySelect = `SELECT MaSoDangVien FROM loaidangvien WHERE MaLoai = ${id}`
+        sql.query(sqlQuerySelect, (err, result) => {
+            if (err) {
+                console.log("error: ", err);
+                callback(err, null);
+                return;
+            }
+            if (result.length > 0) {
+                callback({ type: 'foreign', message: `Có loại đang được sử dụng, không thể xóa!` }, null)
+                return
+            }
+            const sqlQuery = `DELETE FROM loai WHERE MaLoai = ${id}`
+            sql.query(sqlQuery, ((err, res) => {
+                if (err) {
+                    console.log("error: ", err);
+                    callback(err, null);
+                    return;
+                }
+
+                if (res.affectedRows == 0) {
+                    callback({ type: "not_found" }, null);
+                    return;
+                }
+
+                console.log("Deleted: ", id);
+                callback(null, res);
+            }))
+        })
+    },
     removeAll: removeAll("loai")
 }
 

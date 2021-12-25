@@ -5,7 +5,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useEffect, useState } from 'react';
 import { CSVLink } from 'react-csv';
 import { useForm } from 'react-hook-form';
-import { getAllCategory } from '../action/categoryAction';
+import { getAllCategory, getAllCategoryPM } from '../action/categoryAction';
 import { filterPartyMember, mailing, removePartyMember } from '../action/partyMemberAction';
 import InputGrid from '../component/InputGrid';
 import Layout from '../component/Layout';
@@ -172,10 +172,7 @@ const Search = () => {
     }, [rows])
 
     useEffect(() => {
-        getAllCategory(categoryDispatch, "ethnic")
-        getAllCategory(categoryDispatch, "religion")
-        getAllCategory(categoryDispatch, "partycell")
-        getAllCategory(categoryDispatch, "position")
+        getAllCategoryPM(categoryDispatch);
         const fetchAPISetArr = async () => {
             const res = await axios.get('https://provinces.open-api.vn/api/')
             setProvinceArr(res.data);
@@ -296,6 +293,60 @@ const Search = () => {
                             <InputGrid
                                 select
                                 onChange={handleChangeSelect}
+                                nameTitle={"Trình độ tin học"}
+                                name="it"
+                                defaultValue="0"
+                                control={control}
+                                errors={errors}
+                            >
+                                <MenuItem value="0">Tất cả</MenuItem>
+                                {
+                                    category.categories["it"].map(el =>
+                                        <MenuItem key={el.MaTinHoc} value={el.MaTinHoc} >{el.TenTinHoc}</MenuItem>
+                                    )
+                                }
+                            </InputGrid>
+                        </Grid>
+                        <Grid item xs={4}>
+                            <InputGrid
+                                select
+                                onChange={handleChangeSelect}
+                                nameTitle={"Trình độ chính trị"}
+                                name="politics"
+                                defaultValue="0"
+                                control={control}
+                                errors={errors}
+                            >
+                                <MenuItem value="0">Tất cả</MenuItem>
+                                {
+                                    category.categories["politics"].map(el =>
+                                        <MenuItem key={el.MaChinhTri} value={el.MaChinhTri} >{el.TenChinhTri}</MenuItem>
+                                    )
+                                }
+                            </InputGrid>
+                        </Grid>
+                        <Grid item xs={4}>
+                            <InputGrid
+                                select
+                                onChange={handleChangeSelect}
+                                nameTitle={"Ngoại ngữ"}
+                                name="flanguage"
+                                defaultValue="0"
+                                control={control}
+                                errors={errors}
+                            >
+                                <MenuItem value="0">Tất cả</MenuItem>
+                                {
+                                    category.categories["flanguage"].map(el =>
+                                        <MenuItem key={el.MaNgoaiNgu} value={el.MaNgoaiNgu} >{el.TenNgoaiNgu}</MenuItem>
+                                    )
+                                }
+                            </InputGrid>
+                        </Grid>
+                        <Grid item xs={4}>
+                            <InputGrid
+                                select
+                                onChange={handleChangeSelect}
                                 nameTitle={"Giới tính"}
                                 name="gender"
                                 defaultValue="0"
@@ -325,6 +376,21 @@ const Search = () => {
                                         <MenuItem value={pro.code} key={pro.code}>{pro.name}</MenuItem>
                                     ))
                                 }
+                            </InputGrid>
+                        </Grid>
+                        <Grid item xs={4}>
+                            <InputGrid
+                                select
+                                onChange={handleChangeSelect}
+                                nameTitle={"Kết nạp mới"}
+                                name="isnew"
+                                defaultValue="0"
+                                control={control}
+                                errors={errors}
+                            >
+                                <MenuItem value="0">Tất cả</MenuItem>
+                                <MenuItem value="yes">Đảng viên Kết nạp mới</MenuItem>
+                                <MenuItem value="no">Không</MenuItem>
                             </InputGrid>
                         </Grid>
                     </Grid>

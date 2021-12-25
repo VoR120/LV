@@ -123,6 +123,26 @@ const EditMoveForm = (props) => {
                                 <>
                                     <Grid item xs={6}>
                                         <InputGrid
+                                            nameTitle={`Mã số đảng viên`}
+                                            name={"MaSoDangVien"}
+                                            defaultValue={""}
+                                            disabled={true}
+                                            control={control}
+                                            errors={errors}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <InputGrid
+                                            nameTitle={`Họ tên`}
+                                            name={"HoTen"}
+                                            defaultValue={""}
+                                            disabled={true}
+                                            control={control}
+                                            errors={errors}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <InputGrid
                                             nameTitle={`Chuyển từ Đảng bộ`}
                                             name={"ChuyenTuDangBo"}
                                             defaultValue={"DHCT"}
@@ -201,7 +221,7 @@ const EditMoveForm = (props) => {
                                     <Grid item xs={6}>
                                         <InputGrid
                                             nameTitle={`Chuyển từ chi bộ`}
-                                            name={"ChuyenTuChiBo"}
+                                            name={"TenChiBoTu"}
                                             defaultValue={""}
                                             control={control}
                                             errors={errors}

@@ -113,6 +113,8 @@ const EvaluateDepartment = () => {
     }
 
     const handleChange = async (e, id) => {
+        if (e.target.value == 0)
+            return;
         try {
             setLoadingTable(true)
             const res = await axios.post('/api/evaluate/create', {
@@ -206,8 +208,8 @@ const EvaluateDepartment = () => {
 
     useEffect(() => {
         firstLoading
-        ? loadingDispatch({ type: 'OPEN_LOADING' })
-        : loadingDispatch({ type: 'CLOSE_LOADING' })
+            ? loadingDispatch({ type: 'OPEN_LOADING' })
+            : loadingDispatch({ type: 'CLOSE_LOADING' })
     }, [firstLoading])
 
     return (

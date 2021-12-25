@@ -60,7 +60,10 @@ const PermissionPM = {
             ( ${MaSoDangVien}, 0009, 0 ),
             ( ${MaSoDangVien}, 0010, 0 ),
             ( ${MaSoDangVien}, 0011, 0 ),
-            ( ${MaSoDangVien}, 0012, 0 )
+            ( ${MaSoDangVien}, 0012, 0 ),
+            ( ${MaSoDangVien}, 0013, 0 ),
+            ( ${MaSoDangVien}, 0014, 0 ),
+            ( ${MaSoDangVien}, 0015, 0 ),
         `, (err, res) => {
             if (err) {
                 console.log("error: ", err);
