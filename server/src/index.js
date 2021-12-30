@@ -1,6 +1,7 @@
 const express = require('express');
 const env = require('dotenv');
 const cors = require('cors');
+const path = require('path');
 
 
 env.config();
@@ -26,7 +27,14 @@ const route = require('./routes/index');
 
 route(app);
 
-app.listen('4000', () => {
-    console.log('Server running 4000!');
-})
+app.use(express.static(path.join(__dirname, 'build')))
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
+app.listen(process.env.PORT || 5000, function(){
+  console.log("Success")
+  // console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
+});
 
