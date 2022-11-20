@@ -16,7 +16,6 @@ export const login = async (dispatch, payload) => {
             // axios.defaults.headers.common['Authorization'] = 'Bearer ' + JSON.stringify(token);
         }
     } catch (error) {
-        console.log(error);
         dispatch({ type: userConstant.LOGIN_FAILURE, error: error.response.data });
     }
 }

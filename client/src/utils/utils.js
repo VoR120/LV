@@ -22,7 +22,7 @@ export const getKeyField = (key) => {
         case 'religion':
             return ["MaTonGiao", "TenTonGiao", "SoDangVien"]
         case 'position':
-            return ["MaChucVu", "TenChucVu", "BiThu", "PhoBiThu", "SoDangVien"]
+            return ["MaChucVu", "TenChucVu", "SoDangVien"]
         case 'term':
             return ["MaNhiemKy", "NamBatDau", "NamKetThuc"]
         case 'flanguage':

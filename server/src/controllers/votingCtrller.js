@@ -49,13 +49,13 @@ exports.createPoll = async (req, res) => {
                 const mail = nodemailer.createTransport({
                     service: 'gmail',
                     auth: {
-                        user: 'vob1706895@student.ctu.edu.vn',
+                        user: 'vonguyen2.vn@gmail.com',
                         pass: `${process.env.PASSWORD}`
                     }
                 })
 
                 const mailOptions = {
-                    from: 'vob1706895@student.ctu.edu.vn',
+                    from: 'vonguyen2.vn@gmail.com',
                     to: mailList.map(el => el.Email),
                     subject: `Nhắc nhở: Bạn có một cuộc biểu quyết Đảng viên khoa CNTT&TT, Đại học Cần Thơ`,
                     html: `
@@ -129,14 +129,14 @@ exports.updatePoll = async (req, res) => {
             const mail = nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
-                    user: 'vob1706895@student.ctu.edu.vn',
+                    user: 'vonguyen2.vn@gmail.com',
                     pass: `${process.env.PASSWORD}`
                 }
             })
 
             const mailOptions = {
-                from: 'vob1706895@student.ctu.edu.vn',
-                to: "vonguyen2.vn@gmail.com",
+                from: 'vonguyen2.vn@gmail.com',
+                to: "vonguyen3.vn@gmail.com",
                 subject: `Nhắc nhở: Bạn có một cuộc biểu quyết Đảng viên khoa CNTT&TT, Đại học Cần Thơ`,
                 html: `
                 Thời gian còn lại: ${ThoiGianNhacNho} phút. <br />
@@ -441,13 +441,13 @@ exports.mailing = async (req, res) => {
             const mail = nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
-                    user: 'vob1706895@student.ctu.edu.vn',
+                    user: 'vonguyen2.vn@gmail.com',
                     pass: `${process.env.PASSWORD}`
                 }
             })
 
             const mailOptions = {
-                from: 'vob1706895@student.ctu.edu.vn',
+                from: 'vonguyen2.vn@gmail.com',
                 to: mailList.map(el => el.Email),
                 subject: `Bạn có một cuộc biểu quyết Đảng viên khoa CNTT&TT, Đại học Cần Thơ`,
                 html: `
